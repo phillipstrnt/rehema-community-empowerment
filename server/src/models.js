@@ -1,446 +1,440 @@
 import mongoose from "mongoose";
 
-
-const programSchema =
-  new mongoose.Schema(
-
-    {
-      title: {
-        type: String,
-        required: true,
-        trim: true
-      },
-
-      slug: {
-        type: String,
-        required: true,
-        unique: true
-      },
-
-      shortDescription:
-        String,
-
-      description:
-        String,
-
-      image:
-        String,
-
-      active: {
-        type: Boolean,
-        default: true
-      }
+// ===============================
+// PROGRAM
+// ===============================
+const programSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
     },
 
-    {
-      timestamps: true
-    }
-
-  );
-
-
-const postSchema =
-  new mongoose.Schema(
-
-    {
-      title: {
-        type: String,
-        required: true,
-        trim: true
-      },
-
-      slug: {
-        type: String,
-        required: true,
-        unique: true
-      },
-
-      excerpt:
-        String,
-
-      content: {
-        type: String,
-        required: true
-      },
-
-      image:
-        String,
-
-      author:
-        String,
-
-      publishedAt: {
-        type: Date,
-        default: Date.now
-      },
-
-      published: {
-        type: Boolean,
-        default: true
-      }
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
     },
 
-    {
-      timestamps: true
-    }
-
-  );
-
-
-const eventSchema =
-  new mongoose.Schema(
-
-    {
-      title: {
-        type: String,
-        required: true
-      },
-
-      description:
-        String,
-
-      date:
-        Date,
-
-      location:
-        String,
-
-      registrationUrl:
-        String,
-
-      image:
-        String,
-
-      active: {
-        type: Boolean,
-        default: true
-      }
+    shortDescription: {
+      type: String,
+      trim: true,
     },
 
-    {
-      timestamps: true
-    }
-
-  );
-
-
-const gallerySchema =
-  new mongoose.Schema(
-
-    {
-      title:
-        String,
-
-      type: {
-        type: String,
-
-        enum: [
-          "image",
-          "video"
-        ],
-
-        default: "image"
-      },
-
-      url: {
-        type: String,
-        required: true
-      },
-
-      caption:
-        String,
-
-      date:
-        Date
+    description: {
+      type: String,
+      trim: true,
     },
 
-    {
-      timestamps: true
-    }
-
-  );
-
-
-const volunteerSchema =
-  new mongoose.Schema(
-
-    {
-      name: {
-        type: String,
-        required: true
-      },
-
-      email: {
-        type: String,
-        required: true
-      },
-
-      phone:
-        String,
-
-      skills:
-        String,
-
-      message:
-        String,
-
-      status: {
-        type: String,
-        default: "new"
-      }
+    image: {
+      type: String,
+      trim: true,
     },
 
-    {
-      timestamps: true
-    }
+    active: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-  );
-
-
-const partnerSchema =
-  new mongoose.Schema(
-
-    {
-      organization: {
-        type: String,
-        required: true
-      },
-
-      contactName:
-        String,
-
-      email: {
-        type: String,
-        required: true
-      },
-
-      phone:
-        String,
-
-      message:
-        String,
-
-      status: {
-        type: String,
-        default: "new"
-      }
+// ===============================
+// POST / BLOG
+// ===============================
+const postSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
     },
 
-    {
-      timestamps: true
-    }
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
 
-  );
+    excerpt: {
+      type: String,
+      trim: true,
+    },
 
+    content: {
+      type: String,
+      required: true,
+    },
+
+    image: {
+      type: String,
+      trim: true,
+    },
+
+    author: {
+      type: String,
+      trim: true,
+    },
+
+    publishedAt: {
+      type: Date,
+      default: Date.now,
+    },
+
+    published: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// ===============================
+// EVENT
+// ===============================
+const eventSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    description: {
+      type: String,
+      trim: true,
+    },
+
+    date: {
+      type: Date,
+    },
+
+    location: {
+      type: String,
+      trim: true,
+    },
+
+    registrationUrl: {
+      type: String,
+      trim: true,
+    },
+
+    image: {
+      type: String,
+      trim: true,
+    },
+
+    active: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// ===============================
+// GALLERY
+// ===============================
+const gallerySchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      trim: true,
+    },
+
+    type: {
+      type: String,
+      enum: ["image", "video"],
+      default: "image",
+    },
+
+    url: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    caption: {
+      type: String,
+      trim: true,
+    },
+
+    date: {
+      type: Date,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// ===============================
+// VOLUNTEER
+// ===============================
+const volunteerSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+
+    phone: {
+      type: String,
+      trim: true,
+    },
+
+    skills: {
+      type: String,
+      trim: true,
+    },
+
+    message: {
+      type: String,
+      trim: true,
+    },
+
+    status: {
+      type: String,
+      default: "new",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// ===============================
+// PARTNER
+// ===============================
+const partnerSchema = new mongoose.Schema(
+  {
+    organization: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    contactName: {
+      type: String,
+      trim: true,
+    },
+
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+
+    phone: {
+      type: String,
+      trim: true,
+    },
+
+    message: {
+      type: String,
+      trim: true,
+    },
+
+    status: {
+      type: String,
+      default: "new",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// ===============================
+// DONATION
+// ===============================
 const donationSchema = new mongoose.Schema(
   {
     donorName: {
       type: String,
-      trim: true
+      trim: true,
     },
 
     email: {
       type: String,
       trim: true,
-      lowercase: true
+      lowercase: true,
     },
 
     phone: {
       type: String,
-      trim: true
+      trim: true,
     },
 
     amount: {
       type: Number,
       required: true,
-      min: 1
+      min: 1,
     },
 
     currency: {
       type: String,
       default: "UGX",
-      uppercase: true
+      uppercase: true,
+      trim: true,
     },
 
     method: {
       type: String,
-
-      enum: [
-        "card",
-        "mobile_money",
-        "bank"
-      ],
-
-      required: true
+      enum: ["card", "mobile_money", "bank"],
+      required: true,
     },
 
     reference: {
       type: String,
       unique: true,
       sparse: true,
-      trim: true
+      trim: true,
     },
 
     transactionId: {
       type: String,
-      trim: true
+      trim: true,
     },
 
     status: {
       type: String,
-
       enum: [
         "pending",
         "successful",
         "failed",
-        "cancelled"
+        "cancelled",
       ],
-
-      default: "pending"
+      default: "pending",
     },
 
     message: {
       type: String,
-      trim: true
+      trim: true,
     },
 
     paidAt: {
-      type: Date
-    }
+      type: Date,
+    },
   },
-
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 
-const newsletterSchema =
-  new mongoose.Schema(
+// ===============================
+// NEWSLETTER
+// ===============================
+const newsletterSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-    {
-      email: {
-        type: String,
-        required: true,
-        unique: true,
-        lowercase: true,
-        trim: true
-      }
+// ===============================
+// CONTACT
+// ===============================
+const contactSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
     },
 
-    {
-      timestamps: true
-    }
-
-  );
-
-
-const contactSchema =
-  new mongoose.Schema(
-
-    {
-      name: {
-        type: String,
-        required: true
-      },
-
-      email: {
-        type: String,
-        required: true
-      },
-
-      phone:
-        String,
-
-      subject:
-        String,
-
-      message: {
-        type: String,
-        required: true
-      },
-
-      status: {
-        type: String,
-        default: "new"
-      }
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
     },
 
-    {
-      timestamps: true
-    }
+    phone: {
+      type: String,
+      trim: true,
+    },
 
-  );
+    subject: {
+      type: String,
+      trim: true,
+    },
 
+    message: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-export const Program =
-  mongoose.model(
-    "Program",
-    programSchema
-  );
+    status: {
+      type: String,
+      default: "new",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
+// ===============================
+// MODELS
+// ===============================
 
-export const Post =
-  mongoose.model(
-    "Post",
-    postSchema
-  );
+export const Program = mongoose.model("Program", programSchema);
 
+export const Post = mongoose.model("Post", postSchema);
 
-export const Event =
-  mongoose.model(
-    "Event",
-    eventSchema
-  );
+export const Event = mongoose.model("Event", eventSchema);
 
+export const Gallery = mongoose.model("Gallery", gallerySchema);
 
-export const Gallery =
-  mongoose.model(
-    "Gallery",
-    gallerySchema
-  );
+export const Volunteer = mongoose.model(
+  "Volunteer",
+  volunteerSchema
+);
 
+export const Partner = mongoose.model(
+  "Partner",
+  partnerSchema
+);
 
-export const Volunteer =
-  mongoose.model(
-    "Volunteer",
-    volunteerSchema
-  );
+export const Donation = mongoose.model(
+  "Donation",
+  donationSchema
+);
 
+export const Newsletter = mongoose.model(
+  "Newsletter",
+  newsletterSchema
+);
 
-export const Partner =
-  mongoose.model(
-    "Partner",
-    partnerSchema
-  );
-
-
-export const Donation =
-  mongoose.model(
-    "Donation",
-    donationSchema
-  );
-
-
-export const Newsletter =
-  mongoose.model(
-    "Newsletter",
-    newsletterSchema
-  );
-
-
-export const Contact =
-  mongoose.model(
-    "Contact",
-    contactSchema
-  );
-
-
-
-
-  export {
-  Program,
-  Post,
-  Event,
-  Gallery,
-  Donation
-};
+export const Contact = mongoose.model(
+  "Contact",
+  contactSchema
+);
