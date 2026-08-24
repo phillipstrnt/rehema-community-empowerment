@@ -433,3 +433,14 @@ export const Contact =
     "Contact",
     contactSchema
   );
+
+
+
+
+  export {
+  Program,
+  Post,
+  Event,
+  Gallery,
+  Donation
+};
