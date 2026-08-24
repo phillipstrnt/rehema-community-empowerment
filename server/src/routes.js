@@ -5,603 +5,782 @@ import {
   Post,
   Event,
   Gallery,
-  Volunteer,
-  Partner,
-  Donation,
-  Newsletter,
-  Contact
+  Donation
 } from "./models.js";
 
 
-const router =
-  express.Router();
+const router = express.Router();
 
 
-const clean = (
-  value,
-  max = 5000
-) =>
+/* =========================================================
+   POSTS / NEWS
+========================================================= */
 
-  typeof value === "string"
-    ? value.trim().slice(0, max)
-    : value;
+// GET all posts
+router.get("/posts", async (req, res) => {
 
+  try {
 
-const emailOK = email =>
+    const posts = await Post
+      .find()
+      .sort({ publishedAt: -1, createdAt: -1 });
 
-  typeof email === "string" &&
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    .test(email);
+    res.json(posts);
 
+  } catch (error) {
 
-/* HEALTH */
+    console.error(error);
 
-router.get(
-  "/health",
-  (_req, res) => {
-
-    res.json({
-      ok: true,
-      service: "REHEMA API"
+    res.status(500).json({
+      message: "Failed to fetch posts"
     });
 
   }
-);
 
+});
 
-/* PROGRAMS */
 
-router.get(
-  "/programs",
-  async (_req, res, next) => {
+// GET single post by slug
+router.get("/posts/:slug", async (req, res) => {
 
-    try {
+  try {
 
-      const programs =
-        await Program.find({
-          active: true
-        })
-        .sort({
-          createdAt: -1
-        });
+    const post = await Post.findOne({
+      slug: req.params.slug
+    });
 
+    if (!post) {
 
-      res.json(programs);
-
-    }
-
-    catch (error) {
-
-      next(error);
-
-    }
-
-  }
-);
-
-
-/* POSTS */
-
-router.get(
-  "/posts",
-  async (req, res, next) => {
-
-    try {
-
-      const limit =
-        Math.min(
-          Number(req.query.limit) || 12,
-          50
-        );
-
-
-      const posts =
-        await Post.find({
-          published: true
-        })
-        .sort({
-          publishedAt: -1
-        })
-        .limit(limit);
-
-
-      res.json(posts);
-
-    }
-
-    catch (error) {
-
-      next(error);
-
-    }
-
-  }
-);
-
-
-router.get(
-  "/posts/:slug",
-  async (req, res, next) => {
-
-    try {
-
-      const post =
-        await Post.findOne({
-          slug: req.params.slug,
-          published: true
-        });
-
-
-      if (!post) {
-
-        return res
-          .status(404)
-          .json({
-            message:
-              "Post not found"
-          });
-
-      }
-
-
-      res.json(post);
-
-    }
-
-    catch (error) {
-
-      next(error);
-
-    }
-
-  }
-);
-
-
-/* EVENTS */
-
-router.get(
-  "/events",
-  async (_req, res, next) => {
-
-    try {
-
-      const events =
-        await Event.find({
-          active: true
-        })
-        .sort({
-          date: 1
-        });
-
-
-      res.json(events);
-
-    }
-
-    catch (error) {
-
-      next(error);
-
-    }
-
-  }
-);
-
-
-/* GALLERY */
-
-router.get(
-  "/gallery",
-  async (_req, res, next) => {
-
-    try {
-
-      const gallery =
-        await Gallery.find()
-        .sort({
-          date: -1,
-          createdAt: -1
-        });
-
-
-      res.json(gallery);
-
-    }
-
-    catch (error) {
-
-      next(error);
-
-    }
-
-  }
-);
-
-
-/* VOLUNTEER */
-
-router.post(
-  "/volunteers",
-  async (req, res, next) => {
-
-    try {
-
-      const {
-        name,
-        email,
-        phone,
-        skills,
-        message
-      } = req.body;
-
-
-      if (
-        !name ||
-        !emailOK(email)
-      ) {
-
-        return res
-          .status(400)
-          .json({
-            message:
-              "Valid name and email are required."
-          });
-
-      }
-
-
-      const item =
-        await Volunteer.create({
-
-          name:
-            clean(name, 120),
-
-          email:
-            clean(email, 180),
-
-          phone:
-            clean(phone, 40),
-
-          skills:
-            clean(skills, 1000),
-
-          message:
-            clean(message, 2000)
-
-        });
-
-
-      res.status(201).json({
-
-        message:
-          "Thank you. Your volunteer application was received.",
-
-        id:
-          item._id
-
+      return res.status(404).json({
+        message: "Post not found"
       });
 
     }
 
-    catch (error) {
+    res.json(post);
 
-      next(error);
+  } catch (error) {
 
-    }
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch post"
+    });
 
   }
-);
+
+});
 
 
-/* PARTNER */
+// CREATE post
+router.post("/posts", async (req, res) => {
 
-router.post(
-  "/partners",
-  async (req, res, next) => {
+  try {
 
-    try {
+    const post = await Post.create(req.body);
 
-      const {
-        organization,
-        contactName,
-        email,
-        phone,
-        message
-      } = req.body;
+    res.status(201).json(post);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message
+    });
+
+  }
+
+});
 
 
-      if (
-        !organization ||
-        !emailOK(email)
-      ) {
+// UPDATE post
+router.put("/posts/:id", async (req, res) => {
 
-        return res
-          .status(400)
-          .json({
-            message:
-              "Organization and valid email are required."
-          });
+  try {
 
+    const post = await Post.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true
       }
+    );
 
+    if (!post) {
 
-      const item =
-        await Partner.create({
-
-          organization:
-            clean(
-              organization,
-              180
-            ),
-
-          contactName:
-            clean(
-              contactName,
-              120
-            ),
-
-          email:
-            clean(email, 180),
-
-          phone:
-            clean(phone, 40),
-
-          message:
-            clean(message, 3000)
-
-        });
-
-
-      res.status(201).json({
-
-        message:
-          "Thank you. We will contact you about partnership.",
-
-        id:
-          item._id
-
+      return res.status(404).json({
+        message: "Post not found"
       });
 
     }
 
-    catch (error) {
+    res.json(post);
 
-      next(error);
+  } catch (error) {
 
-    }
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message
+    });
 
   }
-);
+
+});
 
 
-/* DONATION */
+// DELETE post
+router.delete("/posts/:id", async (req, res) => {
 
-router.post(
-  "/donations",
-  async (req, res, next) => {
+  try {
 
-    try {
+    const post = await Post.findByIdAndDelete(
+      req.params.id
+    );
 
-      const {
-        donorName,
-        email,
-        phone,
-        amount,
-        method,
-        reference,
-        message
-      } = req.body;
+    if (!post) {
 
-
-      const numericAmount =
-        Number(amount);
-
-
-      if (
-        !numericAmount ||
-        numericAmount < 1 ||
-        ![
-          "mobile_money",
-          "bank"
-        ].includes(method)
-      ) {
-
-        return res
-          .status(400)
-          .json({
-            message:
-              "Enter a valid amount and payment method."
-          });
-
-      }
-
-
-      const item =
-        await Donation.create({
-
-          donorName:
-            clean(donorName, 120),
-
-          email:
-            clean(email, 180),
-
-          phone:
-            clean(phone, 40),
-
-          amount:
-            numericAmount,
-
-          method,
-
-          reference:
-            clean(reference, 120),
-
-          message:
-            clean(message, 2000)
-
-        });
-
-
-      res.status(201).json({
-
-        message:
-          "Donation request recorded. Complete the payment using the instructions provided by REHEMA.",
-
-        id:
-          item._id
-
+      return res.status(404).json({
+        message: "Post not found"
       });
 
     }
 
-    catch (error) {
+    res.json({
+      message: "Post deleted successfully"
+    });
 
-      next(error);
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to delete post"
+    });
+
+  }
+
+});
+
+
+/* =========================================================
+   PROGRAMS
+========================================================= */
+
+// GET programs
+router.get("/programs", async (req, res) => {
+
+  try {
+
+    const programs = await Program.find()
+      .sort({ createdAt: -1 });
+
+    res.json(programs);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch programs"
+    });
+
+  }
+
+});
+
+
+// GET single program
+router.get("/programs/:id", async (req, res) => {
+
+  try {
+
+    const program = await Program.findById(
+      req.params.id
+    );
+
+    if (!program) {
+
+      return res.status(404).json({
+        message: "Program not found"
+      });
 
     }
 
+    res.json(program);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch program"
+    });
+
   }
-);
+
+});
 
 
-/* NEWSLETTER */
+// CREATE program
+router.post("/programs", async (req, res) => {
 
-router.post(
-  "/newsletter",
-  async (req, res, next) => {
+  try {
 
-    try {
+    const program = await Program.create(
+      req.body
+    );
 
-      const email =
-        clean(
-          req.body.email,
-          180
-        );
+    res.status(201).json(program);
 
+  } catch (error) {
 
-      if (!emailOK(email)) {
+    console.error(error);
 
-        return res
-          .status(400)
-          .json({
-            message:
-              "Enter a valid email."
-          });
+    res.status(400).json({
+      message: error.message
+    });
 
-      }
+  }
+
+});
 
 
-      await Newsletter.updateOne(
+// UPDATE program
+router.put("/programs/:id", async (req, res) => {
 
-        { email },
+  try {
 
+    const program =
+      await Program.findByIdAndUpdate(
+        req.params.id,
+        req.body,
         {
-          $set: {
-            email
-          }
-        },
-
-        {
-          upsert: true
+          new: true,
+          runValidators: true
         }
-
       );
 
+    if (!program) {
 
-      res.status(201).json({
-
-        message:
-          "You have been subscribed to REHEMA updates."
-
+      return res.status(404).json({
+        message: "Program not found"
       });
 
     }
 
-    catch (error) {
+    res.json(program);
 
-      next(error);
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message
+    });
+
+  }
+
+});
+
+
+// DELETE program
+router.delete("/programs/:id", async (req, res) => {
+
+  try {
+
+    const program =
+      await Program.findByIdAndDelete(
+        req.params.id
+      );
+
+    if (!program) {
+
+      return res.status(404).json({
+        message: "Program not found"
+      });
 
     }
 
+    res.json({
+      message: "Program deleted successfully"
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to delete program"
+    });
+
   }
-);
+
+});
 
 
-/* CONTACT */
+/* =========================================================
+   EVENTS
+========================================================= */
 
-router.post(
-  "/contact",
-  async (req, res, next) => {
+// GET events
+router.get("/events", async (req, res) => {
+
+  try {
+
+    const events = await Event.find()
+      .sort({ date: 1 });
+
+    res.json(events);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch events"
+    });
+
+  }
+
+});
+
+
+// GET single event
+router.get("/events/:id", async (req, res) => {
+
+  try {
+
+    const event = await Event.findById(
+      req.params.id
+    );
+
+    if (!event) {
+
+      return res.status(404).json({
+        message: "Event not found"
+      });
+
+    }
+
+    res.json(event);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch event"
+    });
+
+  }
+
+});
+
+
+// CREATE event
+router.post("/events", async (req, res) => {
+
+  try {
+
+    const event = await Event.create(
+      req.body
+    );
+
+    res.status(201).json(event);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message
+    });
+
+  }
+
+});
+
+
+// UPDATE event
+router.put("/events/:id", async (req, res) => {
+
+  try {
+
+    const event =
+      await Event.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {
+          new: true,
+          runValidators: true
+        }
+      );
+
+    if (!event) {
+
+      return res.status(404).json({
+        message: "Event not found"
+      });
+
+    }
+
+    res.json(event);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message
+    });
+
+  }
+
+});
+
+
+// DELETE event
+router.delete("/events/:id", async (req, res) => {
+
+  try {
+
+    const event =
+      await Event.findByIdAndDelete(
+        req.params.id
+      );
+
+    if (!event) {
+
+      return res.status(404).json({
+        message: "Event not found"
+      });
+
+    }
+
+    res.json({
+      message: "Event deleted successfully"
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to delete event"
+    });
+
+  }
+
+});
+
+
+/* =========================================================
+   GALLERY
+========================================================= */
+
+// GET gallery
+router.get("/gallery", async (req, res) => {
+
+  try {
+
+    const gallery = await Gallery.find()
+      .sort({ date: -1, createdAt: -1 });
+
+    res.json(gallery);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch gallery"
+    });
+
+  }
+
+});
+
+
+// GET single gallery item
+router.get("/gallery/:id", async (req, res) => {
+
+  try {
+
+    const item = await Gallery.findById(
+      req.params.id
+    );
+
+    if (!item) {
+
+      return res.status(404).json({
+        message: "Gallery item not found"
+      });
+
+    }
+
+    res.json(item);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch gallery item"
+    });
+
+  }
+
+});
+
+
+// CREATE gallery item
+router.post("/gallery", async (req, res) => {
+
+  try {
+
+    const item = await Gallery.create(
+      req.body
+    );
+
+    res.status(201).json(item);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message
+    });
+
+  }
+
+});
+
+
+// UPDATE gallery item
+router.put("/gallery/:id", async (req, res) => {
+
+  try {
+
+    const item =
+      await Gallery.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {
+          new: true,
+          runValidators: true
+        }
+      );
+
+    if (!item) {
+
+      return res.status(404).json({
+        message: "Gallery item not found"
+      });
+
+    }
+
+    res.json(item);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message
+    });
+
+  }
+
+});
+
+
+// DELETE gallery item
+router.delete("/gallery/:id", async (req, res) => {
+
+  try {
+
+    const item =
+      await Gallery.findByIdAndDelete(
+        req.params.id
+      );
+
+    if (!item) {
+
+      return res.status(404).json({
+        message: "Gallery item not found"
+      });
+
+    }
+
+    res.json({
+      message: "Gallery item deleted successfully"
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to delete gallery item"
+    });
+
+  }
+
+});
+
+
+/* =========================================================
+   DONATIONS
+========================================================= */
+
+// GET donations
+router.get("/donations", async (req, res) => {
+
+  try {
+
+    const donations = await Donation.find()
+      .sort({ createdAt: -1 });
+
+    res.json(donations);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch donations"
+    });
+
+  }
+
+});
+
+
+// CREATE donation
+router.post("/donations", async (req, res) => {
+
+  try {
+
+    const donation = await Donation.create({
+      donorName: req.body.donorName,
+      email: req.body.email,
+      phone: req.body.phone,
+      amount: req.body.amount,
+      method: req.body.method,
+      reference: req.body.reference,
+      message: req.body.message,
+      status: "pending"
+    });
+
+    res.status(201).json(donation);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message
+    });
+
+  }
+
+});
+
+
+// UPDATE donation status
+router.patch(
+  "/donations/:id/status",
+  async (req, res) => {
 
     try {
 
-      const {
-        name,
-        email,
-        phone,
-        subject,
-        message
-      } = req.body;
+      const donation =
+        await Donation.findByIdAndUpdate(
+          req.params.id,
+          {
+            status: req.body.status
+          },
+          {
+            new: true,
+            runValidators: true
+          }
+        );
 
+      if (!donation) {
 
-      if (
-        !name ||
-        !emailOK(email) ||
-        !message
-      ) {
-
-        return res
-          .status(400)
-          .json({
-            message:
-              "Name, valid email and message are required."
-          });
+        return res.status(404).json({
+          message: "Donation not found"
+        });
 
       }
 
+      res.json(donation);
 
-      const item =
-        await Contact.create({
+    } catch (error) {
 
-          name:
-            clean(name, 120),
+      console.error(error);
 
-          email:
-            clean(email, 180),
-
-          phone:
-            clean(phone, 40),
-
-          subject:
-            clean(subject, 180),
-
-          message:
-            clean(message, 4000)
-
-        });
-
-
-      res.status(201).json({
-
-        message:
-          "Your message has been received.",
-
-        id:
-          item._id
-
+      res.status(400).json({
+        message: error.message
       });
-
-    }
-
-    catch (error) {
-
-      next(error);
 
     }
 
   }
 );
+
+
+// DELETE donation
+router.delete("/donations/:id", async (req, res) => {
+
+  try {
+
+    const donation =
+      await Donation.findByIdAndDelete(
+        req.params.id
+      );
+
+    if (!donation) {
+
+      return res.status(404).json({
+        message: "Donation not found"
+      });
+
+    }
+
+    res.json({
+      message: "Donation deleted successfully"
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to delete donation"
+    });
+
+  }
+
+});
+
+
+/* =========================================================
+   HEALTH CHECK
+========================================================= */
+
+router.get("/health", (req, res) => {
+
+  res.json({
+    success: true,
+    message: "REHEMA API is working"
+  });
+
+});
 
 
 export default router;

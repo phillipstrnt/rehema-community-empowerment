@@ -232,55 +232,87 @@ const partnerSchema =
 
   );
 
-
-const donationSchema =
-  new mongoose.Schema(
-
-    {
-      donorName:
-        String,
-
-      email:
-        String,
-
-      phone:
-        String,
-
-      amount: {
-        type: Number,
-        required: true,
-        min: 1
-      },
-
-      method: {
-        type: String,
-
-        enum: [
-          "mobile_money",
-          "bank"
-        ],
-
-        required: true
-      },
-
-      reference:
-        String,
-
-      message:
-        String,
-
-      status: {
-        type: String,
-        default: "pending"
-      }
+const donationSchema = new mongoose.Schema(
+  {
+    donorName: {
+      type: String,
+      trim: true
     },
 
-    {
-      timestamps: true
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true
+    },
+
+    phone: {
+      type: String,
+      trim: true
+    },
+
+    amount: {
+      type: Number,
+      required: true,
+      min: 1
+    },
+
+    currency: {
+      type: String,
+      default: "UGX",
+      uppercase: true
+    },
+
+    method: {
+      type: String,
+
+      enum: [
+        "card",
+        "mobile_money",
+        "bank"
+      ],
+
+      required: true
+    },
+
+    reference: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true
+    },
+
+    transactionId: {
+      type: String,
+      trim: true
+    },
+
+    status: {
+      type: String,
+
+      enum: [
+        "pending",
+        "successful",
+        "failed",
+        "cancelled"
+      ],
+
+      default: "pending"
+    },
+
+    message: {
+      type: String,
+      trim: true
+    },
+
+    paidAt: {
+      type: Date
     }
+  },
 
-  );
-
+  {
+    timestamps: true
+  }
+);
 
 const newsletterSchema =
   new mongoose.Schema(
