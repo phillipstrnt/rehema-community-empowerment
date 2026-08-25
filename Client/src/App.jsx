@@ -297,6 +297,37 @@ export default function App() {
 
         </Route>
 
+
+        <Route
+  path="events/new"
+  element={<EventForm />}
+/>
+
+<Route
+  path="events/:id/edit"
+  element={<EventForm />}
+/>
+
+<Route
+  path="gallery/new"
+  element={<GalleryForm />}
+/>
+
+<Route
+  path="gallery/:id/edit"
+  element={<GalleryForm />}
+/>
+
+<Route
+  path="programs/new"
+  element={<ProgramForm />}
+/>
+
+<Route
+  path="programs/:id/edit"
+  element={<ProgramForm />}
+/>
+
     </Routes>
 
   );
