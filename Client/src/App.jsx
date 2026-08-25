@@ -213,6 +213,41 @@ export default function App() {
     path="gallery"
     element={<AdminGallery />}
   />
+
+  <Route
+  index
+  element={<AdminDashboard />}
+/>
+
+<Route
+  path="posts"
+  element={<AdminPosts />}
+/>
+
+<Route
+  path="posts/new"
+  element={<PostForm />}
+/>
+
+<Route
+  path="posts/:id/edit"
+  element={<PostForm />}
+/>
+
+<Route
+  path="programs"
+  element={<AdminPrograms />}
+/>
+
+<Route
+  path="events"
+  element={<AdminEvents />}
+/>
+
+<Route
+  path="gallery"
+  element={<AdminGallery />}
+/>
 </Route>
       {/* =========================
           404

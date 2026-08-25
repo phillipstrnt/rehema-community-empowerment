@@ -1,86 +1,97 @@
-import React, {
-  useEffect,
-  useState
-} from "react";
-
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
 import { api } from "../api";
 
-
 export default function AdminPosts() {
-
-  const [posts, setPosts] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [error, setError] =
-    useState("");
-
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
 
   async function loadPosts() {
-
     try {
-
       setLoading(true);
+      setError("");
 
-      const data =
-        await api("/posts");
-
-      setPosts(data);
-
-    }
-
-    catch (error) {
-
+      const data = await api("/posts");
+      setPosts(Array.isArray(data) ? data : []);
+    } catch (error) {
       console.error(error);
-
-      setError(
-        "Unable to load news posts."
-      );
-
-    }
-
-    finally {
-
+      setError("Unable to load news posts.");
+    } finally {
       setLoading(false);
-
     }
-
   }
 
-
   useEffect(() => {
-
     loadPosts();
-
   }, []);
 
+  async function deletePost(id) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this story? This cannot be undone."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/admin/posts/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to delete story.");
+      }
+
+      setPosts((previous) =>
+        previous.filter((post) => post._id !== id)
+      );
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
+  }
+
+  const filteredPosts = posts.filter((post) => {
+    const searchText = search.toLowerCase();
+
+    return (
+      post.title?.toLowerCase().includes(searchText) ||
+      post.author?.toLowerCase().includes(searchText) ||
+      post.excerpt?.toLowerCase().includes(searchText)
+    );
+  });
 
   return (
+    <section className="admin-content-page">
 
-    <section>
+      {/* HEADER */}
 
-      <div className="admin-page-header">
+      <div className="admin-content-header">
 
         <div>
-
-          <p className="eyebrow">
-            CONTENT
+          <p className="admin-eyebrow">
+            CONTENT MANAGEMENT
           </p>
 
           <h1>
-            News
+            News & Stories
           </h1>
 
+          <p className="admin-page-description">
+            Create, publish and manage REHEMA news,
+            community stories and updates.
+          </p>
         </div>
-
 
         <Link
           to="/admin/posts/new"
-          className="button"
+          className="admin-button admin-button-primary"
         >
           + Add Story
         </Link>
@@ -88,73 +99,200 @@ export default function AdminPosts() {
       </div>
 
 
-      {loading && (
-        <p>
-          Loading posts...
-        </p>
-      )}
+      {/* TOOLBAR */}
 
+      <div className="admin-toolbar">
+
+        <div className="admin-search">
+
+          <span>🔍</span>
+
+          <input
+            type="text"
+            placeholder="Search stories..."
+            value={search}
+            onChange={(event) =>
+              setSearch(event.target.value)
+            }
+          />
+
+        </div>
+
+        <div className="admin-count">
+          {filteredPosts.length}{" "}
+          {filteredPosts.length === 1
+            ? "story"
+            : "stories"}
+        </div>
+
+      </div>
+
+
+      {/* ERROR */}
 
       {error && (
-        <p>
+        <div className="admin-alert admin-alert-error">
           {error}
-        </p>
+        </div>
       )}
 
 
-      {!loading && !error && (
+      {/* LOADING */}
 
-        <div className="admin-table">
+      {loading && (
+        <div className="admin-empty-state">
+          <div className="admin-loader"></div>
+          <p>Loading stories...</p>
+        </div>
+      )}
 
-          {posts.length === 0 ? (
 
-            <p>
-              No news posts found.
-            </p>
+      {/* EMPTY */}
 
-          ) : (
+      {!loading && !error && filteredPosts.length === 0 && (
+        <div className="admin-empty-state">
 
-            posts.map(post => (
+          <div className="admin-empty-icon">
+            📰
+          </div>
 
-              <div
-                className="admin-row"
-                key={post._id}
-              >
+          <h2>
+            No stories found
+          </h2>
 
-                <div>
+          <p>
+            Start publishing REHEMA news and
+            community stories.
+          </p>
 
-                  <h3>
-                    {post.title}
-                  </h3>
+          <Link
+            to="/admin/posts/new"
+            className="admin-button admin-button-primary"
+          >
+            + Create Your First Story
+          </Link>
 
-                  <small>
-                    {post.published
-                      ? "Published"
-                      : "Draft"}
-                  </small>
+        </div>
+      )}
+
+
+      {/* STORIES */}
+
+      {!loading && filteredPosts.length > 0 && (
+
+        <div className="admin-content-grid">
+
+          {filteredPosts.map((post) => (
+
+            <article
+              className="admin-content-card"
+              key={post._id}
+            >
+
+              {/* IMAGE */}
+
+              <div className="admin-card-image">
+
+                {post.image ? (
+
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                  />
+
+                ) : (
+
+                  <div className="admin-no-image">
+                    <span>📰</span>
+                    <p>No image</p>
+                  </div>
+
+                )}
+
+                <span
+                  className={
+                    post.published
+                      ? "admin-status published"
+                      : "admin-status draft"
+                  }
+                >
+                  {post.published
+                    ? "Published"
+                    : "Draft"}
+                </span>
+
+              </div>
+
+
+              {/* CONTENT */}
+
+              <div className="admin-card-body">
+
+                <div className="admin-card-meta">
+
+                  <span>
+                    {post.author || "REHEMA"}
+                  </span>
+
+                  {post.createdAt && (
+                    <>
+                      <span>•</span>
+
+                      <span>
+                        {new Date(
+                          post.createdAt
+                        ).toLocaleDateString()}
+                      </span>
+                    </>
+                  )}
 
                 </div>
 
 
-                <Link
-                  to={`/admin/posts/${post._id}/edit`}
-                  className="button secondary"
-                >
-                  Edit
-                </Link>
+                <h2>
+                  {post.title}
+                </h2>
+
+
+                <p>
+                  {post.excerpt ||
+                    "No excerpt available for this story."}
+                </p>
+
+
+                {/* ACTIONS */}
+
+                <div className="admin-card-actions">
+
+                  <Link
+                    to={`/admin/posts/${post._id}/edit`}
+                    className="admin-button admin-button-secondary"
+                  >
+                    ✏️ Edit
+                  </Link>
+
+                  <button
+                    type="button"
+                    className="admin-button admin-button-danger"
+                    onClick={() =>
+                      deletePost(post._id)
+                    }
+                  >
+                    🗑️ Delete
+                  </button>
+
+                </div>
 
               </div>
 
-            ))
+            </article>
 
-          )}
+          ))}
 
         </div>
 
       )}
 
     </section>
-
   );
-
 }
