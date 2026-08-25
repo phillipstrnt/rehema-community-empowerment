@@ -5,7 +5,11 @@ import {
   Post,
   Event,
   Gallery,
-  Donation
+  Volunteer,
+  Partner,
+  Donation,
+  Newsletter,
+  Contact
 } from "./models.js";
 
 

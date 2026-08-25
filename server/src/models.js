@@ -263,6 +263,7 @@ const partnerSchema = new mongoose.Schema(
   }
 );
 
+
 // ===============================
 // DONATION
 // ===============================
@@ -270,17 +271,20 @@ const donationSchema = new mongoose.Schema(
   {
     donorName: {
       type: String,
+      required: true,
       trim: true,
     },
 
     email: {
       type: String,
+      required: true,
       trim: true,
       lowercase: true,
     },
 
     phone: {
       type: String,
+      required: true,
       trim: true,
     },
 
@@ -299,7 +303,11 @@ const donationSchema = new mongoose.Schema(
 
     method: {
       type: String,
-      enum: ["card", "mobile_money", "bank"],
+      enum: [
+        "card",
+        "mobile_money",
+        "bank",
+      ],
       required: true,
     },
 
@@ -339,7 +347,6 @@ const donationSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
 // ===============================
 // NEWSLETTER
 // ===============================
