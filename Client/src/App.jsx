@@ -170,74 +170,50 @@ export default function App() {
         }
       />
 
+<Route
+  path="/admin"
+  element={<AdminLayout />}
+>
+  {/* Dashboard */}
+  <Route
+    index
+    element={<AdminDashboard />}
+  />
 
-      {/* =========================
-          ADMIN DASHBOARD
-      ========================= */}
+  {/* News */}
+  <Route
+    path="posts"
+    element={<AdminPosts />}
+  />
 
-      <Route
-        path="/admin"
-        element={<AdminLayout />}
-      >
+  <Route
+    path="posts/new"
+    element={<PostForm />}
+  />
 
-        {/* /admin */}
-        <Route
-          index
-          element={<AdminDashboard />}
-        />
+  <Route
+    path="posts/:id/edit"
+    element={<PostForm />}
+  />
 
-        {/* =====================
-            NEWS
-        ===================== */}
+  {/* Programs */}
+  <Route
+    path="programs"
+    element={<AdminPrograms />}
+  />
 
-        <Route
-          path="posts"
-          element={<AdminPosts />}
-        />
+  {/* Events */}
+  <Route
+    path="events"
+    element={<AdminEvents />}
+  />
 
-        <Route
-          path="posts/new"
-          element={<PostForm />}
-        />
-
-        <Route
-          path="posts/:id/edit"
-          element={<PostForm />}
-        />
-
-
-        {/* =====================
-            PROGRAMS
-        ===================== */}
-
-        <Route
-          path="programs"
-          element={<AdminPrograms />}
-        />
-
-
-        {/* =====================
-            EVENTS
-        ===================== */}
-
-        <Route
-          path="events"
-          element={<AdminEvents />}
-        />
-
-
-        {/* =====================
-            GALLERY
-        ===================== */}
-
-        <Route
-          path="gallery"
-          element={<AdminGallery />}
-        />
-
-      </Route>
-
-
+  {/* Gallery */}
+  <Route
+    path="gallery"
+    element={<AdminGallery />}
+  />
+</Route>
       {/* =========================
           404
       ========================= */}
