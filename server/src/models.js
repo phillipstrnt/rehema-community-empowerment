@@ -347,6 +347,7 @@ const donationSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
 // ===============================
 // NEWSLETTER
 // ===============================
