@@ -5,12 +5,18 @@ import {
   Route
 } from "react-router-dom";
 
-/* Public components */
+/* =========================
+   PUBLIC COMPONENTS
+========================= */
+
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import WhatsAppButton from "./components/WhatsAppButton";
 
-/* Public pages */
+/* =========================
+   PUBLIC PAGES
+========================= */
+
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Programs from "./pages/Programs";
@@ -22,7 +28,13 @@ import Donate from "./pages/Donate";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
-/* Admin */
+
+
+
+/* =========================
+   ADMIN
+========================= */
+
 import AdminLayout from "./admin/AdminLayout";
 import AdminDashboard from "./admin/AdminDashboard";
 import AdminPosts from "./admin/AdminPosts";
@@ -30,6 +42,11 @@ import PostForm from "./admin/PostForm";
 import AdminPrograms from "./admin/AdminPrograms";
 import AdminEvents from "./admin/AdminEvents";
 import AdminGallery from "./admin/AdminGallery";
+
+
+import ProgramForm from "./admin/ProgramForm";
+import EventForm from "./admin/EventForm";
+import GalleryForm from "./admin/GalleryForm";
 
 
 export default function App() {
@@ -47,11 +64,9 @@ export default function App() {
         element={
           <>
             <Navbar />
-
             <main>
               <Home />
             </main>
-
             <Footer />
             <WhatsAppButton />
           </>
@@ -169,17 +184,27 @@ export default function App() {
           </>
         }
       />
+
+
+{/* =========================
+    ADMIN DASHBOARD
+========================= */}
+
 <Route
   path="/admin"
   element={<AdminLayout />}
 >
+
   {/* Dashboard */}
+
   <Route
     index
     element={<AdminDashboard />}
   />
 
-  {/* News / Stories */}
+
+  {/* NEWS */}
+
   <Route
     path="posts"
     element={<AdminPosts />}
@@ -195,24 +220,62 @@ export default function App() {
     element={<PostForm />}
   />
 
-  {/* Programs */}
+
+  {/* PROGRAMS */}
+
   <Route
     path="programs"
     element={<AdminPrograms />}
   />
 
-  {/* Events */}
+  <Route
+    path="programs/new"
+    element={<ProgramForm />}
+  />
+
+  <Route
+    path="programs/:id/edit"
+    element={<ProgramForm />}
+  />
+
+
+  {/* EVENTS */}
+
   <Route
     path="events"
     element={<AdminEvents />}
   />
 
-  {/* Gallery */}
+  <Route
+    path="events/new"
+    element={<EventForm />}
+  />
+
+  <Route
+    path="events/:id/edit"
+    element={<EventForm />}
+  />
+
+
+  {/* GALLERY */}
+
   <Route
     path="gallery"
     element={<AdminGallery />}
   />
+
+  <Route
+    path="gallery/new"
+    element={<GalleryForm />}
+  />
+
+  <Route
+    path="gallery/:id/edit"
+    element={<GalleryForm />}
+  />
+
 </Route>
+
       {/* =========================
           404
       ========================= */}
@@ -222,111 +285,14 @@ export default function App() {
         element={
           <>
             <Navbar />
-
             <main>
               <NotFound />
             </main>
-
             <Footer />
             <WhatsAppButton />
           </>
         }
       />
-
-        <Route
-        path="/admin"
-        element={<AdminLayout />}
-        >
-        {/* Dashboard */}
-        <Route
-            index
-            element={<AdminDashboard />}
-        />
-
-        {/* NEWS */}
-        <Route
-            path="posts"
-            element={<AdminPosts />}
-        />
-
-        <Route
-            path="posts/new"
-            element={<PostForm />}
-        />
-
-        <Route
-            path="posts/:id/edit"
-            element={<PostForm />}
-        />
-
-
-        {/* PROGRAMS */}
-        <Route
-            path="programs"
-            element={<AdminPrograms />}
-        />
-
-        <Route
-            path="programs/new"
-            element={<AdminPrograms />}
-        />
-
-
-        {/* EVENTS */}
-        <Route
-            path="events"
-            element={<AdminEvents />}
-        />
-
-        <Route
-            path="events/new"
-            element={<AdminEvents />}
-        />
-
-
-        {/* GALLERY */}
-        <Route
-            path="gallery"
-            element={<AdminGallery />}
-        />
-
-        <Route
-            path="gallery/new"
-            element={<AdminGallery />}
-        />
-
-        </Route>
-
-
-        <Route
-  path="events/new"
-  element={<EventForm />}
-/>
-
-<Route
-  path="events/:id/edit"
-  element={<EventForm />}
-/>
-
-<Route
-  path="gallery/new"
-  element={<GalleryForm />}
-/>
-
-<Route
-  path="gallery/:id/edit"
-  element={<GalleryForm />}
-/>
-
-<Route
-  path="programs/new"
-  element={<ProgramForm />}
-/>
-
-<Route
-  path="programs/:id/edit"
-  element={<ProgramForm />}
-/>
 
     </Routes>
 
