@@ -22,10 +22,6 @@ export default function AdminGallery() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // ============================
-  // LOAD MEDIA
-  // ============================
-
   async function loadMedia() {
     try {
       setLoading(true);
@@ -33,8 +29,9 @@ export default function AdminGallery() {
 
       const data = await api("/gallery");
 
-      setMedia(data);
+      setMedia(Array.isArray(data) ? data : []);
     } catch (error) {
+      console.error(error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -45,22 +42,14 @@ export default function AdminGallery() {
     loadMedia();
   }, []);
 
-  // ============================
-  // INPUT
-  // ============================
-
   function handleChange(event) {
     const { name, value } = event.target;
 
-    setForm({
-      ...form,
+    setForm((current) => ({
+      ...current,
       [name]: value,
-    });
+    }));
   }
-
-  // ============================
-  // ADD
-  // ============================
 
   function openAddForm() {
     setEditingId(null);
@@ -69,10 +58,6 @@ export default function AdminGallery() {
     setSuccess("");
     setShowForm(true);
   }
-
-  // ============================
-  // EDIT
-  // ============================
 
   function openEditForm(item) {
     setEditingId(item._id);
@@ -90,11 +75,19 @@ export default function AdminGallery() {
     setError("");
     setSuccess("");
     setShowForm(true);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   }
 
-  // ============================
-  // SAVE
-  // ============================
+  function closeForm() {
+    setShowForm(false);
+    setEditingId(null);
+    setForm(emptyForm);
+    setError("");
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -107,13 +100,10 @@ export default function AdminGallery() {
       let saved;
 
       if (editingId) {
-        saved = await api(
-          `/gallery/${editingId}`,
-          {
-            method: "PUT",
-            body: JSON.stringify(form),
-          }
-        );
+        saved = await api(`/gallery/${editingId}`, {
+          method: "PUT",
+          body: JSON.stringify(form),
+        });
 
         setMedia((current) =>
           current.map((item) =>
@@ -125,13 +115,10 @@ export default function AdminGallery() {
 
         setSuccess("Media updated successfully.");
       } else {
-        saved = await api(
-          "/gallery",
-          {
-            method: "POST",
-            body: JSON.stringify(form),
-          }
-        );
+        saved = await api("/gallery", {
+          method: "POST",
+          body: JSON.stringify(form),
+        });
 
         setMedia((current) => [
           saved,
@@ -145,16 +132,18 @@ export default function AdminGallery() {
       setEditingId(null);
       setShowForm(false);
 
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+
     } catch (error) {
+      console.error(error);
       setError(error.message);
     } finally {
       setSaving(false);
     }
   }
-
-  // ============================
-  // DELETE
-  // ============================
 
   async function deleteMedia(id) {
     const confirmed = window.confirm(
@@ -165,13 +154,11 @@ export default function AdminGallery() {
 
     try {
       setError("");
+      setSuccess("");
 
-      await api(
-        `/gallery/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      await api(`/gallery/${id}`, {
+        method: "DELETE",
+      });
 
       setMedia((current) =>
         current.filter(
@@ -179,25 +166,30 @@ export default function AdminGallery() {
         )
       );
 
-      setSuccess("Media deleted successfully.");
+      setSuccess(
+        "Media deleted successfully."
+      );
 
     } catch (error) {
+      console.error(error);
       setError(error.message);
     }
   }
 
   return (
-    <div className="admin-form-page">
+    <section className="gallery-admin-page">
 
-      {/* HEADER */}
+      {/* =========================================
+          PAGE HEADER
+      ========================================== */}
 
-      <div className="admin-form-header">
+      <div className="gallery-admin-header">
 
-        <div>
+        <div className="gallery-admin-header-text">
 
-          <p className="admin-eyebrow">
+          <span className="gallery-admin-eyebrow">
             MEDIA MANAGEMENT
-          </p>
+          </span>
 
           <h1>
             Gallery
@@ -210,161 +202,344 @@ export default function AdminGallery() {
 
         </div>
 
+        {!showForm && (
+          <button
+            type="button"
+            className="gallery-add-button"
+            onClick={openAddForm}
+          >
+            <span className="gallery-button-icon">
+              +
+            </span>
 
-        <button
-          type="button"
-          className="admin-button admin-button-primary"
-          onClick={openAddForm}
-        >
-          + Add Media
-        </button>
+            Add Media
+          </button>
+        )}
 
       </div>
 
 
-      {/* MESSAGES */}
+      {/* =========================================
+          ALERTS
+      ========================================== */}
 
       {error && (
-        <div className="admin-alert admin-alert-error">
+        <div className="gallery-alert gallery-alert-error">
+          <span>!</span>
           {error}
         </div>
       )}
 
       {success && (
-        <div className="admin-alert admin-alert-success">
+        <div className="gallery-alert gallery-alert-success">
+          <span>✓</span>
           {success}
         </div>
       )}
 
 
-      {/* FORM */}
+      {/* =========================================
+          ADD / EDIT FORM
+      ========================================== */}
 
       {showForm && (
 
-        <div className="admin-form-card">
+        <div className="gallery-editor-card">
 
-          <div className="section-heading">
+          <div className="gallery-editor-header">
 
-            <h2>
-              {editingId
-                ? "Edit Media"
-                : "Add New Media"}
-            </h2>
+            <div>
+              <span className="gallery-section-label">
+                {editingId
+                  ? "EDIT MEDIA"
+                  : "NEW MEDIA"}
+              </span>
 
-            <p>
-              Add a photo or video to the REHEMA
-              media library.
-            </p>
+              <h2>
+                {editingId
+                  ? "Edit Media"
+                  : "Add New Media"}
+              </h2>
+
+              <p>
+                Add details about the photo or
+                video you want to display in the
+                REHEMA gallery.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className="gallery-close-button"
+              onClick={closeForm}
+              aria-label="Close form"
+            >
+              ×
+            </button>
 
           </div>
 
 
           <form
-            className="admin-form"
+            className="gallery-editor-form"
             onSubmit={handleSubmit}
           >
 
-            <div className="admin-form-grid">
+            {/* LEFT SIDE */}
 
-              <div className="admin-field">
+            <div className="gallery-form-main">
 
-                <label>
-                  Media Title
-                </label>
+              <div className="gallery-form-section">
 
-                <input
-                  name="title"
-                  value={form.title}
-                  onChange={handleChange}
-                  placeholder="REHEMA Medical Outreach"
-                />
+                <div className="gallery-form-section-title">
+                  <span>01</span>
+                  <div>
+                    <h3>
+                      Media Information
+                    </h3>
 
-              </div>
-
-
-              <div className="admin-field">
-
-                <label>
-                  Media Type
-                </label>
-
-                <select
-                  name="type"
-                  value={form.type}
-                  onChange={handleChange}
-                >
-
-                  <option value="image">
-                    Image
-                  </option>
-
-                  <option value="video">
-                    Video
-                  </option>
-
-                </select>
-
-              </div>
+                    <p>
+                      Provide the basic information
+                      about this media.
+                    </p>
+                  </div>
+                </div>
 
 
-              <div className="admin-field admin-field-full">
+                <div className="gallery-form-grid">
 
-                <label>
-                  Media URL
-                </label>
+                  <div className="gallery-field gallery-field-full">
 
-                <input
-                  type="url"
-                  name="url"
-                  value={form.url}
-                  onChange={handleChange}
-                  placeholder="https://..."
-                  required
-                />
+                    <label htmlFor="gallery-title">
+                      Media Title
+                    </label>
 
-              </div>
+                    <input
+                      id="gallery-title"
+                      name="title"
+                      value={form.title}
+                      onChange={handleChange}
+                      placeholder="e.g. REHEMA Medical Outreach"
+                    />
 
-
-              <div className="admin-field admin-field-full">
-
-                <label>
-                  Caption
-                </label>
-
-                <textarea
-                  name="caption"
-                  value={form.caption}
-                  onChange={handleChange}
-                  rows="4"
-                  placeholder="Describe this photo or video..."
-                />
-
-              </div>
+                  </div>
 
 
-              <div className="admin-field">
+                  <div className="gallery-field">
 
-                <label>
-                  Date
-                </label>
+                    <label htmlFor="gallery-type">
+                      Media Type
+                    </label>
 
-                <input
-                  type="date"
-                  name="date"
-                  value={form.date}
-                  onChange={handleChange}
-                />
+                    <select
+                      id="gallery-type"
+                      name="type"
+                      value={form.type}
+                      onChange={handleChange}
+                    >
+                      <option value="image">
+                        Image
+                      </option>
+
+                      <option value="video">
+                        Video
+                      </option>
+                    </select>
+
+                  </div>
+
+
+                  <div className="gallery-field">
+
+                    <label htmlFor="gallery-date">
+                      Date
+                    </label>
+
+                    <input
+                      id="gallery-date"
+                      type="date"
+                      name="date"
+                      value={form.date}
+                      onChange={handleChange}
+                    />
+
+                  </div>
+
+
+                  <div className="gallery-field gallery-field-full">
+
+                    <label htmlFor="gallery-url">
+                      Media URL
+                      <span className="required-label">
+                        *
+                      </span>
+                    </label>
+
+                    <input
+                      id="gallery-url"
+                      type="url"
+                      name="url"
+                      value={form.url}
+                      onChange={handleChange}
+                      placeholder="https://res.cloudinary.com/..."
+                      required
+                    />
+
+                    <small>
+                      Paste the public URL of the
+                      image or video.
+                    </small>
+
+                  </div>
+
+
+                  <div className="gallery-field gallery-field-full">
+
+                    <label htmlFor="gallery-caption">
+                      Caption
+                    </label>
+
+                    <textarea
+                      id="gallery-caption"
+                      name="caption"
+                      value={form.caption}
+                      onChange={handleChange}
+                      rows="5"
+                      placeholder="Describe what is happening in this photo or video..."
+                    />
+
+                    <small>
+                      A short description helps
+                      visitors understand the media.
+                    </small>
+
+                  </div>
+
+                </div>
 
               </div>
 
             </div>
 
 
-            <div className="admin-form-actions">
+            {/* RIGHT SIDE */}
+
+            <aside className="gallery-form-preview">
+
+              <div className="gallery-preview-header">
+
+                <div>
+                  <span>
+                    PREVIEW
+                  </span>
+
+                  <h3>
+                    Media Preview
+                  </h3>
+                </div>
+
+              </div>
+
+
+              <div className="gallery-preview-box">
+
+                {form.url ? (
+
+                  form.type === "image" ? (
+
+                    <img
+                      src={form.url}
+                      alt={
+                        form.title ||
+                        "Media preview"
+                      }
+                      onError={(event) => {
+                        event.currentTarget.style.display =
+                          "none";
+                      }}
+                    />
+
+                  ) : (
+
+                    <div className="gallery-video-preview">
+
+                      <span>
+                        ▶
+                      </span>
+
+                      <p>
+                        Video selected
+                      </p>
+
+                    </div>
+
+                  )
+
+                ) : (
+
+                  <div className="gallery-preview-empty">
+
+                    <span>
+                      +
+                    </span>
+
+                    <p>
+                      Your media preview
+                      will appear here
+                    </p>
+
+                  </div>
+
+                )}
+
+              </div>
+
+
+              <div className="gallery-preview-details">
+
+                <div>
+                  <span>
+                    TYPE
+                  </span>
+
+                  <strong>
+                    {form.type === "image"
+                      ? "Image"
+                      : "Video"}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>
+                    DATE
+                  </span>
+
+                  <strong>
+                    {form.date || "Not set"}
+                  </strong>
+                </div>
+
+              </div>
+
+            </aside>
+
+
+            {/* FORM ACTIONS */}
+
+            <div className="gallery-form-actions">
+
+              <button
+                type="button"
+                className="gallery-cancel-button"
+                onClick={closeForm}
+                disabled={saving}
+              >
+                Cancel
+              </button>
 
               <button
                 type="submit"
-                className="admin-button admin-button-primary"
+                className="gallery-save-button"
                 disabled={saving}
               >
                 {saving
@@ -372,19 +547,6 @@ export default function AdminGallery() {
                   : editingId
                     ? "Update Media"
                     : "Save Media"}
-              </button>
-
-
-              <button
-                type="button"
-                className="admin-button admin-button-secondary"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingId(null);
-                  setForm(emptyForm);
-                }}
-              >
-                Cancel
               </button>
 
             </div>
@@ -396,110 +558,178 @@ export default function AdminGallery() {
       )}
 
 
-      {/* MEDIA LIBRARY */}
+      {/* =========================================
+          MEDIA LIBRARY
+      ========================================== */}
 
-      <div className="admin-form-card">
+      <div className="gallery-library">
 
-        <div className="section-heading">
+        <div className="gallery-library-header">
 
-          <h2>
-            Media Library
-          </h2>
+          <div>
 
-          <p>
-            {media.length} item
-            {media.length === 1 ? "" : "s"}
-          </p>
+            <span className="gallery-section-label">
+              YOUR CONTENT
+            </span>
+
+            <h2>
+              Media Library
+            </h2>
+
+            <p>
+              {media.length}{" "}
+              {media.length === 1
+                ? "item"
+                : "items"}{" "}
+              in your gallery.
+            </p>
+
+          </div>
+
+          {!showForm && (
+            <button
+              type="button"
+              className="gallery-secondary-add"
+              onClick={openAddForm}
+            >
+              + Add Media
+            </button>
+          )}
 
         </div>
 
 
         {loading ? (
 
-          <p>
-            Loading media...
-          </p>
+          <div className="gallery-loading">
+            <div className="gallery-spinner"></div>
+            <p>
+              Loading media library...
+            </p>
+          </div>
 
         ) : media.length === 0 ? (
 
-          <div className="admin-empty-state">
+          <div className="gallery-empty">
+
+            <div className="gallery-empty-icon">
+              +
+            </div>
 
             <h3>
               No media yet
             </h3>
 
             <p>
-              Click "Add Media" to upload your
-              first image or video.
+              Add your first photo or video to
+              start building the REHEMA gallery.
             </p>
+
+            <button
+              type="button"
+              className="gallery-add-button"
+              onClick={openAddForm}
+            >
+              + Add Your First Media
+            </button>
 
           </div>
 
         ) : (
 
-          <div className="admin-items">
+          <div className="gallery-media-grid">
 
             {media.map((item) => (
 
-              <div
-                className="admin-item-card"
+              <article
+                className="gallery-media-card"
                 key={item._id}
               >
 
-                <div className="admin-item-content">
+                <div className="gallery-media-image">
 
                   {item.type === "image" &&
-                    item.url && (
-                      <img
-                        src={item.url}
-                        alt={item.title || "REHEMA media"}
-                        className="admin-media-preview"
-                      />
-                    )
-                  }
+                  item.url ? (
 
-                  <h3>
-                    {item.title ||
-                      "Untitled Media"}
-                  </h3>
+                    <img
+                      src={item.url}
+                      alt={
+                        item.title ||
+                        "REHEMA media"
+                      }
+                    />
 
-                  <p>
-                    {item.caption}
-                  </p>
+                  ) : (
 
-                  <span className="admin-status admin-status-active">
+                    <div className="gallery-video-card">
+
+                      <span>
+                        ▶
+                      </span>
+
+                      <small>
+                        VIDEO
+                      </small>
+
+                    </div>
+
+                  )}
+
+                  <span className="gallery-media-type">
                     {item.type}
                   </span>
 
                 </div>
 
 
-                <div className="admin-item-actions">
+                <div className="gallery-media-body">
 
-                  <button
-                    type="button"
-                    className="admin-button admin-button-secondary"
-                    onClick={() =>
-                      openEditForm(item)
-                    }
-                  >
-                    Edit
-                  </button>
+                  <h3>
+                    {item.title ||
+                      "Untitled Media"}
+                  </h3>
 
+                  {item.caption && (
+                    <p>
+                      {item.caption}
+                    </p>
+                  )}
 
-                  <button
-                    type="button"
-                    className="admin-button admin-button-danger"
-                    onClick={() =>
-                      deleteMedia(item._id)
-                    }
-                  >
-                    Delete
-                  </button>
+                  {item.date && (
+                    <span className="gallery-media-date">
+                      {new Date(
+                        item.date
+                      ).toLocaleDateString()}
+                    </span>
+                  )}
+
+                  <div className="gallery-media-actions">
+
+                    <button
+                      type="button"
+                      className="gallery-edit-button"
+                      onClick={() =>
+                        openEditForm(item)
+                      }
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      type="button"
+                      className="gallery-delete-button"
+                      onClick={() =>
+                        deleteMedia(item._id)
+                      }
+                    >
+                      Delete
+                    </button>
+
+                  </div>
 
                 </div>
 
-              </div>
+              </article>
 
             ))}
 
@@ -509,6 +739,6 @@ export default function AdminGallery() {
 
       </div>
 
-    </div>
+    </section>
   );
 }

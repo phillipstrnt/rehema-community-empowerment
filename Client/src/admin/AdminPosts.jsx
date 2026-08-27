@@ -35,18 +35,9 @@ export default function AdminPosts() {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/admin/posts/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Unable to delete story.");
-      }
+      await api(`/posts/${id}`, {
+        method: "DELETE",
+      });
 
       setPosts((previous) =>
         previous.filter((post) => post._id !== id)

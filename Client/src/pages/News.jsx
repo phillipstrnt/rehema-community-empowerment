@@ -51,6 +51,17 @@ export default function News() {
             key={post._id}
           >
 
+            {/* FEATURED IMAGE */}
+
+            {post.image && (
+              <img
+                src={post.image}
+                alt={post.title}
+                className="news-card-image"
+              />
+            )}
+
+
             <small>
 
               {new Date(

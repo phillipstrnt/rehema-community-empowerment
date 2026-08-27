@@ -1,17 +1,15 @@
-import React, {
-  useEffect,
-  useState
-} from "react";
+
+import React, { useEffect, useState } from "react";
 
 import {
   useNavigate,
   useParams
 } from "react-router-dom";
 
+import { api } from "../api";
+
 export default function PostForm() {
-
   const { id } = useParams();
-
   const navigate = useNavigate();
 
   const editing = Boolean(id);
@@ -27,34 +25,23 @@ export default function PostForm() {
   });
 
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
-
-  /* =========================
-     LOAD EXISTING POST
-  ========================= */
+  /* =====================================================
+     LOAD EXISTING STORY
+  ===================================================== */
 
   useEffect(() => {
-
-    if (!editing) return;
+    if (!editing) {
+      return;
+    }
 
     async function loadPost() {
-
       try {
-
         setError("");
 
-        const response = await fetch(
-          `http://localhost:5000/api/admin/posts/${id}`
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            "Unable to load this story."
-          );
-        }
-
-        const data = await response.json();
+        const data = await api("/posts/id/" + id);
 
         setForm({
           title: data.title || "",
@@ -65,10 +52,8 @@ export default function PostForm() {
           author: data.author || "REHEMA",
           published: data.published ?? true
         });
-
       } catch (error) {
-
-        console.error(error);
+        console.error("LOAD POST ERROR:", error);
 
         setError(
           error.message ||
@@ -78,16 +63,13 @@ export default function PostForm() {
     }
 
     loadPost();
-
   }, [editing, id]);
 
-
-  /* =========================
+  /* =====================================================
      HANDLE INPUT
-  ========================= */
+  ===================================================== */
 
   function handleChange(event) {
-
     const {
       name,
       value,
@@ -97,7 +79,6 @@ export default function PostForm() {
 
     setForm((previous) => ({
       ...previous,
-
       [name]:
         type === "checkbox"
           ? checked
@@ -105,88 +86,138 @@ export default function PostForm() {
     }));
   }
 
+  /* =====================================================
+     UPLOAD IMAGE TO CLOUDINARY
+  ===================================================== */
 
-  /* =========================
-     SAVE POST
-  ========================= */
+  async function handleImageUpload(event) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    setError("");
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+
+      formData.append("image", file);
+
+      const response = await fetch(
+        "http://localhost:5000/api/upload/image",
+        {
+          method: "POST",
+          body: formData
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+          "Image upload failed."
+        );
+      }
+
+      console.log(
+        "CLOUDINARY UPLOAD:",
+        data
+      );
+
+      setForm((previous) => ({
+        ...previous,
+        image: data.url || ""
+      }));
+    } catch (error) {
+      console.error(
+        "IMAGE UPLOAD ERROR:",
+        error
+      );
+
+      setError(
+        error.message ||
+        "Unable to upload image."
+      );
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  /* =====================================================
+     SAVE STORY
+  ===================================================== */
 
   async function handleSubmit(event) {
-
     event.preventDefault();
+
+    if (uploading) {
+      setError(
+        "Please wait for the image upload to finish."
+      );
+
+      return;
+    }
 
     setSaving(true);
     setError("");
 
     try {
+      let savedPost;
 
-      const url = editing
-        ? `http://localhost:5000/api/admin/posts/${id}`
-        : "http://localhost:5000/api/admin/posts";
-
-      const method = editing
-        ? "PUT"
-        : "POST";
-
-      const response = await fetch(
-        url,
-        {
-          method,
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-
-          body: JSON.stringify(form)
-        }
-      );
-
-      const data =
-        await response.json();
-
-      if (!response.ok) {
-
-        throw new Error(
-          data.message ||
-          "Unable to save story."
+      if (editing) {
+        savedPost = await api(
+          "/posts/" + id,
+          {
+            method: "PUT",
+            body: JSON.stringify(form)
+          }
+        );
+      } else {
+        savedPost = await api(
+          "/posts",
+          {
+            method: "POST",
+            body: JSON.stringify(form)
+          }
         );
       }
 
+      console.log(
+        "POST SAVED:",
+        savedPost
+      );
+
       navigate("/admin/posts");
-
     } catch (error) {
-
-      console.error(error);
+      console.error(
+        "SAVE POST ERROR:",
+        error
+      );
 
       setError(
         error.message ||
-        "Something went wrong."
+        "Unable to save story."
       );
-
     } finally {
-
       setSaving(false);
-
     }
   }
 
-
-  /* =========================
+  /* =====================================================
      IMAGE PREVIEW
-  ========================= */
+  ===================================================== */
 
-  const imagePreview =
-    form.image.trim();
-
+  const imagePreview = form.image.trim();
 
   return (
-
     <section className="admin-form-page">
 
       {/* HEADER */}
 
       <div className="admin-form-header">
-
         <div>
 
           <p className="admin-eyebrow">
@@ -206,20 +237,15 @@ export default function PostForm() {
           </p>
 
         </div>
-
       </div>
-
 
       {/* ERROR */}
 
       {error && (
-
         <div className="admin-alert admin-alert-error">
           {error}
         </div>
-
       )}
-
 
       {/* FORM */}
 
@@ -228,9 +254,11 @@ export default function PostForm() {
         onSubmit={handleSubmit}
       >
 
-        {/* MAIN */}
+        {/* MAIN CONTENT */}
 
         <div className="admin-editor-main">
+
+          {/* STORY INFORMATION */}
 
           <div className="admin-form-card">
 
@@ -239,10 +267,9 @@ export default function PostForm() {
             </h2>
 
             <p className="admin-form-help">
-              Provide the main information about
-              this news story.
+              Provide the main information
+              about this news story.
             </p>
-
 
             <div className="admin-form-group">
 
@@ -260,7 +287,6 @@ export default function PostForm() {
               />
 
             </div>
-
 
             <div className="admin-form-group">
 
@@ -284,7 +310,6 @@ export default function PostForm() {
 
             </div>
 
-
             <div className="admin-form-group">
 
               <label>
@@ -300,7 +325,6 @@ export default function PostForm() {
               />
 
             </div>
-
 
             <div className="admin-form-group">
 
@@ -321,7 +345,6 @@ export default function PostForm() {
 
           </div>
 
-
           {/* IMAGE */}
 
           <div className="admin-form-card">
@@ -331,30 +354,38 @@ export default function PostForm() {
             </h2>
 
             <p className="admin-form-help">
-              Add an image to appear with this story.
-              We will connect Cloudinary here later.
+              Select an image from your computer.
+              It will be uploaded securely to Cloudinary.
             </p>
-
 
             <div className="admin-form-group">
 
               <label>
-                Image URL
+                Choose Image
               </label>
 
               <input
-                type="url"
-                name="image"
-                value={form.image}
-                onChange={handleChange}
-                placeholder="https://example.com/image.jpg"
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploading}
               />
 
             </div>
 
+            {uploading && (
+              <div className="admin-upload-status">
+                Uploading image...
+              </div>
+            )}
+
+            {form.image && !uploading && (
+              <div className="admin-upload-success">
+                Image uploaded successfully.
+              </div>
+            )}
 
             {imagePreview && (
-
               <div className="admin-image-preview">
 
                 <img
@@ -367,13 +398,11 @@ export default function PostForm() {
                 />
 
               </div>
-
             )}
 
           </div>
 
         </div>
-
 
         {/* SIDEBAR */}
 
@@ -401,7 +430,6 @@ export default function PostForm() {
 
             </div>
 
-
             <label className="admin-checkbox">
 
               <input
@@ -416,7 +444,6 @@ export default function PostForm() {
               </span>
 
             </label>
-
 
             <div className="admin-form-group">
 
@@ -433,23 +460,23 @@ export default function PostForm() {
 
             </div>
 
-
             <div className="admin-editor-actions">
 
               <button
                 type="submit"
                 className="admin-button admin-button-primary"
-                disabled={saving}
+                disabled={saving || uploading}
               >
 
-                {saving
-                  ? "Saving..."
-                  : editing
-                    ? "Update Story"
-                    : "Publish Story"}
+                {uploading
+                  ? "Uploading Image..."
+                  : saving
+                    ? "Saving..."
+                    : editing
+                      ? "Update Story"
+                      : "Publish Story"}
 
               </button>
-
 
               <button
                 type="button"

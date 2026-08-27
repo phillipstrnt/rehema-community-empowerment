@@ -1,5 +1,7 @@
 import "dotenv/config";
 
+import uploadRoutes from "./upload.js";
+
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -13,7 +15,6 @@ import {
 } from "./db.js";
 
 import routes from "./routes.js";
-
 
 const app =
   express();
@@ -56,12 +57,19 @@ app.use(
 );
 
 
+/* UPLOAD ROUTES */
+
+app.use(
+  "/api/upload",
+  uploadRoutes
+);
+
+
 /* LOGGING */
 
 app.use(
   morgan("dev")
 );
-
 
 /* RATE LIMIT */
 
@@ -170,3 +178,7 @@ connectDB()
     process.exit(1);
 
   });
+
+
+
+  
