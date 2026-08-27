@@ -88,6 +88,11 @@ export default function AdminLayout() {
 
       </aside>
 
+        <NavLink to="/admin/volunteers">
+          <span>👥</span>
+          Volunteers
+        </NavLink>
+
 
       {/* =========================
           MAIN ADMIN AREA

@@ -636,6 +636,172 @@ router.delete("/gallery/:id", async (req, res) => {
 
 });
 
+/* =========================================================
+   VOLUNTEERS
+========================================================= */
+
+// GET all volunteers
+router.get("/volunteers", async (req, res) => {
+  try {
+    const volunteers = await Volunteer.find()
+      .sort({ createdAt: -1 });
+
+    res.json(volunteers);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch volunteers",
+    });
+  }
+});
+
+
+// GET single volunteer
+router.get("/volunteers/:id", async (req, res) => {
+  try {
+    const volunteer = await Volunteer.findById(
+      req.params.id
+    );
+
+    if (!volunteer) {
+      return res.status(404).json({
+        message: "Volunteer not found",
+      });
+    }
+
+    res.json(volunteer);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch volunteer",
+    });
+  }
+});
+
+
+// CREATE volunteer
+router.post("/volunteers", async (req, res) => {
+  try {
+    const volunteer = await Volunteer.create({
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone,
+      skills: req.body.skills,
+      message: req.body.message,
+      status: "new",
+    });
+
+    res.status(201).json(volunteer);
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+});
+
+
+// UPDATE volunteer
+router.put("/volunteers/:id", async (req, res) => {
+  try {
+    const volunteer =
+      await Volunteer.findByIdAndUpdate(
+        req.params.id,
+        {
+          name: req.body.name,
+          email: req.body.email,
+          phone: req.body.phone,
+          skills: req.body.skills,
+          message: req.body.message,
+          status: req.body.status,
+        },
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+
+    if (!volunteer) {
+      return res.status(404).json({
+        message: "Volunteer not found",
+      });
+    }
+
+    res.json(volunteer);
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+});
+
+
+// UPDATE volunteer status
+router.patch(
+  "/volunteers/:id/status",
+  async (req, res) => {
+    try {
+      const volunteer =
+        await Volunteer.findByIdAndUpdate(
+          req.params.id,
+          {
+            status: req.body.status,
+          },
+          {
+            new: true,
+            runValidators: true,
+          }
+        );
+
+      if (!volunteer) {
+        return res.status(404).json({
+          message: "Volunteer not found",
+        });
+      }
+
+      res.json(volunteer);
+    } catch (error) {
+      console.error(error);
+
+      res.status(400).json({
+        message: error.message,
+      });
+    }
+  }
+);
+
+
+// DELETE volunteer
+router.delete("/volunteers/:id", async (req, res) => {
+  try {
+    const volunteer =
+      await Volunteer.findByIdAndDelete(
+        req.params.id
+      );
+
+    if (!volunteer) {
+      return res.status(404).json({
+        message: "Volunteer not found",
+      });
+    }
+
+    res.json({
+      message: "Volunteer deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to delete volunteer",
+    });
+  }
+});
+
 
 /* =========================================================
    DONATIONS
@@ -770,6 +936,133 @@ router.delete("/donations/:id", async (req, res) => {
 
   }
 
+});
+
+
+/* =========================================================
+   VOLUNTEERS
+========================================================= */
+
+// GET all volunteers
+router.get("/volunteers", async (req, res) => {
+  try {
+    const volunteers = await Volunteer.find()
+      .sort({ createdAt: -1 });
+
+    res.json(volunteers);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch volunteers"
+    });
+  }
+});
+
+
+// GET single volunteer
+router.get("/volunteers/:id", async (req, res) => {
+  try {
+    const volunteer = await Volunteer.findById(
+      req.params.id
+    );
+
+    if (!volunteer) {
+      return res.status(404).json({
+        message: "Volunteer not found"
+      });
+    }
+
+    res.json(volunteer);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch volunteer"
+    });
+  }
+});
+
+
+// CREATE volunteer
+router.post("/volunteers", async (req, res) => {
+  try {
+    const volunteer = await Volunteer.create({
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone,
+      skills: req.body.skills,
+      message: req.body.message,
+      status: "new"
+    });
+
+    res.status(201).json(volunteer);
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message
+    });
+  }
+});
+
+
+// UPDATE volunteer status
+router.patch("/volunteers/:id/status", async (req, res) => {
+  try {
+    const volunteer =
+      await Volunteer.findByIdAndUpdate(
+        req.params.id,
+        {
+          status: req.body.status
+        },
+        {
+          new: true,
+          runValidators: true
+        }
+      );
+
+    if (!volunteer) {
+      return res.status(404).json({
+        message: "Volunteer not found"
+      });
+    }
+
+    res.json(volunteer);
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message
+    });
+  }
+});
+
+
+// DELETE volunteer
+router.delete("/volunteers/:id", async (req, res) => {
+  try {
+    const volunteer =
+      await Volunteer.findByIdAndDelete(
+        req.params.id
+      );
+
+    if (!volunteer) {
+      return res.status(404).json({
+        message: "Volunteer not found"
+      });
+    }
+
+    res.json({
+      message: "Volunteer deleted successfully"
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to delete volunteer"
+    });
+  }
 });
 
 

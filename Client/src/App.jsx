@@ -1,4 +1,5 @@
 import React from "react";
+import AdminVolunteers from "./admin/AdminVolunteers";
 
 import {
   Routes,
@@ -273,6 +274,13 @@ export default function App() {
     path="gallery/:id/edit"
     element={<GalleryForm />}
   />
+
+  {/* VOLUNTEERS */}
+
+<Route
+  path="volunteers"
+  element={<AdminVolunteers />}
+/>
 
 </Route>
 
