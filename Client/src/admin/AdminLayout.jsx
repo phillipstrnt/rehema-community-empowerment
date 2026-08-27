@@ -74,6 +74,11 @@ export default function AdminLayout() {
 
         </nav>
 
+        <NavLink to="/admin/volunteers">
+          <span>👥</span>
+          Volunteers
+        </NavLink>
+
 
         {/* SIDEBAR FOOTER */}
 
@@ -88,10 +93,7 @@ export default function AdminLayout() {
 
       </aside>
 
-        <NavLink to="/admin/volunteers">
-          <span>👥</span>
-          Volunteers
-        </NavLink>
+        
 
 
       {/* =========================
