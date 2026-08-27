@@ -1,22 +1,18 @@
+
 import React from "react";
-import AdminVolunteers from "./admin/AdminVolunteers";
+import { Routes, Route } from "react-router-dom";
 
-import {
-  Routes,
-  Route
-} from "react-router-dom";
-
-/* =========================
+/* =====================================================
    PUBLIC COMPONENTS
-========================= */
+===================================================== */
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import WhatsAppButton from "./components/WhatsAppButton";
 
-/* =========================
+/* =====================================================
    PUBLIC PAGES
-========================= */
+===================================================== */
 
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -29,36 +25,40 @@ import Donate from "./pages/Donate";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
-
-
-
-/* =========================
-   ADMIN
-========================= */
+/* =====================================================
+   ADMIN LAYOUT
+===================================================== */
 
 import AdminLayout from "./admin/AdminLayout";
+
+/* =====================================================
+   ADMIN PAGES
+===================================================== */
+
 import AdminDashboard from "./admin/AdminDashboard";
 import AdminPosts from "./admin/AdminPosts";
-import PostForm from "./admin/PostForm";
 import AdminPrograms from "./admin/AdminPrograms";
 import AdminEvents from "./admin/AdminEvents";
 import AdminGallery from "./admin/AdminGallery";
+import AdminVolunteers from "./admin/AdminVolunteers";
 
+/* =====================================================
+   ADMIN FORMS
+===================================================== */
 
+import PostForm from "./admin/PostForm";
 import ProgramForm from "./admin/ProgramForm";
 import EventForm from "./admin/EventForm";
 import GalleryForm from "./admin/GalleryForm";
 
 
 export default function App() {
-
   return (
-
     <Routes>
 
-      {/* =========================
+      {/* =================================================
           PUBLIC WEBSITE
-      ========================= */}
+      ================================================= */}
 
       <Route
         path="/"
@@ -187,106 +187,113 @@ export default function App() {
       />
 
 
-{/* =========================
-    ADMIN DASHBOARD
-========================= */}
+      {/* =================================================
+          ADMIN DASHBOARD
+      ================================================= */}
 
-<Route
-  path="/admin"
-  element={<AdminLayout />}
->
+      <Route path="/admin" element={<AdminLayout />}>
 
-  {/* Dashboard */}
+        {/* Dashboard */}
+        <Route
+          index
+          element={<AdminDashboard />}
+        />
 
-  <Route
-    index
-    element={<AdminDashboard />}
-  />
+        {/* =================================================
+            NEWS & STORIES
+        ================================================= */}
 
+        <Route
+          path="posts"
+          element={<AdminPosts />}
+        />
 
-  {/* NEWS */}
+        <Route
+          path="posts/new"
+          element={<PostForm />}
+        />
 
-  <Route
-    path="posts"
-    element={<AdminPosts />}
-  />
-
-  <Route
-    path="posts/new"
-    element={<PostForm />}
-  />
-
-  <Route
-    path="posts/:id/edit"
-    element={<PostForm />}
-  />
+        <Route
+          path="posts/:id/edit"
+          element={<PostForm />}
+        />
 
 
-  {/* PROGRAMS */}
+        {/* =================================================
+            PROGRAMS
+        ================================================= */}
 
-  <Route
-    path="programs"
-    element={<AdminPrograms />}
-  />
+        <Route
+          path="programs"
+          element={<AdminPrograms />}
+        />
 
-  <Route
-    path="programs/new"
-    element={<ProgramForm />}
-  />
+        <Route
+          path="programs/new"
+          element={<ProgramForm />}
+        />
 
-  <Route
-    path="programs/:id/edit"
-    element={<ProgramForm />}
-  />
-
-
-  {/* EVENTS */}
-
-  <Route
-    path="events"
-    element={<AdminEvents />}
-  />
-
-  <Route
-    path="events/new"
-    element={<EventForm />}
-  />
-
-  <Route
-    path="events/:id/edit"
-    element={<EventForm />}
-  />
+        <Route
+          path="programs/:id/edit"
+          element={<ProgramForm />}
+        />
 
 
-  {/* GALLERY */}
+        {/* =================================================
+            EVENTS
+        ================================================= */}
 
-  <Route
-    path="gallery"
-    element={<AdminGallery />}
-  />
+        <Route
+          path="events"
+          element={<AdminEvents />}
+        />
 
-  <Route
-    path="gallery/new"
-    element={<GalleryForm />}
-  />
+        <Route
+          path="events/new"
+          element={<EventForm />}
+        />
 
-  <Route
-    path="gallery/:id/edit"
-    element={<GalleryForm />}
-  />
+        <Route
+          path="events/:id/edit"
+          element={<EventForm />}
+        />
 
-  {/* VOLUNTEERS */}
 
-<Route
-  path="volunteers"
-  element={<AdminVolunteers />}
-/>
+        {/* =================================================
+            GALLERY
+        ================================================= */}
 
-</Route>
+        <Route
+          path="gallery"
+          element={<AdminGallery />}
+        />
 
-      {/* =========================
-          404
-      ========================= */}
+        <Route
+          path="gallery/new"
+          element={<GalleryForm />}
+        />
+
+        <Route
+          path="gallery/:id/edit"
+          element={<GalleryForm />}
+        />
+
+
+        {/* =================================================
+            VOLUNTEERS
+        ================================================= */}
+
+        <Route
+          path="volunteers"
+          element={<AdminVolunteers />}
+        />
+
+      </Route>
+
+
+      {/* =================================================
+          404 PAGE
+      ================================================= */}
 
       <Route
         path="*"
@@ -303,7 +310,7 @@ export default function App() {
       />
 
     </Routes>
-
+    
   );
 
 }

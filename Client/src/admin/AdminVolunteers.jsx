@@ -1,13 +1,7 @@
-import React, {
-  useEffect,
-  useMemo,
-  useState
-} from "react";
-
+import React, { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 
 export default function AdminVolunteers() {
-
   const [volunteers, setVolunteers] = useState([]);
 
   const [loading, setLoading] = useState(true);
@@ -20,11 +14,8 @@ export default function AdminVolunteers() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
 
-  const [selectedVolunteer, setSelectedVolunteer] =
-    useState(null);
-
-  const [editingVolunteer, setEditingVolunteer] =
-    useState(null);
+  const [selectedVolunteer, setSelectedVolunteer] = useState(null);
+  const [editingVolunteer, setEditingVolunteer] = useState(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -32,183 +23,111 @@ export default function AdminVolunteers() {
     phone: "",
     skills: "",
     message: "",
-    status: "new"
+    status: "new",
   });
 
-
-  /* =====================================================
-     LOAD VOLUNTEERS
-  ===================================================== */
+  // =====================================================
+  // LOAD VOLUNTEERS
+  // =====================================================
 
   async function loadVolunteers() {
-
     try {
-
       setLoading(true);
       setError("");
 
       const data = await api("/volunteers");
 
-      setVolunteers(
-        Array.isArray(data)
-          ? data
-          : []
-      );
-
-    } catch (error) {
-
-      console.error(error);
+      setVolunteers(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Load volunteers error:", err);
 
       setError(
-        error.message ||
-        "Unable to load volunteers."
+        err.message || "Unable to load volunteer applications."
       );
-
     } finally {
-
       setLoading(false);
-
     }
-
   }
-
 
   useEffect(() => {
     loadVolunteers();
   }, []);
 
-
-  /* =====================================================
-     SEARCH + FILTER + SORT
-  ===================================================== */
+  // =====================================================
+  // SEARCH / FILTER / SORT
+  // =====================================================
 
   const filteredVolunteers = useMemo(() => {
+    const searchText = search.trim().toLowerCase();
 
-    const searchText =
-      search
-        .trim()
-        .toLowerCase();
+    const result = volunteers.filter((volunteer) => {
+      const name = String(volunteer.name || "").toLowerCase();
+      const email = String(volunteer.email || "").toLowerCase();
+      const phone = String(volunteer.phone || "").toLowerCase();
+      const skills = String(volunteer.skills || "").toLowerCase();
+      const message = String(volunteer.message || "").toLowerCase();
 
-    const filtered =
-      volunteers.filter((volunteer) => {
+      const matchesSearch =
+        !searchText ||
+        name.includes(searchText) ||
+        email.includes(searchText) ||
+        phone.includes(searchText) ||
+        skills.includes(searchText) ||
+        message.includes(searchText);
 
-        const matchesSearch =
-          !searchText ||
+      const status = volunteer.status || "new";
 
-          volunteer.name
-            ?.toLowerCase()
-            .includes(searchText) ||
+      const matchesStatus =
+        statusFilter === "all" || status === statusFilter;
 
-          volunteer.email
-            ?.toLowerCase()
-            .includes(searchText) ||
+      return matchesSearch && matchesStatus;
+    });
 
-          volunteer.phone
-            ?.toLowerCase()
-            .includes(searchText) ||
-
-          volunteer.skills
-            ?.toLowerCase()
-            .includes(searchText) ||
-
-          volunteer.message
-            ?.toLowerCase()
-            .includes(searchText);
-
-
-        const matchesStatus =
-          statusFilter === "all" ||
-          volunteer.status === statusFilter;
-
-
-        return (
-          matchesSearch &&
-          matchesStatus
+    return [...result].sort((a, b) => {
+      if (sortBy === "name") {
+        return String(a.name || "").localeCompare(
+          String(b.name || "")
         );
-
-      });
-
-
-    return [...filtered].sort(
-      (a, b) => {
-
-        const dateA =
-          new Date(
-            a.createdAt || 0
-          ).getTime();
-
-        const dateB =
-          new Date(
-            b.createdAt || 0
-          ).getTime();
-
-
-        if (sortBy === "oldest") {
-          return dateA - dateB;
-        }
-
-
-        if (sortBy === "name") {
-          return (
-            (a.name || "")
-              .localeCompare(
-                b.name || ""
-              )
-          );
-        }
-
-
-        return dateB - dateA;
-
       }
-    );
 
-  }, [
-    volunteers,
-    search,
-    statusFilter,
-    sortBy
-  ]);
+      const dateA = new Date(a.createdAt || 0).getTime();
+      const dateB = new Date(b.createdAt || 0).getTime();
 
+      if (sortBy === "oldest") {
+        return dateA - dateB;
+      }
 
-  /* =====================================================
-     STATISTICS
-  ===================================================== */
+      return dateB - dateA;
+    });
+  }, [volunteers, search, statusFilter, sortBy]);
 
-  const totalVolunteers =
-    volunteers.length;
+  // =====================================================
+  // STATISTICS
+  // =====================================================
 
-  const newVolunteers =
-    volunteers.filter(
-      (volunteer) =>
-        volunteer.status === "new"
-    ).length;
+  const totalVolunteers = volunteers.length;
 
-  const contactedVolunteers =
-    volunteers.filter(
-      (volunteer) =>
-        volunteer.status === "contacted"
-    ).length;
+  const newVolunteers = volunteers.filter(
+    (volunteer) => (volunteer.status || "new") === "new"
+  ).length;
 
-  const approvedVolunteers =
-    volunteers.filter(
-      (volunteer) =>
-        volunteer.status === "approved"
-    ).length;
+  const contactedVolunteers = volunteers.filter(
+    (volunteer) => volunteer.status === "contacted"
+  ).length;
 
-  const rejectedVolunteers =
-    volunteers.filter(
-      (volunteer) =>
-        volunteer.status === "rejected"
-    ).length;
+  const approvedVolunteers = volunteers.filter(
+    (volunteer) => volunteer.status === "approved"
+  ).length;
 
+  const rejectedVolunteers = volunteers.filter(
+    (volunteer) => volunteer.status === "rejected"
+  ).length;
 
-  /* =====================================================
-     EDIT
-  ===================================================== */
+  // =====================================================
+  // OPEN EDIT
+  // =====================================================
 
   function openEdit(volunteer) {
-
     setEditingVolunteer(volunteer);
 
     setForm({
@@ -217,256 +136,201 @@ export default function AdminVolunteers() {
       phone: volunteer.phone || "",
       skills: volunteer.skills || "",
       message: volunteer.message || "",
-      status: volunteer.status || "new"
+      status: volunteer.status || "new",
     });
 
     setError("");
     setSuccess("");
-
   }
 
-
-  /* =====================================================
-     INPUT
-  ===================================================== */
+  // =====================================================
+  // INPUT
+  // =====================================================
 
   function handleChange(event) {
-
-    const {
-      name,
-      value
-    } = event.target;
+    const { name, value } = event.target;
 
     setForm((current) => ({
       ...current,
-      [name]: value
+      [name]: value,
     }));
-
   }
 
-
-  /* =====================================================
-     UPDATE VOLUNTEER
-  ===================================================== */
+  // =====================================================
+  // SAVE EDIT
+  // =====================================================
 
   async function handleSubmit(event) {
-
     event.preventDefault();
 
-    if (!editingVolunteer) {
+    if (!editingVolunteer?._id) {
+      setError("No volunteer selected for editing.");
       return;
     }
 
     try {
-
       setSaving(true);
       setError("");
       setSuccess("");
 
-      const updated =
-        await api(
-          `/volunteers/${editingVolunteer._id}`,
-          {
-            method: "PUT",
-            body: JSON.stringify(form)
-          }
-        );
-
-
-      setVolunteers((current) =>
-        current.map(
-          (volunteer) =>
-            volunteer._id === updated._id
-              ? updated
-              : volunteer
-        )
+      const updated = await api(
+        `/volunteers/${editingVolunteer._id}`,
+        {
+          method: "PUT",
+          body: JSON.stringify(form),
+        }
       );
 
+      setVolunteers((current) =>
+        current.map((volunteer) =>
+          volunteer._id === updated._id
+            ? updated
+            : volunteer
+        )
+      );
 
       setEditingVolunteer(null);
 
-      setSuccess(
-        "Volunteer updated successfully."
-      );
-
-    } catch (error) {
-
-      console.error(error);
+      setSuccess("Volunteer updated successfully.");
+    } catch (err) {
+      console.error("Update volunteer error:", err);
 
       setError(
-        error.message ||
-        "Unable to update volunteer."
+        err.message || "Unable to update volunteer."
       );
-
     } finally {
-
       setSaving(false);
-
     }
-
   }
 
+  // =====================================================
+  // QUICK STATUS UPDATE
+  // =====================================================
 
-  /* =====================================================
-     QUICK STATUS UPDATE
-  ===================================================== */
-
-  async function updateStatus(
-    id,
-    status
-  ) {
-
+  async function updateStatus(id, status) {
     try {
-
       setError("");
+      setSuccess("");
 
-      const updated =
-        await api(
-          `/volunteers/${id}/status`,
-          {
-            method: "PATCH",
-            body: JSON.stringify({
-              status
-            })
-          }
-        );
-
+      const updated = await api(
+        `/volunteers/${id}/status`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ status }),
+        }
+      );
 
       setVolunteers((current) =>
-        current.map(
-          (volunteer) =>
-            volunteer._id === updated._id
-              ? updated
-              : volunteer
+        current.map((volunteer) =>
+          volunteer._id === updated._id
+            ? updated
+            : volunteer
         )
       );
 
-
-      setSuccess(
-        "Volunteer status updated."
+      // Also update the open modal if this volunteer is being viewed
+      setSelectedVolunteer((current) =>
+        current && current._id === updated._id
+          ? updated
+          : current
       );
 
-    } catch (error) {
-
-      console.error(error);
+      setSuccess("Volunteer status updated successfully.");
+    } catch (err) {
+      console.error("Status update error:", err);
 
       setError(
-        error.message ||
-        "Unable to update status."
+        err.message || "Unable to update volunteer status."
       );
-
     }
-
   }
 
-
-  /* =====================================================
-     DELETE
-  ===================================================== */
+  // =====================================================
+  // DELETE
+  // =====================================================
 
   async function deleteVolunteer(id) {
+    const volunteer = volunteers.find(
+      (item) => item._id === id
+    );
 
-    const confirmed =
-      window.confirm(
-        "Are you sure you want to delete this volunteer? This cannot be undone."
-      );
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${
+        volunteer?.name || "this volunteer"
+      }?\n\nThis action cannot be undone.`
+    );
 
     if (!confirmed) {
       return;
     }
 
-
     try {
-
       setError("");
+      setSuccess("");
 
-      await api(
-        `/volunteers/${id}`,
-        {
-          method: "DELETE"
-        }
-      );
-
+      await api(`/volunteers/${id}`, {
+        method: "DELETE",
+      });
 
       setVolunteers((current) =>
         current.filter(
-          (volunteer) =>
-            volunteer._id !== id
+          (volunteer) => volunteer._id !== id
         )
       );
 
-
       setSelectedVolunteer(null);
+      setEditingVolunteer(null);
 
-      setSuccess(
-        "Volunteer deleted successfully."
-      );
-
-    } catch (error) {
-
-      console.error(error);
+      setSuccess("Volunteer deleted successfully.");
+    } catch (err) {
+      console.error("Delete volunteer error:", err);
 
       setError(
-        error.message ||
-        "Unable to delete volunteer."
+        err.message || "Unable to delete volunteer."
       );
-
     }
-
   }
 
-
-  /* =====================================================
-     EMAIL VOLUNTEER
-  ===================================================== */
+  // =====================================================
+  // EMAIL
+  // =====================================================
 
   function emailVolunteer(volunteer) {
-
-    if (!volunteer.email) {
-
+    if (!volunteer?.email) {
       setError(
         "This volunteer does not have an email address."
       );
-
       return;
-
     }
 
+    const subject = encodeURIComponent(
+      "REHEMA Foundation Volunteer Application"
+    );
 
-    const subject =
-      encodeURIComponent(
-        "REHEMA Foundation Volunteer Application"
-      );
+    const body = encodeURIComponent(
+      `Dear ${volunteer.name || "Volunteer"},
 
+Thank you for your interest in volunteering with REHEMA Foundation.
 
-    const body =
-      encodeURIComponent(
-        `Dear ${volunteer.name || "Volunteer"},\n\nThank you for your interest in volunteering with REHEMA Foundation.\n\n`
-      );
+We have received your volunteer application and would like to follow up with you.
 
+Kind regards,
+REHEMA Foundation`
+    );
 
     window.location.href =
       `mailto:${volunteer.email}?subject=${subject}&body=${body}`;
-
   }
 
-
-  /* =====================================================
-     EXPORT CSV
-  ===================================================== */
+  // =====================================================
+  // EXPORT CSV
+  // =====================================================
 
   function exportVolunteers() {
-
     if (filteredVolunteers.length === 0) {
-
-      setError(
-        "There are no volunteers to export."
-      );
-
+      setError("There are no volunteers to export.");
       return;
-
     }
-
 
     const headers = [
       "Name",
@@ -475,71 +339,45 @@ export default function AdminVolunteers() {
       "Skills",
       "Message",
       "Status",
-      "Submitted"
+      "Submitted",
     ];
 
+    const rows = filteredVolunteers.map((volunteer) => [
+      volunteer.name || "",
+      volunteer.email || "",
+      volunteer.phone || "",
+      volunteer.skills || "",
+      volunteer.message || "",
+      volunteer.status || "new",
+      volunteer.createdAt
+        ? new Date(volunteer.createdAt).toLocaleDateString()
+        : "",
+    ]);
 
-    const rows =
-      filteredVolunteers.map(
-        (volunteer) => [
+    const csv = [headers, ...rows]
+      .map((row) =>
+        row
+          .map((value) => {
+            const safeValue = String(value ?? "")
+              .replace(/"/g, '""')
+              .replace(/\r?\n|\r/g, " ");
 
-          volunteer.name || "",
+            return `"${safeValue}"`;
+          })
+          .join(",")
+      )
+      .join("\n");
 
-          volunteer.email || "",
+    const blob = new Blob(
+      ["\uFEFF" + csv],
+      {
+        type: "text/csv;charset=utf-8;",
+      }
+    );
 
-          volunteer.phone || "",
+    const url = URL.createObjectURL(blob);
 
-          volunteer.skills || "",
-
-          volunteer.message || "",
-
-          volunteer.status || "new",
-
-          volunteer.createdAt
-            ? new Date(
-                volunteer.createdAt
-              ).toLocaleDateString()
-            : ""
-
-        ]
-      );
-
-
-    const csvData = [
-      headers,
-      ...rows
-    ];
-
-
-    const csv =
-      csvData
-        .map((row) =>
-          row
-            .map((value) =>
-              `"${String(value)
-                .replace(/"/g, '""')}"`
-            )
-            .join(",")
-        )
-        .join("\n");
-
-
-    const blob =
-      new Blob(
-        [csv],
-        {
-          type:
-            "text/csv;charset=utf-8;"
-        }
-      );
-
-
-    const url =
-      URL.createObjectURL(blob);
-
-
-    const link =
-      document.createElement("a");
+    const link = document.createElement("a");
 
     link.href = url;
 
@@ -547,7 +385,6 @@ export default function AdminVolunteers() {
       `rehema-volunteers-${new Date()
         .toISOString()
         .slice(0, 10)}.csv`;
-
 
     document.body.appendChild(link);
 
@@ -557,22 +394,17 @@ export default function AdminVolunteers() {
 
     URL.revokeObjectURL(url);
 
-
     setSuccess(
       `${filteredVolunteers.length} volunteer record(s) exported successfully.`
     );
-
   }
 
-
-  /* =====================================================
-     STATUS CLASS
-  ===================================================== */
+  // =====================================================
+  // HELPERS
+  // =====================================================
 
   function getStatusClass(status) {
-
     switch (status) {
-
       case "approved":
         return "approved";
 
@@ -584,27 +416,50 @@ export default function AdminVolunteers() {
 
       default:
         return "new";
-
     }
-
   }
 
+  function formatStatus(status) {
+    const value = status || "new";
 
-  /* =====================================================
-     CLEAR FILTERS
-  ===================================================== */
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  }
+
+  function formatDate(date) {
+    if (!date) {
+      return "—";
+    }
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "—";
+    }
+
+    return parsedDate.toLocaleDateString();
+  }
 
   function clearFilters() {
-
     setSearch("");
     setStatusFilter("all");
     setSortBy("newest");
-
   }
 
+  function closeViewModal() {
+    setSelectedVolunteer(null);
+  }
+
+  function closeEditModal() {
+    if (saving) return;
+
+    setEditingVolunteer(null);
+  }
+
+  // =====================================================
+  // RENDER
+  // =====================================================
 
   return (
-
     <div className="admin-form-page">
 
       {/* =================================================
@@ -614,23 +469,17 @@ export default function AdminVolunteers() {
       <div className="admin-form-header">
 
         <div>
-
           <p className="admin-eyebrow">
             COMMUNITY MANAGEMENT
           </p>
 
-          <h1>
-            Volunteers
-          </h1>
+          <h1>Volunteers</h1>
 
           <p>
-            Review, manage and communicate with
-            people interested in volunteering
-            with REHEMA.
+            Review, manage and communicate with people
+            interested in volunteering with REHEMA.
           </p>
-
         </div>
-
 
         <button
           type="button"
@@ -648,24 +497,21 @@ export default function AdminVolunteers() {
       ================================================= */}
 
       {error && (
-
-        <div className="admin-alert admin-alert-error">
-
+        <div
+          className="admin-alert admin-alert-error"
+          role="alert"
+        >
           {error}
-
         </div>
-
       )}
 
-
       {success && (
-
-        <div className="admin-alert admin-alert-success">
-
+        <div
+          className="admin-alert admin-alert-success"
+          role="status"
+        >
           {success}
-
         </div>
-
       )}
 
 
@@ -676,97 +522,62 @@ export default function AdminVolunteers() {
       <div className="volunteer-stats">
 
         <div className="volunteer-stat-card">
-
           <div className="volunteer-stat-icon">
             👥
           </div>
 
           <div>
-            <span>
-              Total Volunteers
-            </span>
-
-            <strong>
-              {totalVolunteers}
-            </strong>
+            <span>Total Volunteers</span>
+            <strong>{totalVolunteers}</strong>
           </div>
-
         </div>
 
 
         <div className="volunteer-stat-card">
-
           <div className="volunteer-stat-icon">
             🆕
           </div>
 
           <div>
-            <span>
-              New Applications
-            </span>
-
-            <strong>
-              {newVolunteers}
-            </strong>
+            <span>New Applications</span>
+            <strong>{newVolunteers}</strong>
           </div>
-
         </div>
 
 
         <div className="volunteer-stat-card">
-
           <div className="volunteer-stat-icon">
             📞
           </div>
 
           <div>
-            <span>
-              Contacted
-            </span>
-
-            <strong>
-              {contactedVolunteers}
-            </strong>
+            <span>Contacted</span>
+            <strong>{contactedVolunteers}</strong>
           </div>
-
         </div>
 
 
         <div className="volunteer-stat-card">
-
           <div className="volunteer-stat-icon">
             ✓
           </div>
 
           <div>
-            <span>
-              Approved
-            </span>
-
-            <strong>
-              {approvedVolunteers}
-            </strong>
+            <span>Approved</span>
+            <strong>{approvedVolunteers}</strong>
           </div>
-
         </div>
 
 
         <div className="volunteer-stat-card">
-
           <div className="volunteer-stat-icon">
             ✕
           </div>
 
           <div>
-            <span>
-              Rejected
-            </span>
-
-            <strong>
-              {rejectedVolunteers}
-            </strong>
+            <span>Rejected</span>
+            <strong>{rejectedVolunteers}</strong>
           </div>
-
         </div>
 
       </div>
@@ -781,26 +592,24 @@ export default function AdminVolunteers() {
         <div className="section-heading">
 
           <div>
-
             <h2>
               Volunteer Applications
             </h2>
 
             <p>
-              {filteredVolunteers.length}
-              {" "}
-              of
-              {" "}
-              {volunteers.length}
-              {" "}
+              Showing{" "}
+              <strong>
+                {filteredVolunteers.length}
+              </strong>{" "}
+              of{" "}
+              <strong>
+                {volunteers.length}
+              </strong>{" "}
               volunteer
               {volunteers.length === 1
                 ? ""
                 : "s"}
-              {" "}
-              shown
             </p>
-
           </div>
 
         </div>
@@ -814,7 +623,7 @@ export default function AdminVolunteers() {
 
           <div className="volunteer-search">
 
-            <span>
+            <span aria-hidden="true">
               🔍
             </span>
 
@@ -823,10 +632,9 @@ export default function AdminVolunteers() {
               placeholder="Search name, email, phone, skills..."
               value={search}
               onChange={(event) =>
-                setSearch(
-                  event.target.value
-                )
+                setSearch(event.target.value)
               }
+              aria-label="Search volunteers"
             />
 
           </div>
@@ -836,12 +644,10 @@ export default function AdminVolunteers() {
             className="volunteer-filter"
             value={statusFilter}
             onChange={(event) =>
-              setStatusFilter(
-                event.target.value
-              )
+              setStatusFilter(event.target.value)
             }
+            aria-label="Filter volunteers by status"
           >
-
             <option value="all">
               All Statuses
             </option>
@@ -861,7 +667,6 @@ export default function AdminVolunteers() {
             <option value="rejected">
               Rejected
             </option>
-
           </select>
 
 
@@ -869,12 +674,10 @@ export default function AdminVolunteers() {
             className="volunteer-filter"
             value={sortBy}
             onChange={(event) =>
-              setSortBy(
-                event.target.value
-              )
+              setSortBy(event.target.value)
             }
+            aria-label="Sort volunteers"
           >
-
             <option value="newest">
               Newest First
             </option>
@@ -886,7 +689,6 @@ export default function AdminVolunteers() {
             <option value="name">
               Name A–Z
             </option>
-
           </select>
 
 
@@ -912,7 +714,6 @@ export default function AdminVolunteers() {
         ================================================= */}
 
         {loading && (
-
           <div className="admin-empty-state">
 
             <div className="admin-loader"></div>
@@ -922,7 +723,6 @@ export default function AdminVolunteers() {
             </p>
 
           </div>
-
         )}
 
 
@@ -944,17 +744,24 @@ export default function AdminVolunteers() {
               </h3>
 
               <p>
-                Try changing your search or
-                filter settings.
+                {volunteers.length === 0
+                  ? "There are currently no volunteer applications."
+                  : "Try changing your search or filter settings."}
               </p>
 
-              <button
-                type="button"
-                className="admin-button admin-button-secondary"
-                onClick={clearFilters}
-              >
-                Clear Filters
-              </button>
+              {(search ||
+                statusFilter !== "all" ||
+                sortBy !== "newest") && (
+
+                <button
+                  type="button"
+                  className="admin-button admin-button-secondary"
+                  onClick={clearFilters}
+                >
+                  Clear Filters
+                </button>
+
+              )}
 
             </div>
 
@@ -973,7 +780,6 @@ export default function AdminVolunteers() {
               <table className="volunteer-table">
 
                 <thead>
-
                   <tr>
 
                     <th>
@@ -1001,7 +807,6 @@ export default function AdminVolunteers() {
                     </th>
 
                   </tr>
-
                 </thead>
 
 
@@ -1011,9 +816,7 @@ export default function AdminVolunteers() {
                     (volunteer) => (
 
                       <tr
-                        key={
-                          volunteer._id
-                        }
+                        key={volunteer._id}
                       >
 
                         {/* VOLUNTEER */}
@@ -1023,30 +826,21 @@ export default function AdminVolunteers() {
                           <div className="volunteer-person">
 
                             <div className="volunteer-avatar">
-
-                              {(
-                                volunteer.name ||
-                                "V"
-                              )
+                              {(volunteer.name || "V")
                                 .charAt(0)
                                 .toUpperCase()}
-
                             </div>
 
                             <div>
 
                               <strong>
-                                {
-                                  volunteer.name ||
-                                  "Unnamed"
-                                }
+                                {volunteer.name ||
+                                  "Unnamed Volunteer"}
                               </strong>
 
                               <span>
-                                {
-                                  volunteer.email ||
-                                  "No email"
-                                }
+                                {volunteer.email ||
+                                  "No email"}
                               </span>
 
                             </div>
@@ -1063,17 +857,13 @@ export default function AdminVolunteers() {
                           <div className="volunteer-contact">
 
                             <span>
-                              {
-                                volunteer.email ||
-                                "No email"
-                              }
+                              {volunteer.email ||
+                                "No email"}
                             </span>
 
                             <span>
-                              {
-                                volunteer.phone ||
-                                "No phone"
-                              }
+                              {volunteer.phone ||
+                                "No phone"}
                             </span>
 
                           </div>
@@ -1087,10 +877,8 @@ export default function AdminVolunteers() {
 
                           <div className="volunteer-skills">
 
-                            {
-                              volunteer.skills ||
-                              "Not specified"
-                            }
+                            {volunteer.skills ||
+                              "Not specified"}
 
                           </div>
 
@@ -1100,15 +888,9 @@ export default function AdminVolunteers() {
                         {/* DATE */}
 
                         <td>
-
-                          {
+                          {formatDate(
                             volunteer.createdAt
-                              ? new Date(
-                                  volunteer.createdAt
-                                ).toLocaleDateString()
-                              : "—"
-                          }
-
+                          )}
                         </td>
 
 
@@ -1130,6 +912,10 @@ export default function AdminVolunteers() {
                                 event.target.value
                               )
                             }
+                            aria-label={`Status for ${
+                              volunteer.name ||
+                              "volunteer"
+                            }`}
                           >
 
                             <option value="new">
@@ -1193,6 +979,12 @@ export default function AdminVolunteers() {
                                   volunteer
                                 )
                               }
+                              disabled={!volunteer.email}
+                              title={
+                                volunteer.email
+                                  ? "Email volunteer"
+                                  : "No email address"
+                              }
                             >
                               Email
                             </button>
@@ -1238,9 +1030,7 @@ export default function AdminVolunteers() {
 
         <div
           className="admin-modal-overlay"
-          onClick={() =>
-            setSelectedVolunteer(null)
-          }
+          onClick={closeViewModal}
         >
 
           <div
@@ -1259,9 +1049,8 @@ export default function AdminVolunteers() {
                 </p>
 
                 <h2>
-                  {
-                    selectedVolunteer.name
-                  }
+                  {selectedVolunteer.name ||
+                    "Volunteer"}
                 </h2>
 
               </div>
@@ -1269,9 +1058,8 @@ export default function AdminVolunteers() {
               <button
                 type="button"
                 className="admin-modal-close"
-                onClick={() =>
-                  setSelectedVolunteer(null)
-                }
+                onClick={closeViewModal}
+                aria-label="Close volunteer details"
               >
                 ×
               </button>
@@ -1279,14 +1067,13 @@ export default function AdminVolunteers() {
             </div>
 
 
+            {/* PROFILE */}
+
             <div className="volunteer-profile-header">
 
               <div className="volunteer-avatar volunteer-avatar-large">
 
-                {(
-                  selectedVolunteer.name ||
-                  "V"
-                )
+                {(selectedVolunteer.name || "V")
                   .charAt(0)
                   .toUpperCase()}
 
@@ -1295,17 +1082,13 @@ export default function AdminVolunteers() {
               <div>
 
                 <h3>
-                  {
-                    selectedVolunteer.name ||
-                    "Unnamed Volunteer"
-                  }
+                  {selectedVolunteer.name ||
+                    "Unnamed Volunteer"}
                 </h3>
 
                 <span>
-                  {
-                    selectedVolunteer.skills ||
-                    "Volunteer"
-                  }
+                  {selectedVolunteer.skills ||
+                    "Volunteer"}
                 </span>
 
               </div>
@@ -1313,92 +1096,79 @@ export default function AdminVolunteers() {
             </div>
 
 
+            {/* DETAILS */}
+
             <div className="volunteer-detail-grid">
 
               <div>
-
                 <span>
                   Email
                 </span>
 
                 <strong>
-                  {
-                    selectedVolunteer.email ||
-                    "Not provided"
-                  }
+                  {selectedVolunteer.email ||
+                    "Not provided"}
                 </strong>
-
               </div>
 
 
               <div>
-
                 <span>
                   Phone
                 </span>
 
                 <strong>
-                  {
-                    selectedVolunteer.phone ||
-                    "Not provided"
-                  }
+                  {selectedVolunteer.phone ||
+                    "Not provided"}
                 </strong>
-
               </div>
 
 
               <div>
-
                 <span>
                   Skills
                 </span>
 
                 <strong>
-                  {
-                    selectedVolunteer.skills ||
-                    "Not provided"
-                  }
+                  {selectedVolunteer.skills ||
+                    "Not provided"}
                 </strong>
-
               </div>
 
 
               <div>
-
                 <span>
                   Application Date
                 </span>
 
                 <strong>
-                  {
+                  {formatDate(
                     selectedVolunteer.createdAt
-                      ? new Date(
-                          selectedVolunteer.createdAt
-                        ).toLocaleDateString()
-                      : "Not available"
-                  }
+                  )}
                 </strong>
-
               </div>
 
 
               <div>
-
                 <span>
                   Current Status
                 </span>
 
-                <strong>
-                  {
-                    selectedVolunteer.status ||
-                    "new"
-                  }
+                <strong
+                  className={`volunteer-status-text ${getStatusClass(
+                    selectedVolunteer.status
+                  )}`}
+                >
+                  {formatStatus(
+                    selectedVolunteer.status
+                  )}
                 </strong>
-
               </div>
 
             </div>
 
+
+            {/* MESSAGE */}
 
             <div className="volunteer-message">
 
@@ -1407,14 +1177,14 @@ export default function AdminVolunteers() {
               </span>
 
               <p>
-                {
-                  selectedVolunteer.message ||
-                  "No message provided."
-                }
+                {selectedVolunteer.message ||
+                  "No message provided."}
               </p>
 
             </div>
 
+
+            {/* MODAL ACTIONS */}
 
             <div className="admin-form-actions">
 
@@ -1423,11 +1193,12 @@ export default function AdminVolunteers() {
                 className="admin-button admin-button-secondary"
                 onClick={() => {
 
+                  const volunteer =
+                    selectedVolunteer;
+
                   setSelectedVolunteer(null);
 
-                  openEdit(
-                    selectedVolunteer
-                  );
+                  openEdit(volunteer);
 
                 }}
               >
@@ -1443,6 +1214,7 @@ export default function AdminVolunteers() {
                     selectedVolunteer
                   )
                 }
+                disabled={!selectedVolunteer.email}
               >
                 Email Volunteer
               </button>
@@ -1451,9 +1223,7 @@ export default function AdminVolunteers() {
               <button
                 type="button"
                 className="admin-button admin-button-primary"
-                onClick={() =>
-                  setSelectedVolunteer(null)
-                }
+                onClick={closeViewModal}
               >
                 Close
               </button>
@@ -1475,9 +1245,7 @@ export default function AdminVolunteers() {
 
         <div
           className="admin-modal-overlay"
-          onClick={() =>
-            setEditingVolunteer(null)
-          }
+          onClick={closeEditModal}
         >
 
           <div
@@ -1504,9 +1272,9 @@ export default function AdminVolunteers() {
               <button
                 type="button"
                 className="admin-modal-close"
-                onClick={() =>
-                  setEditingVolunteer(null)
-                }
+                onClick={closeEditModal}
+                disabled={saving}
+                aria-label="Close edit volunteer"
               >
                 ×
               </button>
@@ -1521,13 +1289,16 @@ export default function AdminVolunteers() {
 
               <div className="admin-form-grid">
 
+                {/* NAME */}
+
                 <div className="admin-field">
 
-                  <label>
+                  <label htmlFor="volunteer-name">
                     Full Name
                   </label>
 
                   <input
+                    id="volunteer-name"
                     name="name"
                     value={form.name}
                     onChange={handleChange}
@@ -1537,13 +1308,16 @@ export default function AdminVolunteers() {
                 </div>
 
 
+                {/* EMAIL */}
+
                 <div className="admin-field">
 
-                  <label>
+                  <label htmlFor="volunteer-email">
                     Email
                   </label>
 
                   <input
+                    id="volunteer-email"
                     type="email"
                     name="email"
                     value={form.email}
@@ -1554,13 +1328,16 @@ export default function AdminVolunteers() {
                 </div>
 
 
+                {/* PHONE */}
+
                 <div className="admin-field">
 
-                  <label>
+                  <label htmlFor="volunteer-phone">
                     Phone
                   </label>
 
                   <input
+                    id="volunteer-phone"
                     name="phone"
                     value={form.phone}
                     onChange={handleChange}
@@ -1569,13 +1346,16 @@ export default function AdminVolunteers() {
                 </div>
 
 
+                {/* STATUS */}
+
                 <div className="admin-field">
 
-                  <label>
+                  <label htmlFor="volunteer-status">
                     Status
                   </label>
 
                   <select
+                    id="volunteer-status"
                     name="status"
                     value={form.status}
                     onChange={handleChange}
@@ -1602,13 +1382,16 @@ export default function AdminVolunteers() {
                 </div>
 
 
+                {/* SKILLS */}
+
                 <div className="admin-field admin-field-full">
 
-                  <label>
+                  <label htmlFor="volunteer-skills">
                     Skills
                   </label>
 
                   <input
+                    id="volunteer-skills"
                     name="skills"
                     value={form.skills}
                     onChange={handleChange}
@@ -1617,13 +1400,16 @@ export default function AdminVolunteers() {
                 </div>
 
 
+                {/* MESSAGE */}
+
                 <div className="admin-field admin-field-full">
 
-                  <label>
+                  <label htmlFor="volunteer-message">
                     Message
                   </label>
 
                   <textarea
+                    id="volunteer-message"
                     name="message"
                     rows="6"
                     value={form.message}
@@ -1634,6 +1420,8 @@ export default function AdminVolunteers() {
 
               </div>
 
+
+              {/* FORM ACTIONS */}
 
               <div className="admin-form-actions">
 
@@ -1651,9 +1439,8 @@ export default function AdminVolunteers() {
                 <button
                   type="button"
                   className="admin-button admin-button-secondary"
-                  onClick={() =>
-                    setEditingVolunteer(null)
-                  }
+                  onClick={closeEditModal}
+                  disabled={saving}
                 >
                   Cancel
                 </button>
@@ -1671,5 +1458,5 @@ export default function AdminVolunteers() {
     </div>
 
   );
-
+  
 }

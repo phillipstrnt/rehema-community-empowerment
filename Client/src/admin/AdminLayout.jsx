@@ -1,146 +1,220 @@
-import React from "react";
 
-import {
-  Link,
-  NavLink,
-  Outlet
-} from "react-router-dom";
+import React, { useState } from "react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
+const mainMenu = [
+  {
+    label: "Dashboard",
+    icon: "▣",
+    path: "/admin",
+  },
+  {
+    label: "News & Stories",
+    icon: "📰",
+    path: "/admin/posts",
+  },
+  {
+    label: "Programs",
+    icon: "▣",
+    path: "/admin/programs",
+  },
+  {
+    label: "Events",
+    icon: "📅",
+    path: "/admin/events",
+  },
+  {
+    label: "Gallery",
+    icon: "🖼️",
+    path: "/admin/gallery",
+  },
+  {
+    label: "Volunteers",
+    icon: "👥",
+    path: "/admin/volunteers",
+  },
+  {
+  label: "Partners",
+  icon: "🤝",
+  path: "/admin/partners",
+  },
+];
+
+const communicationMenu = [
+  {
+    label: "Donations",
+    icon: "💰",
+    path: "/admin/donations",
+  },
+  {
+    label: "Messages",
+    icon: "✉️",
+    path: "/admin/messages",
+  },
+  {
+    label: "Newsletter",
+    icon: "📧",
+    path: "/admin/newsletter",
+  },
+];
+
+const systemMenu = [
+  {
+    label: "Settings",
+    icon: "⚙️",
+    path: "/admin/settings",
+  },
+  {
+    label: "Admin Users",
+    icon: "🔐",
+    path: "/admin/users",
+  },
+];
 
 export default function AdminLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
+  const handleLogout = () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to logout?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminUser");
+
+    navigate("/admin/login");
+  };
+
+  const renderMenu = (items) => {
+    return items.map((item) => (
+      <NavLink
+        key={item.path}
+        to={item.path}
+        end={item.path === "/admin"}
+        onClick={closeSidebar}
+        className={({ isActive }) =>
+          `admin-nav-link ${isActive ? "active" : ""}`
+        }
+      >
+        <span className="admin-nav-icon">
+          {item.icon}
+        </span>
+
+        <span className="admin-nav-label">
+          {item.label}
+        </span>
+      </NavLink>
+    ));
+  };
 
   return (
 
     <div className="admin-layout">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="admin-sidebar-overlay"
+          onClick={closeSidebar}
+        />
+      )}
 
-      {/* =========================
-          SIDEBAR
-      ========================= */}
-
-      <aside className="admin-sidebar">
-
-        <div className="admin-brand">
-
-          <div className="admin-logo">
+      {/* Sidebar */}
+      <aside
+        className={`admin-sidebar ${
+          sidebarOpen ? "open" : ""
+        }`}
+      >
+        {/* Brand */}
+        <div className="admin-sidebar-brand">
+          <div className="admin-brand-mark">
             R
           </div>
 
-          <div>
-            <h2>REHEMA</h2>
-            <span>Administration</span>
+          <div className="admin-brand-text">
+            <strong>REHEMA</strong>
+            <span>ADMINISTRATION</span>
           </div>
 
+          <button
+            type="button"
+            className="admin-sidebar-close"
+            onClick={closeSidebar}
+            aria-label="Close menu"
+          >
+            ×
+          </button>
         </div>
 
+        {/* Navigation */}
+        <nav className="admin-sidebar-nav">
+          <div className="admin-nav-section">
+            <span className="admin-nav-heading">
+              MAIN MENU
+            </span>
 
-        <nav className="admin-nav">
+            {renderMenu(mainMenu)}
+          </div>
 
-          <p className="admin-nav-title">
-            MAIN MENU
-          </p>
+          <div className="admin-nav-section">
+            <span className="admin-nav-heading">
+              COMMUNICATION
+            </span>
 
+            {renderMenu(communicationMenu)}
+          </div>
 
-          <NavLink
-            to="/admin"
-            end
-          >
-            <span>▦</span>
-            Dashboard
-          </NavLink>
+          <div className="admin-nav-section">
+            <span className="admin-nav-heading">
+              SYSTEM
+            </span>
 
-
-          <NavLink to="/admin/posts">
-            <span>📰</span>
-            News & Stories
-          </NavLink>
-
-
-          <NavLink to="/admin/programs">
-            <span>▣</span>
-            Programs
-          </NavLink>
-
-
-          <NavLink to="/admin/events">
-            <span>📅</span>
-            Events
-          </NavLink>
-
-
-          <NavLink to="/admin/gallery">
-            <span>🖼️</span>
-            Gallery
-          </NavLink>
-
+            {renderMenu(systemMenu)}
+          </div>
         </nav>
 
-        <NavLink to="/admin/volunteers">
-          <span>👥</span>
-          Volunteers
-        </NavLink>
-
-
-        {/* SIDEBAR FOOTER */}
-
-        <div className="admin-sidebar-footer">
-
-          <Link to="/">
-            <span>←</span>
-            Back to Website
-          </Link>
-
-        </div>
-
+        {/* Logout */}
+        <button
+          type="button"
+          className="admin-logout-button"
+          onClick={handleLogout}
+        >
+          <span>🚪</span>
+          <span>Logout</span>
+        </button>
       </aside>
 
-        
-
-
-      {/* =========================
-          MAIN ADMIN AREA
-      ========================= */}
-
+      {/* Main area */}
       <div className="admin-main">
-
-        {/* HEADER */}
-
-        <header className="admin-header">
-
-          <div>
-
-            <h1>
-              REHEMA Admin
-            </h1>
-
-            <p>
-              Manage your website content
-            </p>
-
-          </div>
-
-
-          <Link
-            to="/"
-            className="admin-view-site"
+        {/* Top bar */}
+        <header className="admin-topbar">
+          <button
+            type="button"
+            className="admin-menu-button"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open menu"
           >
-            View Website
-          </Link>
+            ☰
+          </button>
 
+          <div className="admin-topbar-title">
+            Administration
+          </div>
         </header>
 
-
-        {/* PAGE CONTENT */}
-
+        {/* Page content */}
         <main className="admin-content">
-
           <Outlet />
-
         </main>
-
       </div>
-
     </div>
-
   );
-
 }
