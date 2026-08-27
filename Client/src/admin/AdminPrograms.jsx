@@ -2,20 +2,6 @@ import React, { useEffect, useState } from "react";
 import { api } from "../api";
 
 export default function AdminPrograms() {
-  const [programs, setPrograms] = useState([]);
-
-  const [showForm, setShowForm] = useState(false);
-
-  const [editingId, setEditingId] = useState(null);
-
-  const [loading, setLoading] = useState(true);
-
-  const [saving, setSaving] = useState(false);
-
-  const [error, setError] = useState("");
-
-  const [success, setSuccess] = useState("");
-
   const emptyForm = {
     title: "",
     slug: "",
@@ -25,8 +11,17 @@ export default function AdminPrograms() {
     active: true,
   };
 
+  const [programs, setPrograms] = useState([]);
   const [form, setForm] = useState(emptyForm);
 
+  const [editingId, setEditingId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   // ============================
   // LOAD PROGRAMS
@@ -39,19 +34,18 @@ export default function AdminPrograms() {
 
       const data = await api("/programs");
 
-      setPrograms(data);
+      setPrograms(Array.isArray(data) ? data : []);
     } catch (error) {
+      console.error(error);
       setError(error.message);
     } finally {
       setLoading(false);
     }
   }
 
-
   useEffect(() => {
     loadPrograms();
   }, []);
-
 
   // ============================
   // HANDLE INPUT
@@ -60,12 +54,11 @@ export default function AdminPrograms() {
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
 
-    setForm({
-      ...form,
+    setForm((current) => ({
+      ...current,
       [name]: type === "checkbox" ? checked : value,
-    });
+    }));
   }
-
 
   // ============================
   // ADD PROGRAM
@@ -73,16 +66,11 @@ export default function AdminPrograms() {
 
   function openAddForm() {
     setEditingId(null);
-
     setForm(emptyForm);
-
     setError("");
-
     setSuccess("");
-
     setShowForm(true);
   }
-
 
   // ============================
   // EDIT PROGRAM
@@ -101,12 +89,25 @@ export default function AdminPrograms() {
     });
 
     setError("");
-
     setSuccess("");
-
     setShowForm(true);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   }
 
+  // ============================
+  // CLOSE FORM
+  // ============================
+
+  function closeForm() {
+    setShowForm(false);
+    setEditingId(null);
+    setForm(emptyForm);
+    setError("");
+  }
 
   // ============================
   // SAVE PROGRAM
@@ -115,23 +116,18 @@ export default function AdminPrograms() {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    setSaving(true);
-
-    setError("");
-
-    setSuccess("");
-
     try {
+      setSaving(true);
+      setError("");
+      setSuccess("");
+
       let savedProgram;
 
       if (editingId) {
-        savedProgram = await api(
-          `/programs/${editingId}`,
-          {
-            method: "PUT",
-            body: JSON.stringify(form),
-          }
-        );
+        savedProgram = await api(`/programs/${editingId}`, {
+          method: "PUT",
+          body: JSON.stringify(form),
+        });
 
         setPrograms((current) =>
           current.map((program) =>
@@ -143,13 +139,10 @@ export default function AdminPrograms() {
 
         setSuccess("Program updated successfully.");
       } else {
-        savedProgram = await api(
-          "/programs",
-          {
-            method: "POST",
-            body: JSON.stringify(form),
-          }
-        );
+        savedProgram = await api("/programs", {
+          method: "POST",
+          body: JSON.stringify(form),
+        });
 
         setPrograms((current) => [
           savedProgram,
@@ -160,18 +153,15 @@ export default function AdminPrograms() {
       }
 
       setForm(emptyForm);
-
       setEditingId(null);
-
       setShowForm(false);
-
     } catch (error) {
+      console.error(error);
       setError(error.message);
     } finally {
       setSaving(false);
     }
   }
-
 
   // ============================
   // DELETE PROGRAM
@@ -179,41 +169,36 @@ export default function AdminPrograms() {
 
   async function deleteProgram(id) {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this program?"
+      "Are you sure you want to delete this program? This cannot be undone."
     );
 
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
     try {
       setError("");
+      setSuccess("");
 
-      await api(
-        `/programs/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      await api(`/programs/${id}`, {
+        method: "DELETE",
+      });
 
       setPrograms((current) =>
-        current.filter(
-          (program) => program._id !== id
-        )
+        current.filter((program) => program._id !== id)
       );
 
       setSuccess("Program deleted successfully.");
-
     } catch (error) {
+      console.error(error);
       setError(error.message);
     }
   }
 
-
   return (
     <div className="admin-form-page">
 
-      {/* HEADER */}
+      {/* ==================================
+          HEADER
+      ================================== */}
 
       <div className="admin-form-header">
 
@@ -227,8 +212,8 @@ export default function AdminPrograms() {
           </h1>
 
           <p>
-            Manage REHEMA's health programs and
-            community initiatives.
+            Manage REHEMA's health programs,
+            community initiatives and services.
           </p>
         </div>
 
@@ -243,7 +228,9 @@ export default function AdminPrograms() {
       </div>
 
 
-      {/* MESSAGES */}
+      {/* ==================================
+          MESSAGES
+      ================================== */}
 
       {error && (
         <div className="admin-alert admin-alert-error">
@@ -258,22 +245,34 @@ export default function AdminPrograms() {
       )}
 
 
-      {/* FORM */}
+      {/* ==================================
+          ADD / EDIT FORM
+      ================================== */}
 
       {showForm && (
         <div className="admin-form-card">
 
           <div className="section-heading">
 
-            <h2>
-              {editingId
-                ? "Edit Program"
-                : "Add New Program"}
-            </h2>
+            <div>
+              <p className="admin-eyebrow">
+                {editingId
+                  ? "EDIT PROGRAM"
+                  : "NEW PROGRAM"}
+              </p>
 
-            <p>
-              Enter the program information below.
-            </p>
+              <h2>
+                {editingId
+                  ? "Edit Program"
+                  : "Add New Program"}
+              </h2>
+
+              <p>
+                {editingId
+                  ? "Update the program information below."
+                  : "Add a new REHEMA program to your website."}
+              </p>
+            </div>
 
           </div>
 
@@ -285,13 +284,16 @@ export default function AdminPrograms() {
 
             <div className="admin-form-grid">
 
+              {/* PROGRAM NAME */}
+
               <div className="admin-field">
 
-                <label>
+                <label htmlFor="program-title">
                   Program Name
                 </label>
 
                 <input
+                  id="program-title"
                   name="title"
                   value={form.title}
                   onChange={handleChange}
@@ -302,13 +304,16 @@ export default function AdminPrograms() {
               </div>
 
 
+              {/* SLUG */}
+
               <div className="admin-field">
 
-                <label>
+                <label htmlFor="program-slug">
                   Slug
                 </label>
 
                 <input
+                  id="program-slug"
                   name="slug"
                   value={form.slug}
                   onChange={handleChange}
@@ -316,16 +321,23 @@ export default function AdminPrograms() {
                   required
                 />
 
+                <small>
+                  Used for the program's web address.
+                </small>
+
               </div>
 
 
+              {/* SHORT DESCRIPTION */}
+
               <div className="admin-field admin-field-full">
 
-                <label>
+                <label htmlFor="program-short-description">
                   Short Description
                 </label>
 
                 <input
+                  id="program-short-description"
                   name="shortDescription"
                   value={form.shortDescription}
                   onChange={handleChange}
@@ -335,40 +347,53 @@ export default function AdminPrograms() {
               </div>
 
 
+              {/* FULL DESCRIPTION */}
+
               <div className="admin-field admin-field-full">
 
-                <label>
+                <label htmlFor="program-description">
                   Full Description
                 </label>
 
                 <textarea
+                  id="program-description"
                   name="description"
                   value={form.description}
                   onChange={handleChange}
-                  rows="6"
-                  placeholder="Describe this program..."
+                  rows="7"
+                  placeholder="Describe the program, its goals, activities and community impact..."
                 />
 
               </div>
 
 
+              {/* IMAGE */}
+
               <div className="admin-field admin-field-full">
 
-                <label>
-                  Image URL
+                <label htmlFor="program-image">
+                  Program Image
                 </label>
 
                 <input
+                  id="program-image"
+                  type="url"
                   name="image"
                   value={form.image}
                   onChange={handleChange}
                   placeholder="https://..."
                 />
 
+                <small>
+                  Paste the Cloudinary image URL for this program.
+                </small>
+
               </div>
 
 
-              <div className="admin-field">
+              {/* ACTIVE */}
+
+              <div className="admin-field admin-field-full">
 
                 <label className="admin-checkbox">
 
@@ -380,7 +405,7 @@ export default function AdminPrograms() {
                   />
 
                   <span>
-                    Active Program
+                    Make this program active on the website
                   </span>
 
                 </label>
@@ -389,6 +414,8 @@ export default function AdminPrograms() {
 
             </div>
 
+
+            {/* ACTIONS */}
 
             <div className="admin-form-actions">
 
@@ -404,15 +431,11 @@ export default function AdminPrograms() {
                     : "Save Program"}
               </button>
 
-
               <button
                 type="button"
                 className="admin-button admin-button-secondary"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingId(null);
-                  setForm(emptyForm);
-                }}
+                onClick={closeForm}
+                disabled={saving}
               >
                 Cancel
               </button>
@@ -425,46 +448,81 @@ export default function AdminPrograms() {
       )}
 
 
-      {/* PROGRAM LIST */}
+      {/* ==================================
+          PROGRAM LIBRARY
+      ================================== */}
 
       <div className="admin-form-card">
 
         <div className="section-heading">
 
-          <h2>
-            Existing Programs
-          </h2>
+          <div>
+            <p className="admin-eyebrow">
+              PROGRAM LIBRARY
+            </p>
 
-          <p>
-            {programs.length} program
-            {programs.length === 1 ? "" : "s"}
-          </p>
+            <h2>
+              Existing Programs
+            </h2>
+
+            <p>
+              {programs.length} program
+              {programs.length === 1 ? "" : "s"} in your
+              content library.
+            </p>
+          </div>
 
         </div>
 
 
-        {loading ? (
+        {/* LOADING */}
 
-          <p>
-            Loading programs...
-          </p>
-
-        ) : programs.length === 0 ? (
-
+        {loading && (
           <div className="admin-empty-state">
+
+            <div className="admin-loader"></div>
+
+            <p>
+              Loading programs...
+            </p>
+
+          </div>
+        )}
+
+
+        {/* EMPTY */}
+
+        {!loading && programs.length === 0 && (
+          <div className="admin-empty-state">
+
+            <div className="admin-empty-icon">
+              📋
+            </div>
 
             <h3>
               No programs yet
             </h3>
 
             <p>
-              Click "Add Program" to create your
-              first program.
+              Create your first REHEMA program
+              using the button above.
             </p>
 
-          </div>
+            <button
+              type="button"
+              className="admin-button admin-button-primary"
+              onClick={openAddForm}
+            >
+              + Add Program
+            </button>
 
-        ) : (
+          </div>
+        )}
+
+
+        {/* PROGRAMS */}
+
+        {!loading && programs.length > 0 && (
 
           <div className="admin-items">
 
@@ -475,15 +533,30 @@ export default function AdminPrograms() {
                 key={program._id}
               >
 
+                {/* IMAGE */}
+
+                {program.image && (
+                  <img
+                    src={program.image}
+                    alt={program.title}
+                    className="admin-media-preview"
+                  />
+                )}
+
+
+                {/* CONTENT */}
+
                 <div className="admin-item-content">
 
                   <h3>
                     {program.title}
                   </h3>
 
-                  <p>
-                    {program.shortDescription}
-                  </p>
+                  {program.shortDescription && (
+                    <p>
+                      {program.shortDescription}
+                    </p>
+                  )}
 
                   <span
                     className={
@@ -500,6 +573,8 @@ export default function AdminPrograms() {
                 </div>
 
 
+                {/* ACTIONS */}
+
                 <div className="admin-item-actions">
 
                   <button
@@ -511,7 +586,6 @@ export default function AdminPrograms() {
                   >
                     Edit
                   </button>
-
 
                   <button
                     type="button"

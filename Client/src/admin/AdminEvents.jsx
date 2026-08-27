@@ -14,9 +14,10 @@ export default function AdminEvents() {
 
   const [events, setEvents] = useState([]);
   const [form, setForm] = useState(emptyForm);
-  const [editingId, setEditingId] = useState(null);
 
+  const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -34,8 +35,9 @@ export default function AdminEvents() {
 
       const data = await api("/events");
 
-      setEvents(data);
+      setEvents(Array.isArray(data) ? data : []);
     } catch (error) {
+      console.error(error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -47,20 +49,28 @@ export default function AdminEvents() {
   }, []);
 
   // ============================
-  // INPUT
+  // HANDLE INPUT
   // ============================
 
   function handleChange(event) {
-    const { name, value, type, checked } = event.target;
+    const {
+      name,
+      value,
+      type,
+      checked,
+    } = event.target;
 
-    setForm({
-      ...form,
-      [name]: type === "checkbox" ? checked : value,
-    });
+    setForm((current) => ({
+      ...current,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : value,
+    }));
   }
 
   // ============================
-  // ADD
+  // ADD EVENT
   // ============================
 
   function openAddForm() {
@@ -72,7 +82,7 @@ export default function AdminEvents() {
   }
 
   // ============================
-  // EDIT
+  // EDIT EVENT
   // ============================
 
   function openEditForm(event) {
@@ -85,7 +95,8 @@ export default function AdminEvents() {
         ? event.date.substring(0, 10)
         : "",
       location: event.location || "",
-      registrationUrl: event.registrationUrl || "",
+      registrationUrl:
+        event.registrationUrl || "",
       image: event.image || "",
       active: event.active ?? true,
     });
@@ -93,10 +104,26 @@ export default function AdminEvents() {
     setError("");
     setSuccess("");
     setShowForm(true);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   }
 
   // ============================
-  // SAVE
+  // CLOSE FORM
+  // ============================
+
+  function closeForm() {
+    setShowForm(false);
+    setEditingId(null);
+    setForm(emptyForm);
+    setError("");
+  }
+
+  // ============================
+  // SAVE EVENT
   // ============================
 
   async function handleSubmit(event) {
@@ -107,10 +134,10 @@ export default function AdminEvents() {
       setError("");
       setSuccess("");
 
-      let saved;
+      let savedEvent;
 
       if (editingId) {
-        saved = await api(
+        savedEvent = await api(
           `/events/${editingId}`,
           {
             method: "PUT",
@@ -121,14 +148,16 @@ export default function AdminEvents() {
         setEvents((current) =>
           current.map((item) =>
             item._id === editingId
-              ? saved
+              ? savedEvent
               : item
           )
         );
 
-        setSuccess("Event updated successfully.");
+        setSuccess(
+          "Event updated successfully."
+        );
       } else {
-        saved = await api(
+        savedEvent = await api(
           "/events",
           {
             method: "POST",
@@ -137,18 +166,20 @@ export default function AdminEvents() {
         );
 
         setEvents((current) => [
-          saved,
+          savedEvent,
           ...current,
         ]);
 
-        setSuccess("Event added successfully.");
+        setSuccess(
+          "Event added successfully."
+        );
       }
 
       setForm(emptyForm);
       setEditingId(null);
       setShowForm(false);
-
     } catch (error) {
+      console.error(error);
       setError(error.message);
     } finally {
       setSaving(false);
@@ -156,25 +187,23 @@ export default function AdminEvents() {
   }
 
   // ============================
-  // DELETE
+  // DELETE EVENT
   // ============================
 
   async function deleteEvent(id) {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this event?"
+      "Are you sure you want to delete this event? This cannot be undone."
     );
 
     if (!confirmed) return;
 
     try {
       setError("");
+      setSuccess("");
 
-      await api(
-        `/events/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      await api(`/events/${id}`, {
+        method: "DELETE",
+      });
 
       setEvents((current) =>
         current.filter(
@@ -182,9 +211,11 @@ export default function AdminEvents() {
         )
       );
 
-      setSuccess("Event deleted successfully.");
-
+      setSuccess(
+        "Event deleted successfully."
+      );
     } catch (error) {
+      console.error(error);
       setError(error.message);
     }
   }
@@ -192,11 +223,14 @@ export default function AdminEvents() {
   return (
     <div className="admin-form-page">
 
-      {/* HEADER */}
+      {/* ==================================
+          HEADER
+      ================================== */}
 
       <div className="admin-form-header">
 
         <div>
+
           <p className="admin-eyebrow">
             CONTENT MANAGEMENT
           </p>
@@ -207,8 +241,9 @@ export default function AdminEvents() {
 
           <p>
             Create and manage REHEMA community
-            events and campaigns.
+            events, campaigns and outreach activities.
           </p>
+
         </div>
 
         <button
@@ -222,7 +257,9 @@ export default function AdminEvents() {
       </div>
 
 
-      {/* MESSAGES */}
+      {/* ==================================
+          MESSAGES
+      ================================== */}
 
       {error && (
         <div className="admin-alert admin-alert-error">
@@ -237,22 +274,37 @@ export default function AdminEvents() {
       )}
 
 
-      {/* FORM */}
+      {/* ==================================
+          ADD / EDIT FORM
+      ================================== */}
 
       {showForm && (
+
         <div className="admin-form-card">
 
           <div className="section-heading">
 
-            <h2>
-              {editingId
-                ? "Edit Event"
-                : "Add New Event"}
-            </h2>
+            <div>
 
-            <p>
-              Enter the event details below.
-            </p>
+              <p className="admin-eyebrow">
+                {editingId
+                  ? "EDIT EVENT"
+                  : "NEW EVENT"}
+              </p>
+
+              <h2>
+                {editingId
+                  ? "Edit Event"
+                  : "Add New Event"}
+              </h2>
+
+              <p>
+                {editingId
+                  ? "Update the event information below."
+                  : "Add a new REHEMA event to your website."}
+              </p>
+
+            </div>
 
           </div>
 
@@ -264,13 +316,16 @@ export default function AdminEvents() {
 
             <div className="admin-form-grid">
 
+              {/* EVENT TITLE */}
+
               <div className="admin-field">
 
-                <label>
+                <label htmlFor="event-title">
                   Event Title
                 </label>
 
                 <input
+                  id="event-title"
                   name="title"
                   value={form.title}
                   onChange={handleChange}
@@ -281,13 +336,16 @@ export default function AdminEvents() {
               </div>
 
 
+              {/* DATE */}
+
               <div className="admin-field">
 
-                <label>
-                  Date
+                <label htmlFor="event-date">
+                  Event Date
                 </label>
 
                 <input
+                  id="event-date"
                   type="date"
                   name="date"
                   value={form.date}
@@ -297,13 +355,16 @@ export default function AdminEvents() {
               </div>
 
 
+              {/* LOCATION */}
+
               <div className="admin-field">
 
-                <label>
+                <label htmlFor="event-location">
                   Location
                 </label>
 
                 <input
+                  id="event-location"
                   name="location"
                   value={form.location}
                   onChange={handleChange}
@@ -313,13 +374,16 @@ export default function AdminEvents() {
               </div>
 
 
+              {/* REGISTRATION */}
+
               <div className="admin-field">
 
-                <label>
+                <label htmlFor="event-registration">
                   Registration URL
                 </label>
 
                 <input
+                  id="event-registration"
                   type="url"
                   name="registrationUrl"
                   value={form.registrationUrl}
@@ -330,30 +394,36 @@ export default function AdminEvents() {
               </div>
 
 
+              {/* DESCRIPTION */}
+
               <div className="admin-field admin-field-full">
 
-                <label>
-                  Description
+                <label htmlFor="event-description">
+                  Event Description
                 </label>
 
                 <textarea
+                  id="event-description"
                   name="description"
                   value={form.description}
                   onChange={handleChange}
-                  rows="6"
-                  placeholder="Describe the event..."
+                  rows="7"
+                  placeholder="Describe the event, activities, target community and expected outcomes..."
                 />
 
               </div>
 
 
+              {/* IMAGE */}
+
               <div className="admin-field admin-field-full">
 
-                <label>
-                  Image URL
+                <label htmlFor="event-image">
+                  Event Image
                 </label>
 
                 <input
+                  id="event-image"
                   type="url"
                   name="image"
                   value={form.image}
@@ -361,10 +431,17 @@ export default function AdminEvents() {
                   placeholder="https://..."
                 />
 
+                <small>
+                  Paste the Cloudinary image URL for
+                  this event.
+                </small>
+
               </div>
 
 
-              <div className="admin-field">
+              {/* ACTIVE */}
+
+              <div className="admin-field admin-field-full">
 
                 <label className="admin-checkbox">
 
@@ -376,7 +453,7 @@ export default function AdminEvents() {
                   />
 
                   <span>
-                    Active Event
+                    Make this event active on the website
                   </span>
 
                 </label>
@@ -385,6 +462,8 @@ export default function AdminEvents() {
 
             </div>
 
+
+            {/* ACTIONS */}
 
             <div className="admin-form-actions">
 
@@ -400,15 +479,11 @@ export default function AdminEvents() {
                     : "Save Event"}
               </button>
 
-
               <button
                 type="button"
                 className="admin-button admin-button-secondary"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingId(null);
-                  setForm(emptyForm);
-                }}
+                onClick={closeForm}
+                disabled={saving}
               >
                 Cancel
               </button>
@@ -421,46 +496,86 @@ export default function AdminEvents() {
       )}
 
 
-      {/* EVENTS */}
+      {/* ==================================
+          EVENT LIBRARY
+      ================================== */}
 
       <div className="admin-form-card">
 
         <div className="section-heading">
 
-          <h2>
-            Existing Events
-          </h2>
+          <div>
 
-          <p>
-            {events.length} event
-            {events.length === 1 ? "" : "s"}
-          </p>
+            <p className="admin-eyebrow">
+              EVENT LIBRARY
+            </p>
+
+            <h2>
+              Existing Events
+            </h2>
+
+            <p>
+              {events.length} event
+              {events.length === 1
+                ? ""
+                : "s"} in your content library.
+            </p>
+
+          </div>
 
         </div>
 
 
-        {loading ? (
+        {/* LOADING */}
 
-          <p>
-            Loading events...
-          </p>
+        {loading && (
+          <div className="admin-empty-state">
 
-        ) : events.length === 0 ? (
+            <div className="admin-loader"></div>
+
+            <p>
+              Loading events...
+            </p>
+
+          </div>
+        )}
+
+
+        {/* EMPTY */}
+
+        {!loading && events.length === 0 && (
 
           <div className="admin-empty-state">
+
+            <div className="admin-empty-icon">
+              📅
+            </div>
 
             <h3>
               No events yet
             </h3>
 
             <p>
-              Click "Add Event" to create your
-              first event.
+              Create your first REHEMA event
+              using the button above.
             </p>
+
+            <button
+              type="button"
+              className="admin-button admin-button-primary"
+              onClick={openAddForm}
+            >
+              + Add Event
+            </button>
 
           </div>
 
-        ) : (
+        )}
+
+
+        {/* EVENTS */}
+
+        {!loading && events.length > 0 && (
 
           <div className="admin-items">
 
@@ -471,29 +586,51 @@ export default function AdminEvents() {
                 key={event._id}
               >
 
+                {/* IMAGE */}
+
+                {event.image && (
+
+                  <img
+                    src={event.image}
+                    alt={event.title}
+                    className="admin-media-preview"
+                  />
+
+                )}
+
+
+                {/* CONTENT */}
+
                 <div className="admin-item-content">
 
                   <h3>
                     {event.title}
                   </h3>
 
-                  <p>
-                    {event.description}
-                  </p>
+                  {event.description && (
+                    <p>
+                      {event.description}
+                    </p>
+                  )}
 
-                  <p>
-                    <strong>Date:</strong>{" "}
-                    {event.date
-                      ? new Date(
-                          event.date
-                        ).toLocaleDateString()
-                      : "Not specified"}
-                  </p>
+                  <div className="admin-event-details">
 
-                  <p>
-                    <strong>Location:</strong>{" "}
-                    {event.location || "Not specified"}
-                  </p>
+                    <p>
+                      <strong>Date:</strong>{" "}
+                      {event.date
+                        ? new Date(
+                            event.date
+                          ).toLocaleDateString()
+                        : "Not specified"}
+                    </p>
+
+                    <p>
+                      <strong>Location:</strong>{" "}
+                      {event.location ||
+                        "Not specified"}
+                    </p>
+
+                  </div>
 
                   <span
                     className={
@@ -510,6 +647,8 @@ export default function AdminEvents() {
                 </div>
 
 
+                {/* ACTIONS */}
+
                 <div className="admin-item-actions">
 
                   <button
@@ -521,7 +660,6 @@ export default function AdminEvents() {
                   >
                     Edit
                   </button>
-
 
                   <button
                     type="button"
