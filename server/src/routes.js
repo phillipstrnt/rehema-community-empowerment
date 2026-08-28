@@ -1,6 +1,10 @@
 import express from "express";
 
 import {
+  createNotification
+} from "./notificationHelper.js";
+
+import {
   Program,
   Post,
   Event,
@@ -9,7 +13,8 @@ import {
   Partner,
   Donation,
   Newsletter,
-  Contact
+  Contact,
+  Notification
 } from "./models.js";
 
 
@@ -693,6 +698,13 @@ router.post("/volunteers", async (req, res) => {
       status: "new",
     });
 
+  await createNotification({
+  type: "volunteer",
+  title: "New volunteer application",
+  message: `${volunteer.name} submitted a volunteer application.`,
+  link: "/admin/volunteers",
+});
+
     res.status(201).json(volunteer);
   } catch (error) {
     console.error(error);
@@ -802,8 +814,6 @@ router.delete("/volunteers/:id", async (req, res) => {
   }
 });
 
-
-
 /* =========================================================
    PARTNERS
 ========================================================= */
@@ -817,7 +827,7 @@ router.get("/partners", async (req, res) => {
     res.json(partners);
 
   } catch (error) {
-    console.error(error);
+    console.error("GET partners error:", error);
 
     res.status(500).json({
       message: "Failed to fetch partners",
@@ -842,7 +852,7 @@ router.get("/partners/:id", async (req, res) => {
     res.json(partner);
 
   } catch (error) {
-    console.error(error);
+    console.error("GET partner error:", error);
 
     res.status(500).json({
       message: "Failed to fetch partner",
@@ -854,9 +864,10 @@ router.get("/partners/:id", async (req, res) => {
 // CREATE partner
 router.post("/partners", async (req, res) => {
   try {
+
     const partner = await Partner.create({
       organization: req.body.organization,
-      partnerType: req.body.partnerType,
+      type: req.body.type,
       contactName: req.body.contactName,
       email: req.body.email,
       phone: req.body.phone,
@@ -866,10 +877,20 @@ router.post("/partners", async (req, res) => {
       status: req.body.status || "Active",
     });
 
+
+    // CREATE ADMIN NOTIFICATION
+    await createNotification({
+      type: "partner",
+      title: "New partner application",
+      message: `${partner.organization} has submitted a partnership application.`,
+      link: "/admin/partners",
+    });
+
+
     res.status(201).json(partner);
 
   } catch (error) {
-    console.error(error);
+    console.error("CREATE partner error:", error);
 
     res.status(400).json({
       message: error.message,
@@ -881,12 +902,13 @@ router.post("/partners", async (req, res) => {
 // UPDATE partner
 router.put("/partners/:id", async (req, res) => {
   try {
+
     const partner =
       await Partner.findByIdAndUpdate(
         req.params.id,
         {
           organization: req.body.organization,
-          partnerType: req.body.partnerType,
+          type: req.body.type,
           contactName: req.body.contactName,
           email: req.body.email,
           phone: req.body.phone,
@@ -901,16 +923,18 @@ router.put("/partners/:id", async (req, res) => {
         }
       );
 
+
     if (!partner) {
       return res.status(404).json({
         message: "Partner not found",
       });
     }
 
+
     res.json(partner);
 
   } catch (error) {
-    console.error(error);
+    console.error("UPDATE partner error:", error);
 
     res.status(400).json({
       message: error.message,
@@ -922,10 +946,12 @@ router.put("/partners/:id", async (req, res) => {
 // DELETE partner
 router.delete("/partners/:id", async (req, res) => {
   try {
+
     const partner =
       await Partner.findByIdAndDelete(
         req.params.id
       );
+
 
     if (!partner) {
       return res.status(404).json({
@@ -933,12 +959,13 @@ router.delete("/partners/:id", async (req, res) => {
       });
     }
 
+
     res.json({
       message: "Partner deleted successfully",
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("DELETE partner error:", error);
 
     res.status(500).json({
       message: "Failed to delete partner",
@@ -989,6 +1016,13 @@ router.post("/donations", async (req, res) => {
       reference: req.body.reference,
       message: req.body.message,
       status: "pending"
+    });
+
+    await createNotification({
+      type: "donation",
+      title: "New donation received",
+      message: `A donation of UGX ${Number(donation.amount).toLocaleString()} was submitted.`,
+      link: "/admin/donations",
     });
 
     res.status(201).json(donation);
@@ -1085,127 +1119,356 @@ router.delete("/donations/:id", async (req, res) => {
 
 
 /* =========================================================
-   VOLUNTEERS
+   NOTIFICATIONS
 ========================================================= */
 
-// GET all volunteers
-router.get("/volunteers", async (req, res) => {
+// GET notifications
+router.get("/notifications", async (req, res) => {
   try {
-    const volunteers = await Volunteer.find()
-      .sort({ createdAt: -1 });
+    const notifications = await Notification.find()
+      .sort({ createdAt: -1 })
+      .limit(50);
 
-    res.json(volunteers);
+    res.json(notifications);
+
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
-      message: "Failed to fetch volunteers"
+      message: "Failed to fetch notifications",
     });
   }
 });
 
 
-// GET single volunteer
-router.get("/volunteers/:id", async (req, res) => {
+// GET unread notification count
+router.get("/notifications/unread-count", async (req, res) => {
   try {
-    const volunteer = await Volunteer.findById(
-      req.params.id
-    );
+    const count = await Notification.countDocuments({
+      read: false,
+    });
 
-    if (!volunteer) {
-      return res.status(404).json({
-        message: "Volunteer not found"
-      });
-    }
+    res.json({
+      count,
+    });
 
-    res.json(volunteer);
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
-      message: "Failed to fetch volunteer"
+      message: "Failed to fetch unread notification count",
     });
   }
 });
 
 
-// CREATE volunteer
-router.post("/volunteers", async (req, res) => {
+// MARK ONE notification as read
+router.patch("/notifications/:id/read", async (req, res) => {
   try {
-    const volunteer = await Volunteer.create({
-      name: req.body.name,
-      email: req.body.email,
-      phone: req.body.phone,
-      skills: req.body.skills,
-      message: req.body.message,
-      status: "new"
-    });
-
-    res.status(201).json(volunteer);
-  } catch (error) {
-    console.error(error);
-
-    res.status(400).json({
-      message: error.message
-    });
-  }
-});
-
-
-// UPDATE volunteer status
-router.patch("/volunteers/:id/status", async (req, res) => {
-  try {
-    const volunteer =
-      await Volunteer.findByIdAndUpdate(
+    const notification =
+      await Notification.findByIdAndUpdate(
         req.params.id,
         {
-          status: req.body.status
+          read: true,
         },
         {
           new: true,
-          runValidators: true
         }
       );
 
-    if (!volunteer) {
+    if (!notification) {
       return res.status(404).json({
-        message: "Volunteer not found"
+        message: "Notification not found",
       });
     }
 
-    res.json(volunteer);
+    res.json(notification);
+
   } catch (error) {
     console.error(error);
 
     res.status(400).json({
-      message: error.message
+      message: "Failed to mark notification as read",
     });
   }
 });
 
 
-// DELETE volunteer
-router.delete("/volunteers/:id", async (req, res) => {
+// MARK ALL notifications as read
+router.patch("/notifications/read-all", async (req, res) => {
   try {
-    const volunteer =
-      await Volunteer.findByIdAndDelete(
+    await Notification.updateMany(
+      {
+        read: false,
+      },
+      {
+        $set: {
+          read: true,
+        },
+      }
+    );
+
+    res.json({
+      message: "All notifications marked as read",
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to mark notifications as read",
+    });
+  }
+});
+
+
+// DELETE notification
+router.delete("/notifications/:id", async (req, res) => {
+  try {
+    const notification =
+      await Notification.findByIdAndDelete(
         req.params.id
       );
 
-    if (!volunteer) {
+    if (!notification) {
       return res.status(404).json({
-        message: "Volunteer not found"
+        message: "Notification not found",
       });
     }
 
     res.json({
-      message: "Volunteer deleted successfully"
+      message: "Notification deleted successfully",
     });
+
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
-      message: "Failed to delete volunteer"
+      message: "Failed to delete notification",
+    });
+  }
+});
+
+
+/* =========================================================
+   CONTACT MESSAGES
+========================================================= */
+
+// GET messages
+router.get("/messages", async (req, res) => {
+  try {
+    const messages = await Contact.find()
+      .sort({ createdAt: -1 });
+
+    res.json(messages);
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch messages",
+    });
+  }
+});
+
+
+// GET single message
+router.get("/messages/:id", async (req, res) => {
+  try {
+    const message = await Contact.findById(
+      req.params.id
+    );
+
+    if (!message) {
+      return res.status(404).json({
+        message: "Message not found",
+      });
+    }
+
+    res.json(message);
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch message",
+    });
+  }
+});
+
+
+// CREATE message
+router.post("/messages", async (req, res) => {
+  try {
+    const message = await Contact.create({
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone,
+      subject: req.body.subject,
+      message: req.body.message,
+      status: "new",
+    });
+
+    await createNotification({
+      type: "message",
+      title: "New contact message",
+      message: `${message.name} sent a new message.`,
+      link: "/admin/messages",
+    });
+
+    res.status(201).json(message);
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+});
+
+
+// UPDATE message status
+router.patch("/messages/:id/status", async (req, res) => {
+  try {
+    const message =
+      await Contact.findByIdAndUpdate(
+        req.params.id,
+        {
+          status: req.body.status,
+        },
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+
+    if (!message) {
+      return res.status(404).json({
+        message: "Message not found",
+      });
+    }
+
+    res.json(message);
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+});
+
+
+// DELETE message
+router.delete("/messages/:id", async (req, res) => {
+  try {
+    const message =
+      await Contact.findByIdAndDelete(
+        req.params.id
+      );
+
+    if (!message) {
+      return res.status(404).json({
+        message: "Message not found",
+      });
+    }
+
+    res.json({
+      message: "Message deleted successfully",
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to delete message",
+    });
+  }
+});
+
+
+
+
+/* =========================================================
+   NEWSLETTER
+========================================================= */
+
+// GET subscribers
+router.get("/newsletter", async (req, res) => {
+  try {
+    const subscribers = await Newsletter.find()
+      .sort({ createdAt: -1 });
+
+    res.json(subscribers);
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch newsletter subscribers",
+    });
+  }
+});
+
+
+// CREATE subscriber
+router.post("/newsletter", async (req, res) => {
+  try {
+    const subscriber =
+      await Newsletter.create({
+        email: req.body.email,
+      });
+
+    await createNotification({
+      type: "newsletter",
+      title: "New newsletter subscriber",
+      message: `${subscriber.email} subscribed to the newsletter.`,
+      link: "/admin/newsletter",
+    });
+
+    res.status(201).json(subscriber);
+
+  } catch (error) {
+    console.error(error);
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        message: "Email is already subscribed.",
+      });
+    }
+
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+});
+
+
+// DELETE subscriber
+router.delete("/newsletter/:id", async (req, res) => {
+  try {
+    const subscriber =
+      await Newsletter.findByIdAndDelete(
+        req.params.id
+      );
+
+    if (!subscriber) {
+      return res.status(404).json({
+        message: "Subscriber not found",
+      });
+    }
+
+    res.json({
+      message: "Subscriber deleted successfully",
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to delete subscriber",
     });
   }
 });

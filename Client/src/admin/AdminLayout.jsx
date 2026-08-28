@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-// import "./AdminLayout.css";
+
+import React, { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 /* =========================================================
@@ -76,17 +76,111 @@ const systemMenu = [
 ];
 
 /* =========================================================
+   INITIAL NOTIFICATIONS
+========================================================= */
+
+const initialNotifications = [
+  {
+    id: 1,
+    type: "message",
+    icon: "✉",
+    title: "New message received",
+    text: "A visitor has submitted a new contact message.",
+    time: "Just now",
+    read: false,
+    path: "/admin/messages",
+  },
+
+  {
+    id: 2,
+    type: "volunteer",
+    icon: "♟",
+    title: "New volunteer application",
+    text: "A new volunteer has submitted an application.",
+    time: "10 minutes ago",
+    read: false,
+    path: "/admin/volunteers",
+  },
+
+  {
+    id: 3,
+    type: "donation",
+    icon: "◆",
+    title: "New donation received",
+    text: "A new donation has been recorded.",
+    time: "25 minutes ago",
+    read: false,
+    path: "/admin/donations",
+  },
+
+  {
+    id: 4,
+    type: "newsletter",
+    icon: "◎",
+    title: "New newsletter subscriber",
+    text: "Someone has subscribed to the REHEMA newsletter.",
+    time: "1 hour ago",
+    read: true,
+    path: "/admin/newsletter",
+  },
+];
+
+/* =========================================================
    ADMIN LAYOUT
 ========================================================= */
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const [notifications, setNotifications] = useState(
+    initialNotifications
+  );
+
+  const [notificationsOpen, setNotificationsOpen] =
+    useState(false);
+
+  const notificationRef = useRef(null);
+
   const navigate = useNavigate();
+
+  /* =======================================================
+     CLOSE NOTIFICATION PANEL WHEN CLICKING OUTSIDE
+  ======================================================= */
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target)
+      ) {
+        setNotificationsOpen(false);
+      }
+    };
+
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+    };
+  }, []);
+
+  /* =======================================================
+     SIDEBAR
+  ======================================================= */
 
   const closeSidebar = () => {
     setSidebarOpen(false);
   };
+
+  /* =======================================================
+     LOGOUT
+  ======================================================= */
 
   const handleLogout = () => {
     const confirmed = window.confirm(
@@ -100,6 +194,43 @@ export default function AdminLayout() {
 
     navigate("/admin/login");
   };
+
+  /* =======================================================
+     NOTIFICATION FUNCTIONS
+  ======================================================= */
+
+  const unreadCount = notifications.filter(
+    (notification) => !notification.read
+  ).length;
+
+  const handleNotificationClick = (notification) => {
+    setNotifications((current) =>
+      current.map((item) =>
+        item.id === notification.id
+          ? { ...item, read: true }
+          : item
+      )
+    );
+
+    setNotificationsOpen(false);
+
+    if (notification.path) {
+      navigate(notification.path);
+    }
+  };
+
+  const markAllAsRead = () => {
+    setNotifications((current) =>
+      current.map((notification) => ({
+        ...notification,
+        read: true,
+      }))
+    );
+  };
+
+  /* =======================================================
+     MENU RENDERER
+  ======================================================= */
 
   const renderMenu = (items) => {
     return items.map((item) => (
@@ -148,6 +279,7 @@ export default function AdminLayout() {
       >
 
         {/* BRAND */}
+
         <div className="admin-sidebar-brand">
 
           <div className="admin-brand-mark">
@@ -177,7 +309,7 @@ export default function AdminLayout() {
 
           <nav className="admin-sidebar-nav">
 
-            {/* MAIN MENU */}
+
             <div className="admin-nav-section">
 
               <div className="admin-nav-heading">
@@ -189,8 +321,9 @@ export default function AdminLayout() {
             </div>
 
 
-            {/* COMMUNICATION */}
+
             <div className="admin-nav-section">
+
 
               <div className="admin-nav-heading">
                 <span>COMMUNICATION</span>
@@ -201,7 +334,7 @@ export default function AdminLayout() {
             </div>
 
 
-            {/* SYSTEM */}
+
             <div className="admin-nav-section">
 
               <div className="admin-nav-heading">
@@ -292,24 +425,171 @@ export default function AdminLayout() {
 
           </div>
 
-
-          {/* TOPBAR RIGHT */}
+          {/* =================================================
+              TOPBAR RIGHT
+          ================================================= */}
 
           <div className="admin-topbar-right">
 
-            <button
-              type="button"
-              className="admin-topbar-icon"
-              aria-label="Notifications"
-              title="Notifications"
-            >
-              🔔
-              <span className="admin-notification-dot" />
-            </button>
+            {/* =================================================
+                NOTIFICATIONS
+            ================================================= */}
 
+            <div
+              className="admin-notification-wrapper"
+              ref={notificationRef}
+            >
+
+              <button
+                type="button"
+                className="admin-topbar-icon"
+                aria-label="Notifications"
+                title="Notifications"
+                onClick={() =>
+                  setNotificationsOpen(
+                    (current) => !current
+                  )
+                }
+              >
+
+                🔔
+
+                {unreadCount > 0 && (
+                  <span className="admin-notification-badge">
+                    {unreadCount > 9
+                      ? "9+"
+                      : unreadCount}
+                  </span>
+                )}
+
+              </button>
+
+              {/* =================================================
+                  NOTIFICATION DROPDOWN
+              ================================================= */}
+
+              {notificationsOpen && (
+                <div className="admin-notification-panel">
+
+                  <div className="admin-notification-header">
+
+                    <div>
+                      <strong>
+                        Notifications
+                      </strong>
+
+                      <span>
+                        {unreadCount > 0
+                          ? `${unreadCount} unread`
+                          : "All caught up"}
+                      </span>
+                    </div>
+
+                    {unreadCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={markAllAsRead}
+                        className="admin-mark-read"
+                      >
+                        Mark all read
+                      </button>
+                    )}
+
+                  </div>
+
+                  <div className="admin-notification-list">
+
+                    {notifications.length === 0 ? (
+
+                      <div className="admin-no-notifications">
+                        <div>
+                          ✓
+                        </div>
+
+                        <strong>
+                          No notifications
+                        </strong>
+
+                        <span>
+                          You're all caught up.
+                        </span>
+                      </div>
+
+                    ) : (
+
+                      notifications.map(
+                        (notification) => (
+                          <button
+                            type="button"
+                            key={notification.id}
+                            className={`admin-notification-item ${
+                              !notification.read
+                                ? "unread"
+                                : ""
+                            }`}
+                            onClick={() =>
+                              handleNotificationClick(
+                                notification
+                              )
+                            }
+                          >
+
+                            <span
+                              className={`admin-notification-icon ${notification.type}`}
+                            >
+                              {notification.icon}
+                            </span>
+
+                            <span className="admin-notification-content">
+
+                              <strong>
+                                {notification.title}
+                              </strong>
+
+                              <span>
+                                {notification.text}
+                              </span>
+
+                              <small>
+                                {notification.time}
+                              </small>
+
+                            </span>
+
+                            {!notification.read && (
+                              <span className="admin-notification-unread-dot" />
+                            )}
+
+                          </button>
+                        )
+                      )
+
+                    )}
+
+                  </div>
+
+                  <div className="admin-notification-footer">
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNotificationsOpen(false);
+                        navigate("/admin/messages");
+                      }}
+                    >
+                      View communication center →
+                    </button>
+
+                  </div>
+
+                </div>
+              )}
+
+            </div>
 
             <div className="admin-topbar-divider" />
 
+            {/* PROFILE */}
 
             <button
               type="button"
@@ -322,8 +602,13 @@ export default function AdminLayout() {
               </div>
 
               <div className="admin-profile-info">
-                <strong>Administrator</strong>
-                <span>Admin</span>
+                <strong>
+                  Administrator
+                </strong>
+
+                <span>
+                  Admin
+                </span>
               </div>
 
               <span className="admin-profile-arrow">
@@ -347,5 +632,5 @@ export default function AdminLayout() {
 
     </div>
   );
-
+  
 }

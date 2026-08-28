@@ -433,6 +433,56 @@ const contactSchema = new mongoose.Schema(
   }
 );
 
+
+// ===============================
+// NOTIFICATION
+// ===============================
+const notificationSchema = new mongoose.Schema(
+  {
+    type: {
+      type: String,
+      enum: [
+        "volunteer",
+        "donation",
+        "message",
+        "newsletter",
+        "partner",
+        "program",
+        "event",
+        "post",
+        "gallery",
+        "system",
+      ],
+      required: true,
+    },
+
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    message: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    link: {
+      type: String,
+      trim: true,
+    },
+
+    read: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
 // ===============================
 // MODELS
 // ===============================
@@ -468,4 +518,9 @@ export const Newsletter = mongoose.model(
 export const Contact = mongoose.model(
   "Contact",
   contactSchema
+);
+
+export const Notification = mongoose.model(
+  "Notification",
+  notificationSchema
 );
