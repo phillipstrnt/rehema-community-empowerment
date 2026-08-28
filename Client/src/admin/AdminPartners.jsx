@@ -4,7 +4,7 @@ const API_URL = "http://localhost:5000/api";
 
 const emptyForm = {
   organization: "",
-  partnerType: "NGO / Organization",
+  type: "NGO / Organization",
   contactName: "",
   email: "",
   phone: "",
@@ -21,23 +21,17 @@ export default function AdminPartners() {
 
   const [editingId, setEditingId] = useState(null);
 
-  const [formData, setFormData] = useState(emptyForm);
-
-  const [search, setSearch] = useState("");
-
-  const [typeFilter, setTypeFilter] = useState("All");
-
-  const [statusFilter, setStatusFilter] = useState("All");
-
   const [loading, setLoading] = useState(true);
 
   const [saving, setSaving] = useState(false);
 
   const [error, setError] = useState("");
 
+  const [formData, setFormData] = useState(emptyForm);
+
 
   /* =====================================================
-     FETCH PARTNERS
+     LOAD PARTNERS
   ===================================================== */
 
   const fetchPartners = async () => {
@@ -58,14 +52,12 @@ export default function AdminPartners() {
       const data = await response.json();
 
       setPartners(data);
-
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
 
       setError(
-        "Unable to load partners. Please make sure the server is running."
+        "Unable to load partners. Please check that the server is running."
       );
-
     } finally {
       setLoading(false);
     }
@@ -78,7 +70,7 @@ export default function AdminPartners() {
 
 
   /* =====================================================
-     FORM HANDLING
+     FORM
   ===================================================== */
 
   const handleChange = (e) => {
@@ -104,16 +96,23 @@ export default function AdminPartners() {
 
     setFormData({
       organization: partner.organization || "",
-      partnerType:
-        partner.partnerType ||
+      type:
+        partner.type ||
         "NGO / Organization",
-      contactName: partner.contactName || "",
-      email: partner.email || "",
-      phone: partner.phone || "",
-      website: partner.website || "",
-      description: partner.description || "",
-      logo: partner.logo || "",
-      status: partner.status || "Active",
+      contactName:
+        partner.contactName || "",
+      email:
+        partner.email || "",
+      phone:
+        partner.phone || "",
+      website:
+        partner.website || "",
+      description:
+        partner.description || "",
+      logo:
+        partner.logo || "",
+      status:
+        partner.status || "Active",
     });
 
     setShowForm(true);
@@ -155,7 +154,8 @@ export default function AdminPartners() {
       const response = await fetch(url, {
         method,
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type":
+            "application/json",
         },
         body: JSON.stringify(formData),
       });
@@ -165,35 +165,20 @@ export default function AdminPartners() {
       if (!response.ok) {
         throw new Error(
           data.message ||
-          "Failed to save partner."
+            "Failed to save partner."
         );
       }
 
-      if (editingId) {
-        setPartners((prev) =>
-          prev.map((partner) =>
-            partner._id === editingId
-              ? data
-              : partner
-          )
-        );
-      } else {
-        setPartners((prev) => [
-          data,
-          ...prev,
-        ]);
-      }
+      await fetchPartners();
 
       closeForm();
-
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
 
       setError(
-        error.message ||
-        "Failed to save partner."
+        err.message ||
+          "Failed to save partner."
       );
-
     } finally {
       setSaving(false);
     }
@@ -212,6 +197,8 @@ export default function AdminPartners() {
     if (!confirmed) return;
 
     try {
+      setError("");
+
       const response = await fetch(
         `${API_URL}/partners/${id}`,
         {
@@ -224,7 +211,7 @@ export default function AdminPartners() {
       if (!response.ok) {
         throw new Error(
           data.message ||
-          "Failed to delete partner."
+            "Failed to delete partner."
         );
       }
 
@@ -234,89 +221,47 @@ export default function AdminPartners() {
             partner._id !== id
         )
       );
-
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
 
       setError(
-        error.message ||
-        "Failed to delete partner."
+        err.message ||
+          "Failed to delete partner."
       );
     }
   };
 
 
   /* =====================================================
-     FILTERING
-  ===================================================== */
-
-  const filteredPartners = useMemo(() => {
-    return partners.filter((partner) => {
-      const searchText =
-        search.toLowerCase();
-
-      const matchesSearch =
-        partner.organization
-          ?.toLowerCase()
-          .includes(searchText) ||
-        partner.contactName
-          ?.toLowerCase()
-          .includes(searchText) ||
-        partner.email
-          ?.toLowerCase()
-          .includes(searchText);
-
-      const matchesType =
-        typeFilter === "All" ||
-        partner.partnerType ===
-          typeFilter;
-
-      const matchesStatus =
-        statusFilter === "All" ||
-        partner.status ===
-          statusFilter;
-
-      return (
-        matchesSearch &&
-        matchesType &&
-        matchesStatus
-      );
-    });
-  }, [
-    partners,
-    search,
-    typeFilter,
-    statusFilter,
-  ]);
-
-
-  /* =====================================================
      STATISTICS
   ===================================================== */
 
-  const totalPartners =
-    partners.length;
+  const statistics = useMemo(() => {
+    return {
+      total: partners.length,
 
-  const activePartners =
-    partners.filter(
-      (partner) =>
-        partner.status === "Active"
-    ).length;
+      active: partners.filter(
+        (partner) =>
+          partner.status === "Active"
+      ).length,
 
-  const ngoPartners =
-    partners.filter(
-      (partner) =>
-        partner.partnerType ===
-        "NGO / Organization"
-    ).length;
+      ngo: partners.filter(
+        (partner) =>
+          partner.type ===
+          "NGO / Organization"
+      ).length,
 
-  const corporatePartners =
-    partners.filter(
-      (partner) =>
-        partner.partnerType ===
-        "Corporate"
-    ).length;
+      corporate: partners.filter(
+        (partner) =>
+          partner.type === "Corporate"
+      ).length,
+    };
+  }, [partners]);
 
+
+  /* =====================================================
+     RENDER
+  ===================================================== */
 
   return (
     <div className="admin-page">
@@ -328,33 +273,42 @@ export default function AdminPartners() {
       <div className="admin-page-header">
 
         <div>
-          <div className="admin-eyebrow">
+          <p className="admin-eyebrow">
             PARTNERS
-          </div>
+          </p>
 
           <h1>
             Partners & Organizations
           </h1>
 
-          <p>
-            Manage organizations, companies,
-            donors and partners supporting
-            REHEMA Foundation.
+          <p className="admin-page-description">
+            Manage the organizations,
+            institutions and corporate
+            partners working with REHEMA
+            Foundation.
           </p>
         </div>
 
         <button
           type="button"
           className="admin-primary-button"
-          onClick={openAddForm}
+          onClick={
+            showForm
+              ? closeForm
+              : openAddForm
+          }
         >
-          + Add Partner
+          {showForm
+            ? "Close Form"
+            : "+ Add Partner"}
         </button>
 
       </div>
 
 
-      {/* ERROR */}
+      {/* =================================================
+          ERROR
+      ================================================= */}
 
       {error && (
         <div className="admin-alert admin-alert-error">
@@ -376,12 +330,10 @@ export default function AdminPartners() {
           </div>
 
           <div>
-            <span>
-              Total Partners
-            </span>
+            <span>Total Partners</span>
 
             <strong>
-              {totalPartners}
+              {statistics.total}
             </strong>
           </div>
 
@@ -395,12 +347,10 @@ export default function AdminPartners() {
           </div>
 
           <div>
-            <span>
-              Active Partners
-            </span>
+            <span>Active Partners</span>
 
             <strong>
-              {activePartners}
+              {statistics.active}
             </strong>
           </div>
 
@@ -410,16 +360,14 @@ export default function AdminPartners() {
         <div className="admin-stat-card">
 
           <div className="admin-stat-icon">
-            ◎
+            🏢
           </div>
 
           <div>
-            <span>
-              NGO / Organizations
-            </span>
+            <span>NGO / Organizations</span>
 
             <strong>
-              {ngoPartners}
+              {statistics.ngo}
             </strong>
           </div>
 
@@ -429,16 +377,14 @@ export default function AdminPartners() {
         <div className="admin-stat-card">
 
           <div className="admin-stat-icon">
-            ◈
+            ◆
           </div>
 
           <div>
-            <span>
-              Corporate Partners
-            </span>
+            <span>Corporate Partners</span>
 
             <strong>
-              {corporatePartners}
+              {statistics.corporate}
             </strong>
           </div>
 
@@ -457,11 +403,11 @@ export default function AdminPartners() {
           <div className="admin-card-header">
 
             <div>
-              <div className="admin-eyebrow">
+              <p className="admin-eyebrow">
                 {editingId
                   ? "EDIT PARTNER"
                   : "NEW PARTNER"}
-              </div>
+              </p>
 
               <h2>
                 {editingId
@@ -470,18 +416,10 @@ export default function AdminPartners() {
               </h2>
 
               <p>
-                Add organization and
-                partnership information.
+                Enter the organization's
+                information below.
               </p>
             </div>
-
-            <button
-              type="button"
-              className="admin-secondary-button"
-              onClick={closeForm}
-            >
-              Cancel
-            </button>
 
           </div>
 
@@ -520,40 +458,34 @@ export default function AdminPartners() {
 
               <div className="admin-form-group">
 
-                <label htmlFor="partnerType">
+                <label htmlFor="type">
                   Partner Type
                 </label>
 
                 <select
-                  id="partnerType"
-                  name="partnerType"
-                  value={
-                    formData.partnerType
-                  }
+                  id="type"
+                  name="type"
+                  value={formData.type}
                   onChange={handleChange}
                 >
 
-                  <option>
+                  <option value="NGO / Organization">
                     NGO / Organization
                   </option>
 
-                  <option>
+                  <option value="Corporate">
                     Corporate
                   </option>
 
-                  <option>
+                  <option value="Government">
                     Government
                   </option>
 
-                  <option>
+                  <option value="Community">
                     Community
                   </option>
 
-                  <option>
-                    Donor
-                  </option>
-
-                  <option>
+                  <option value="Other">
                     Other
                   </option>
 
@@ -596,9 +528,7 @@ export default function AdminPartners() {
                   id="email"
                   name="email"
                   type="email"
-                  value={
-                    formData.email
-                  }
+                  value={formData.email}
                   onChange={handleChange}
                   placeholder="partner@example.org"
                 />
@@ -618,11 +548,9 @@ export default function AdminPartners() {
                   id="phone"
                   name="phone"
                   type="tel"
-                  value={
-                    formData.phone
-                  }
+                  value={formData.phone}
                   onChange={handleChange}
-                  placeholder="+256 700 000 000"
+                  placeholder="+256..."
                 />
 
               </div>
@@ -655,7 +583,7 @@ export default function AdminPartners() {
               <div className="admin-form-group admin-form-full">
 
                 <label htmlFor="description">
-                  Partnership Description
+                  Description
                 </label>
 
                 <textarea
@@ -665,7 +593,7 @@ export default function AdminPartners() {
                     formData.description
                   }
                   onChange={handleChange}
-                  placeholder="Describe the partnership and how the organization supports REHEMA Foundation..."
+                  placeholder="Describe the partnership..."
                   rows="5"
                 />
 
@@ -674,7 +602,7 @@ export default function AdminPartners() {
 
               {/* LOGO */}
 
-              <div className="admin-form-group">
+              <div className="admin-form-group admin-form-full">
 
                 <label htmlFor="logo">
                   Logo URL
@@ -684,16 +612,14 @@ export default function AdminPartners() {
                   id="logo"
                   name="logo"
                   type="url"
-                  value={
-                    formData.logo
-                  }
+                  value={formData.logo}
                   onChange={handleChange}
                   placeholder="https://..."
                 />
 
                 <small>
-                  You can add the Cloudinary
-                  logo URL here.
+                  Cloudinary logo upload can
+                  be connected here next.
                 </small>
 
               </div>
@@ -731,7 +657,7 @@ export default function AdminPartners() {
             </div>
 
 
-            {/* FORM ACTIONS */}
+            {/* ACTIONS */}
 
             <div className="admin-form-actions">
 
@@ -739,6 +665,7 @@ export default function AdminPartners() {
                 type="button"
                 className="admin-secondary-button"
                 onClick={closeForm}
+                disabled={saving}
               >
                 Cancel
               </button>
@@ -751,8 +678,8 @@ export default function AdminPartners() {
                 {saving
                   ? "Saving..."
                   : editingId
-                    ? "Update Partner"
-                    : "Save Partner"}
+                  ? "Update Partner"
+                  : "Save Partner"}
               </button>
 
             </div>
@@ -772,120 +699,29 @@ export default function AdminPartners() {
         <div className="admin-card-header">
 
           <div>
-            <div className="admin-eyebrow">
-              PARTNER DIRECTORY
-            </div>
+            <p className="admin-eyebrow">
+              DIRECTORY
+            </p>
 
             <h2>
-              Partners & Organizations
+              Partner Organizations
             </h2>
 
             <p>
-              {filteredPartners.length}
-              {" "}
-              partner
-              {filteredPartners.length !== 1
-                ? "s"
-                : ""}
-              {" "}displayed
+              View and manage all REHEMA
+              Foundation partners.
             </p>
           </div>
 
         </div>
 
 
-        {/* FILTERS */}
-
-        <div className="partner-toolbar">
-
-          <div className="partner-search">
-
-            <span>⌕</span>
-
-            <input
-              type="search"
-              placeholder="Search partners..."
-              value={search}
-              onChange={(e) =>
-                setSearch(
-                  e.target.value
-                )
-              }
-            />
-
-          </div>
-
-
-          <select
-            value={typeFilter}
-            onChange={(e) =>
-              setTypeFilter(
-                e.target.value
-              )
-            }
-          >
-
-            <option value="All">
-              All Types
-            </option>
-
-            <option value="NGO / Organization">
-              NGO / Organization
-            </option>
-
-            <option value="Corporate">
-              Corporate
-            </option>
-
-            <option value="Government">
-              Government
-            </option>
-
-            <option value="Community">
-              Community
-            </option>
-
-            <option value="Donor">
-              Donor
-            </option>
-
-          </select>
-
-
-          <select
-            value={statusFilter}
-            onChange={(e) =>
-              setStatusFilter(
-                e.target.value
-              )
-            }
-          >
-
-            <option value="All">
-              All Status
-            </option>
-
-            <option value="Active">
-              Active
-            </option>
-
-            <option value="Inactive">
-              Inactive
-            </option>
-
-          </select>
-
-        </div>
-
-
-        {/* LOADING */}
-
         {loading ? (
 
           <div className="admin-empty-state">
 
             <div className="admin-empty-icon">
-              ◌
+              ⏳
             </div>
 
             <h3>
@@ -893,14 +729,13 @@ export default function AdminPartners() {
             </h3>
 
             <p>
-              Retrieving partner information.
+              Please wait while we retrieve
+              the partner directory.
             </p>
 
           </div>
 
-        ) : filteredPartners.length === 0 ? (
-
-          /* EMPTY */
+        ) : partners.length === 0 ? (
 
           <div className="admin-empty-state">
 
@@ -909,26 +744,21 @@ export default function AdminPartners() {
             </div>
 
             <h3>
-              {partners.length === 0
-                ? "No Partners Yet"
-                : "No Matching Partners"}
+              No Partners Yet
             </h3>
 
             <p>
-              {partners.length === 0
-                ? "Add your first partner organization to get started."
-                : "Try adjusting your search or filters."}
+              Add your first organization or
+              partner to build the directory.
             </p>
 
-            {partners.length === 0 && (
-              <button
-                type="button"
-                className="admin-primary-button"
-                onClick={openAddForm}
-              >
-                + Add Partner
-              </button>
-            )}
+            <button
+              type="button"
+              className="admin-primary-button"
+              onClick={openAddForm}
+            >
+              + Add Partner
+            </button>
 
           </div>
 
@@ -936,14 +766,14 @@ export default function AdminPartners() {
 
           <div className="admin-table-wrapper">
 
-            <table className="admin-table partner-table">
+            <table className="admin-table">
 
               <thead>
 
                 <tr>
 
                   <th>
-                    Partner
+                    Organization
                   </th>
 
                   <th>
@@ -951,11 +781,11 @@ export default function AdminPartners() {
                   </th>
 
                   <th>
-                    Contact Person
+                    Contact
                   </th>
 
                   <th>
-                    Contact
+                    Website
                   </th>
 
                   <th>
@@ -977,44 +807,40 @@ export default function AdminPartners() {
 
               <tbody>
 
-                {filteredPartners.map(
+                {partners.map(
                   (partner) => (
 
                     <tr
                       key={partner._id}
                     >
 
-                      {/* PARTNER */}
+                      {/* ORGANIZATION */}
 
                       <td>
 
-                        <div className="partner-name-cell">
+                        <div className="partner-table-name">
 
-                          <div className="partner-logo">
+                          {partner.logo ? (
 
-                            {partner.logo ? (
+                            <img
+                              src={
+                                partner.logo
+                              }
+                              alt={
+                                partner.organization
+                              }
+                              className="partner-logo"
+                            />
 
-                              <img
-                                src={
-                                  partner.logo
-                                }
-                                alt={
-                                  partner.organization
-                                }
-                              />
+                          ) : (
 
-                            ) : (
+                            <div className="partner-logo-placeholder">
+                              {partner.organization
+                                ?.charAt(0)
+                                ?.toUpperCase()}
+                            </div>
 
-                              <span>
-                                {partner.organization
-                                  ?.charAt(0)
-                                  .toUpperCase()}
-                              </span>
-
-                            )}
-
-                          </div>
-
+                          )}
 
                           <div>
 
@@ -1024,17 +850,12 @@ export default function AdminPartners() {
                               }
                             </strong>
 
-                            {partner.website && (
-                              <a
-                                href={
-                                  partner.website
+                            {partner.description && (
+                              <div className="admin-table-description">
+                                {
+                                  partner.description
                                 }
-                                target="_blank"
-                                rel="noreferrer"
-                                className="partner-website"
-                              >
-                                Visit website
-                              </a>
+                              </div>
                             )}
 
                           </div>
@@ -1048,21 +869,10 @@ export default function AdminPartners() {
 
                       <td>
 
-                        <span className="partner-type">
-                          {
-                            partner.partnerType
-                          }
+                        <span className="partner-type-badge">
+                          {partner.type ||
+                            "—"}
                         </span>
-
-                      </td>
-
-
-                      {/* CONTACT PERSON */}
-
-                      <td>
-
-                        {partner.contactName ||
-                          "—"}
 
                       </td>
 
@@ -1071,19 +881,51 @@ export default function AdminPartners() {
 
                       <td>
 
-                        <div className="partner-contact">
+                        <strong>
+                          {
+                            partner.contactName ||
+                            "—"
+                          }
+                        </strong>
 
-                          <span>
-                            {partner.email ||
-                              "—"}
-                          </span>
+                        {partner.email && (
+                          <div>
+                            {
+                              partner.email
+                            }
+                          </div>
+                        )}
 
-                          <span>
-                            {partner.phone ||
-                              "—"}
-                          </span>
+                        {partner.phone && (
+                          <div>
+                            {
+                              partner.phone
+                            }
+                          </div>
+                        )}
 
-                        </div>
+                      </td>
+
+
+                      {/* WEBSITE */}
+
+                      <td>
+
+                        {partner.website ? (
+
+                          <a
+                            href={
+                              partner.website
+                            }
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Visit Website
+                          </a>
+
+                        ) : (
+                          "—"
+                        )}
 
                       </td>
 
@@ -1116,12 +958,7 @@ export default function AdminPartners() {
                           ? new Date(
                               partner.createdAt
                             ).toLocaleDateString(
-                              "en-GB",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              }
+                              "en-GB"
                             )
                           : "—"}
 
@@ -1136,7 +973,7 @@ export default function AdminPartners() {
 
                           <button
                             type="button"
-                            className="admin-secondary-button admin-small-button"
+                            className="admin-secondary-button"
                             onClick={() =>
                               openEditForm(
                                 partner

@@ -232,14 +232,13 @@ const partnerSchema = new mongoose.Schema(
       trim: true,
     },
 
-    partnerType: {
+    type: {
       type: String,
       enum: [
         "NGO / Organization",
         "Corporate",
         "Government",
         "Community",
-        "Donor",
         "Other",
       ],
       default: "NGO / Organization",

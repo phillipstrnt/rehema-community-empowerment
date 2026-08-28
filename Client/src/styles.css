@@ -7005,3 +7005,216 @@ p {
   }
 
 }
+
+
+
+/* =========================================================
+   PARTNERS PAGE
+========================================================= */
+
+.admin-page-description {
+  max-width: 680px;
+  margin-top: 8px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   STATISTICS
+========================================================= */
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.admin-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  padding: 22px;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+.admin-stat-icon {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: #f1f5f9;
+
+  font-size: 21px;
+}
+
+.admin-stat-card span {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #64748b;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+.admin-stat-card strong {
+  display: block;
+
+  color: #0f172a;
+
+  font-size: 25px;
+
+  line-height: 1.2;
+}
+
+
+/* =========================================================
+   PARTNER TABLE
+========================================================= */
+
+.partner-table-name {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+
+  min-width: 230px;
+}
+
+.partner-logo,
+.partner-logo-placeholder {
+  width: 44px;
+  height: 44px;
+
+  flex: 0 0 44px;
+
+  border-radius: 10px;
+}
+
+.partner-logo {
+  object-fit: contain;
+
+  border: 1px solid #e2e8f0;
+
+  background: #ffffff;
+}
+
+.partner-logo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f1f5f9;
+
+  color: #475569;
+
+  font-size: 16px;
+
+  font-weight: 700;
+}
+
+.partner-type-badge {
+  display: inline-flex;
+
+  align-items: center;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  background: #f1f5f9;
+
+  color: #475569;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   ALERT
+========================================================= */
+
+.admin-alert {
+  padding: 13px 16px;
+
+  margin-bottom: 20px;
+
+  border-radius: 10px;
+
+  font-size: 14px;
+}
+
+.admin-alert-error {
+  background: #fef2f2;
+
+  border: 1px solid #fecaca;
+
+  color: #b91c1c;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.partner-form-card {
+  margin-bottom: 24px;
+}
+
+.admin-form-group small {
+  display: block;
+
+  margin-top: 6px;
+
+  color: #94a3b8;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+
+  .admin-stats-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .partner-table-name {
+    min-width: 200px;
+  }
+
+}
