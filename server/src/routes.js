@@ -803,6 +803,151 @@ router.delete("/volunteers/:id", async (req, res) => {
 });
 
 
+
+/* =========================================================
+   PARTNERS
+========================================================= */
+
+// GET all partners
+router.get("/partners", async (req, res) => {
+  try {
+    const partners = await Partner.find()
+      .sort({ createdAt: -1 });
+
+    res.json(partners);
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch partners",
+    });
+  }
+});
+
+
+// GET single partner
+router.get("/partners/:id", async (req, res) => {
+  try {
+    const partner = await Partner.findById(
+      req.params.id
+    );
+
+    if (!partner) {
+      return res.status(404).json({
+        message: "Partner not found",
+      });
+    }
+
+    res.json(partner);
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to fetch partner",
+    });
+  }
+});
+
+
+// CREATE partner
+router.post("/partners", async (req, res) => {
+  try {
+    const partner = await Partner.create({
+      organization: req.body.organization,
+      partnerType: req.body.partnerType,
+      contactName: req.body.contactName,
+      email: req.body.email,
+      phone: req.body.phone,
+      website: req.body.website,
+      description: req.body.description,
+      logo: req.body.logo,
+      status: req.body.status || "Active",
+    });
+
+    res.status(201).json(partner);
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+});
+
+
+// UPDATE partner
+router.put("/partners/:id", async (req, res) => {
+  try {
+    const partner =
+      await Partner.findByIdAndUpdate(
+        req.params.id,
+        {
+          organization: req.body.organization,
+          partnerType: req.body.partnerType,
+          contactName: req.body.contactName,
+          email: req.body.email,
+          phone: req.body.phone,
+          website: req.body.website,
+          description: req.body.description,
+          logo: req.body.logo,
+          status: req.body.status,
+        },
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+
+    if (!partner) {
+      return res.status(404).json({
+        message: "Partner not found",
+      });
+    }
+
+    res.json(partner);
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+});
+
+
+// DELETE partner
+router.delete("/partners/:id", async (req, res) => {
+  try {
+    const partner =
+      await Partner.findByIdAndDelete(
+        req.params.id
+      );
+
+    if (!partner) {
+      return res.status(404).json({
+        message: "Partner not found",
+      });
+    }
+
+    res.json({
+      message: "Partner deleted successfully",
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to delete partner",
+    });
+  }
+});
+
+
+
 /* =========================================================
    DONATIONS
 ========================================================= */

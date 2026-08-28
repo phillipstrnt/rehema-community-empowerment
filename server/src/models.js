@@ -220,6 +220,7 @@ const volunteerSchema = new mongoose.Schema(
   }
 );
 
+
 // ===============================
 // PARTNER
 // ===============================
@@ -231,6 +232,19 @@ const partnerSchema = new mongoose.Schema(
       trim: true,
     },
 
+    partnerType: {
+      type: String,
+      enum: [
+        "NGO / Organization",
+        "Corporate",
+        "Government",
+        "Community",
+        "Donor",
+        "Other",
+      ],
+      default: "NGO / Organization",
+    },
+
     contactName: {
       type: String,
       trim: true,
@@ -238,7 +252,6 @@ const partnerSchema = new mongoose.Schema(
 
     email: {
       type: String,
-      required: true,
       trim: true,
       lowercase: true,
     },
@@ -248,14 +261,25 @@ const partnerSchema = new mongoose.Schema(
       trim: true,
     },
 
-    message: {
+    website: {
+      type: String,
+      trim: true,
+    },
+
+    description: {
+      type: String,
+      trim: true,
+    },
+
+    logo: {
       type: String,
       trim: true,
     },
 
     status: {
       type: String,
-      default: "new",
+      enum: ["Active", "Inactive"],
+      default: "Active",
     },
   },
   {
