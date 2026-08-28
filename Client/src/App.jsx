@@ -2,6 +2,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import AdminPartners from "./admin/AdminPartners";
+import AdminDonationDetails from "./pages/admin/AdminDonationDetails";
 
 /* =====================================================
    PUBLIC COMPONENTS
@@ -51,6 +52,7 @@ import PostForm from "./admin/PostForm";
 import ProgramForm from "./admin/ProgramForm";
 import EventForm from "./admin/EventForm";
 import GalleryForm from "./admin/GalleryForm";
+import AdminDonations from "./pages/admin/AdminDonations";
 
 
 export default function App() {
@@ -294,6 +296,16 @@ export default function App() {
         <Route
           path="partners"
           element={<AdminPartners />}
+        />
+
+        <Route
+          path="/admin/donations"
+          element={<AdminDonations />}
+        />
+
+        <Route
+          path="/admin/donations/:id"
+          element={<AdminDonationDetails />}
         />
 
       </Route>

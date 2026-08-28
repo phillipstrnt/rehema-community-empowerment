@@ -1002,6 +1002,42 @@ router.get("/donations", async (req, res) => {
 });
 
 
+/* GET single donation */
+router.get("/donations/:id", async (req, res) => {
+
+try {
+
+const donation = await Donation.findById(
+  req.params.id
+);
+
+if (!donation) {
+
+  return res.status(404).json({
+    message: "Donation not found",
+  });
+
+}
+
+res.json(donation);
+
+
+} catch (error) {
+
+
+console.error(error);
+
+res.status(500).json({
+  message: "Failed to fetch donation",
+});
+
+
+}
+
+});
+
+
+
 // CREATE donation
 router.post("/donations", async (req, res) => {
 
