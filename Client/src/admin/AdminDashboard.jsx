@@ -9,11 +9,13 @@ export default function AdminDashboard() {
 
     <div className="dashboard">
 
-      {/* PAGE HEADER */}
+      {/* =====================================================
+          DASHBOARD HEADER CARD
+      ===================================================== */}
 
-      <div className="dashboard-header">
+      <section className="dashboard-welcome-card">
 
-        <div>
+        <div className="dashboard-welcome-content">
 
           <p className="admin-eyebrow">
             ADMINISTRATION
@@ -24,37 +26,54 @@ export default function AdminDashboard() {
           </h1>
 
           <p className="dashboard-subtitle">
-            Manage REHEMA's website content and
-            community information from one place.
+            Welcome back, Administrator. Manage REHEMA's
+            website content and community information from
+            one place.
           </p>
 
         </div>
 
-      </div>
+        <div className="dashboard-welcome-mark">
+          R
+        </div>
+
+      </section>
 
 
-      {/* STATISTICS */}
+      {/* =====================================================
+          STATISTICS
+      ===================================================== */}
 
       <section className="dashboard-stats">
 
+        {/* NEWS */}
+
         <div className="stat-card">
 
-          <div className="stat-icon news-icon">
-            📰
+          <div className="stat-card-top">
+
+            <div className="stat-icon news-icon">
+              📰
+            </div>
+
+            <span className="stat-status">
+              CONTENT
+            </span>
+
           </div>
 
-          <div>
+          <div className="stat-card-body">
 
-            <span>
+            <span className="stat-label">
               NEWS STORIES
             </span>
 
-            <strong>
+            <strong className="stat-number">
               --
             </strong>
 
             <small>
-              Database content
+              Published stories
             </small>
 
           </div>
@@ -62,19 +81,29 @@ export default function AdminDashboard() {
         </div>
 
 
+        {/* PROGRAMS */}
+
         <div className="stat-card">
 
-          <div className="stat-icon program-icon">
-            ❤️
+          <div className="stat-card-top">
+
+            <div className="stat-icon program-icon">
+              ❤️
+            </div>
+
+            <span className="stat-status">
+              ACTIVE
+            </span>
+
           </div>
 
-          <div>
+          <div className="stat-card-body">
 
-            <span>
+            <span className="stat-label">
               PROGRAMS
             </span>
 
-            <strong>
+            <strong className="stat-number">
               --
             </strong>
 
@@ -87,19 +116,29 @@ export default function AdminDashboard() {
         </div>
 
 
+        {/* EVENTS */}
+
         <div className="stat-card">
 
-          <div className="stat-icon event-icon">
-            📅
+          <div className="stat-card-top">
+
+            <div className="stat-icon event-icon">
+              📅
+            </div>
+
+            <span className="stat-status">
+              UPCOMING
+            </span>
+
           </div>
 
-          <div>
+          <div className="stat-card-body">
 
-            <span>
+            <span className="stat-label">
               EVENTS
             </span>
 
-            <strong>
+            <strong className="stat-number">
               --
             </strong>
 
@@ -112,19 +151,29 @@ export default function AdminDashboard() {
         </div>
 
 
+        {/* GALLERY */}
+
         <div className="stat-card">
 
-          <div className="stat-icon gallery-icon">
-            🖼️
+          <div className="stat-card-top">
+
+            <div className="stat-icon gallery-icon">
+              🖼️
+            </div>
+
+            <span className="stat-status">
+              MEDIA
+            </span>
+
           </div>
 
-          <div>
+          <div className="stat-card-body">
 
-            <span>
+            <span className="stat-label">
               GALLERY
             </span>
 
-            <strong>
+            <strong className="stat-number">
               --
             </strong>
 
@@ -139,214 +188,316 @@ export default function AdminDashboard() {
       </section>
 
 
-      {/* MANAGEMENT */}
+      {/* =====================================================
+          LOWER DASHBOARD AREA
+      ===================================================== */}
 
-      <section className="dashboard-section">
+      <div className="dashboard-main-grid">
 
-        <div className="section-heading">
 
-          <div>
+        {/* =================================================
+            CONTENT MANAGEMENT CARD
+        ================================================= */}
 
-            <h2>
-              Content Management
-            </h2>
+        <section className="dashboard-panel">
 
-            <p>
-              Choose what you want to manage.
-            </p>
+          <div className="dashboard-panel-header">
+
+            <div>
+
+              <span className="panel-eyebrow">
+                WEBSITE
+              </span>
+
+              <h2>
+                Content Management
+              </h2>
+
+              <p>
+                Manage the content displayed across
+                the REHEMA website.
+              </p>
+
+            </div>
 
           </div>
 
-        </div>
+
+          <div className="management-grid">
 
 
-        <div className="management-grid">
+            {/* NEWS */}
+
+            <Link
+              to="/admin/posts"
+              className="management-card"
+            >
+
+              <div className="management-icon news-management-icon">
+                📰
+              </div>
+
+              <div className="management-content">
+
+                <h3>
+                  News & Stories
+                </h3>
+
+                <p>
+                  Create, edit and manage REHEMA
+                  news and community stories.
+                </p>
+
+                <span>
+                  Manage News
+                  <b>→</b>
+                </span>
+
+              </div>
+
+            </Link>
 
 
-          <Link
-            to="/admin/posts"
-            className="management-card"
-          >
+            {/* PROGRAMS */}
 
-            <div className="management-icon">
-              📰
-            </div>
+            <Link
+              to="/admin/programs"
+              className="management-card"
+            >
 
-            <div className="management-content">
+              <div className="management-icon program-management-icon">
+                ❤️
+              </div>
 
-              <h3>
-                News & Stories
-              </h3>
+              <div className="management-content">
 
-              <p>
-                Create, edit and manage REHEMA
-                news, stories and updates.
-              </p>
+                <h3>
+                  Programs
+                </h3>
 
-              <span>
-                Manage News →
-              </span>
+                <p>
+                  Manage health programs and
+                  community initiatives.
+                </p>
 
-            </div>
+                <span>
+                  Manage Programs
+                  <b>→</b>
+                </span>
 
-          </Link>
+              </div>
 
-
-          <Link
-            to="/admin/programs"
-            className="management-card"
-          >
-
-            <div className="management-icon">
-              ❤️
-            </div>
-
-            <div className="management-content">
-
-              <h3>
-                Programs
-              </h3>
-
-              <p>
-                Manage health programs and
-                community initiatives.
-              </p>
-
-              <span>
-                Manage Programs →
-              </span>
-
-            </div>
-
-          </Link>
+            </Link>
 
 
-          <Link
-            to="/admin/events"
-            className="management-card"
-          >
+            {/* EVENTS */}
 
-            <div className="management-icon">
-              📅
-            </div>
+            <Link
+              to="/admin/events"
+              className="management-card"
+            >
 
-            <div className="management-content">
+              <div className="management-icon event-management-icon">
+                📅
+              </div>
 
-              <h3>
-                Events
-              </h3>
+              <div className="management-content">
 
-              <p>
-                Create and manage upcoming
-                REHEMA events.
-              </p>
+                <h3>
+                  Events
+                </h3>
 
-              <span>
-                Manage Events →
-              </span>
+                <p>
+                  Create and manage upcoming
+                  REHEMA events.
+                </p>
 
-            </div>
+                <span>
+                  Manage Events
+                  <b>→</b>
+                </span>
 
-          </Link>
+              </div>
 
-
-          <Link
-            to="/admin/gallery"
-            className="management-card"
-          >
-
-            <div className="management-icon">
-              🖼️
-            </div>
-
-            <div className="management-content">
-
-              <h3>
-                Gallery
-              </h3>
-
-              <p>
-                Manage photos, videos and
-                community media.
-              </p>
-
-              <span>
-                Manage Gallery →
-              </span>
-
-            </div>
-
-          </Link>
-
-        </div>
-
-      </section>
+            </Link>
 
 
-      {/* QUICK ACTIONS */}
+            {/* GALLERY */}
 
-      <section className="dashboard-section">
+            <Link
+              to="/admin/gallery"
+              className="management-card"
+            >
 
-        <div className="section-heading">
+              <div className="management-icon gallery-management-icon">
+                🖼️
+              </div>
 
-          <div>
+              <div className="management-content">
 
-            <h2>
-              Quick Actions
-            </h2>
+                <h3>
+                  Gallery
+                </h3>
 
-            <p>
-              Frequently used content actions.
-            </p>
+                <p>
+                  Manage photos, videos and
+                  community media.
+                </p>
+
+                <span>
+                  Manage Gallery
+                  <b>→</b>
+                </span>
+
+              </div>
+
+            </Link>
 
           </div>
 
-        </div>
+        </section>
 
 
-        <div className="quick-actions">
+        {/* =================================================
+            QUICK ACTIONS CARD
+        ================================================= */}
 
-          <Link
-            to="/admin/posts/new"
-            className="quick-action"
-          >
-            <span>＋</span>
-            Add News Story
-          </Link>
+        <section className="dashboard-panel quick-actions-panel">
 
+          <div className="dashboard-panel-header">
 
-          <Link
-            to="/admin/programs/new"
-            className="quick-action"
-          >
-            <span>＋</span>
-            Add Program
-          </Link>
+            <div>
 
+              <span className="panel-eyebrow">
+                SHORTCUTS
+              </span>
 
-          <Link
-            to="/admin/events/new"
-            className="quick-action"
-          >
-            <span>＋</span>
-            Add Event
-          </Link>
+              <h2>
+                Quick Actions
+              </h2>
+
+              <p>
+                Quickly create or upload new content.
+              </p>
+
+            </div>
+
+          </div>
 
 
-          <Link
-            to="/admin/gallery/new"
-            className="quick-action"
-          >
-            <span>＋</span>
-            Add Gallery Media
-          </Link>
+          <div className="quick-actions">
 
-        </div>
 
-      </section>
+            <Link
+              to="/admin/posts/new"
+              className="quick-action"
+            >
+
+              <span className="quick-action-icon">
+                +
+              </span>
+
+              <span className="quick-action-text">
+                <strong>
+                  Add News Story
+                </strong>
+
+                <small>
+                  Publish a new story
+                </small>
+              </span>
+
+              <span className="quick-action-arrow">
+                →
+              </span>
+
+            </Link>
+
+
+            <Link
+              to="/admin/programs/new"
+              className="quick-action"
+            >
+
+              <span className="quick-action-icon">
+                +
+              </span>
+
+              <span className="quick-action-text">
+                <strong>
+                  Add Program
+                </strong>
+
+                <small>
+                  Create a community program
+                </small>
+              </span>
+
+              <span className="quick-action-arrow">
+                →
+              </span>
+
+            </Link>
+
+
+            <Link
+              to="/admin/events/new"
+              className="quick-action"
+            >
+
+              <span className="quick-action-icon">
+                +
+              </span>
+
+              <span className="quick-action-text">
+                <strong>
+                  Add Event
+                </strong>
+
+                <small>
+                  Schedule an upcoming event
+                </small>
+              </span>
+
+              <span className="quick-action-arrow">
+                →
+              </span>
+
+            </Link>
+
+
+            <Link
+              to="/admin/gallery/new"
+              className="quick-action"
+            >
+
+              <span className="quick-action-icon">
+                +
+              </span>
+
+              <span className="quick-action-text">
+                <strong>
+                  Add Gallery Media
+                </strong>
+
+                <small>
+                  Upload photos or videos
+                </small>
+              </span>
+
+              <span className="quick-action-arrow">
+                →
+              </span>
+
+            </Link>
+
+          </div>
+
+        </section>
+
+      </div>
 
     </div>
-
   );
 
 }

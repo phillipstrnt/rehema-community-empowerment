@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import AdminPartners from "./admin/AdminPartners";
 
 /* =====================================================
    PUBLIC COMPONENTS
@@ -288,6 +289,13 @@ export default function App() {
           element={<AdminVolunteers />}
         />
 
+        {/* PARTNERS */}
+
+        <Route
+          path="partners"
+          element={<AdminPartners />}
+        />
+
       </Route>
 
 
@@ -310,7 +318,7 @@ export default function App() {
       />
 
     </Routes>
-    
+
   );
 
 }
