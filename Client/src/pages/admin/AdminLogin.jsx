@@ -114,51 +114,73 @@ export default function AdminLogin() {
       }
 
 
-      /* ---------------------------------------------------
-         SAVE ADMIN LOGIN
-         
+      /* ===================================================
+         SAVE AUTHENTICATION
+
          Remember me checked:
          → localStorage
 
          Remember me unchecked:
          → sessionStorage
-      --------------------------------------------------- */
+      =================================================== */
 
       if (rememberMe) {
 
+        /* -----------------------------------------------
+           Persistent login
+        ------------------------------------------------ */
+
         localStorage.setItem(
-          "adminToken",
+          "rehema_admin_token",
           data.token
         );
 
         localStorage.setItem(
-          "adminUser",
+          "rehema_admin_user",
           JSON.stringify(data.admin || {})
         );
 
-        sessionStorage.removeItem("adminToken");
-        sessionStorage.removeItem("adminUser");
+        /* Remove any old session login */
+
+        sessionStorage.removeItem(
+          "rehema_admin_token"
+        );
+
+        sessionStorage.removeItem(
+          "rehema_admin_user"
+        );
 
       } else {
 
+        /* -----------------------------------------------
+           Session-only login
+        ------------------------------------------------ */
+
         sessionStorage.setItem(
-          "adminToken",
+          "rehema_admin_token",
           data.token
         );
 
         sessionStorage.setItem(
-          "adminUser",
+          "rehema_admin_user",
           JSON.stringify(data.admin || {})
         );
 
-        localStorage.removeItem("adminToken");
-        localStorage.removeItem("adminUser");
+        /* Remove any old persistent login */
+
+        localStorage.removeItem(
+          "rehema_admin_token"
+        );
+
+        localStorage.removeItem(
+          "rehema_admin_user"
+        );
       }
 
 
-      /* ---------------------------------------------------
+      /* ===================================================
          LOGIN SUCCESSFUL
-      --------------------------------------------------- */
+      =================================================== */
 
       navigate("/admin", {
         replace: true,

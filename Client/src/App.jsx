@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
@@ -32,6 +31,12 @@ import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/admin/AdminLogin";
 
 /* =====================================================
+   ADMIN AUTHENTICATION
+===================================================== */
+
+import ProtectedRoute from "./components/ProtectedRoute";
+
+/* =====================================================
    ADMIN LAYOUT
 ===================================================== */
 
@@ -48,6 +53,7 @@ import AdminEvents from "./admin/AdminEvents";
 import AdminGallery from "./admin/AdminGallery";
 import AdminVolunteers from "./admin/AdminVolunteers";
 import AdminPartners from "./admin/AdminPartners";
+import AdminUsers from "./admin/AdminUsers";
 
 /* =====================================================
    ADMIN FORMS
@@ -84,168 +90,133 @@ export default function App() {
         element={
           <>
             <Navbar />
-
             <main>
               <Home />
             </main>
-
             <Footer />
-
             <WhatsAppButton />
           </>
         }
       />
-
 
       <Route
         path="/about"
         element={
           <>
             <Navbar />
-
             <main>
               <About />
             </main>
-
             <Footer />
-
             <WhatsAppButton />
           </>
         }
       />
-
 
       <Route
         path="/programs"
         element={
           <>
             <Navbar />
-
             <main>
               <Programs />
             </main>
-
             <Footer />
-
             <WhatsAppButton />
           </>
         }
       />
-
 
       <Route
         path="/news"
         element={
           <>
             <Navbar />
-
             <main>
               <News />
             </main>
-
             <Footer />
-
             <WhatsAppButton />
           </>
         }
       />
-
 
       <Route
         path="/news/:slug"
         element={
           <>
             <Navbar />
-
             <main>
               <Post />
             </main>
-
             <Footer />
-
             <WhatsAppButton />
           </>
         }
       />
-
 
       <Route
         path="/gallery"
         element={
           <>
             <Navbar />
-
             <main>
               <Gallery />
             </main>
-
             <Footer />
-
             <WhatsAppButton />
           </>
         }
       />
-
 
       <Route
         path="/get-involved"
         element={
           <>
             <Navbar />
-
             <main>
               <GetInvolved />
             </main>
-
             <Footer />
-
             <WhatsAppButton />
           </>
         }
       />
-
 
       <Route
         path="/donate"
         element={
           <>
             <Navbar />
-
             <main>
               <Donate />
             </main>
-
             <Footer />
-
             <WhatsAppButton />
           </>
         }
       />
-
 
       <Route
         path="/contact"
         element={
           <>
             <Navbar />
-
             <main>
               <Contact />
             </main>
-
             <Footer />
-
             <WhatsAppButton />
           </>
         }
       />
 
-
       {/* =================================================
           ADMIN LOGIN
 
           IMPORTANT:
-          This is OUTSIDE AdminLayout.
+          This MUST remain outside ProtectedRoute
+          and AdminLayout.
       ================================================= */}
 
       <Route
@@ -253,172 +224,185 @@ export default function App() {
         element={<AdminLogin />}
       />
 
-
       {/* =================================================
-          ADMIN DASHBOARD
+          PROTECTED ADMIN AREA
+
+          ProtectedRoute checks authentication first.
+
+          If authenticated:
+              ProtectedRoute
+                    ↓
+              AdminLayout
+                    ↓
+              Admin page
+
+          If NOT authenticated:
+              /admin/login
       ================================================= */}
 
-      <Route
-        path="/admin"
-        element={<AdminLayout />}
-      >
-
-        {/* =================================================
-            DASHBOARD
-        ================================================= */}
+      <Route element={<ProtectedRoute />}>
 
         <Route
-          index
-          element={<AdminDashboard />}
-        />
+          path="/admin"
+          element={<AdminLayout />}
+        >
 
+          {/* =================================================
+              DASHBOARD
+          ================================================= */}
 
-        {/* =================================================
-            NEWS & STORIES
-        ================================================= */}
+          <Route
+            index
+            element={<AdminDashboard />}
+          />
 
-        <Route
-          path="posts"
-          element={<AdminPosts />}
-        />
+          {/* =================================================
+              NEWS & STORIES
+          ================================================= */}
 
-        <Route
-          path="posts/new"
-          element={<PostForm />}
-        />
+          <Route
+            path="posts"
+            element={<AdminPosts />}
+          />
 
-        <Route
-          path="posts/:id/edit"
-          element={<PostForm />}
-        />
+          <Route
+            path="posts/new"
+            element={<PostForm />}
+          />
 
+          <Route
+            path="posts/:id/edit"
+            element={<PostForm />}
+          />
 
-        {/* =================================================
-            PROGRAMS
-        ================================================= */}
+          {/* =================================================
+              PROGRAMS
+          ================================================= */}
 
-        <Route
-          path="programs"
-          element={<AdminPrograms />}
-        />
+          <Route
+            path="programs"
+            element={<AdminPrograms />}
+          />
 
-        <Route
-          path="programs/new"
-          element={<ProgramForm />}
-        />
+          <Route
+            path="programs/new"
+            element={<ProgramForm />}
+          />
 
-        <Route
-          path="programs/:id/edit"
-          element={<ProgramForm />}
-        />
+          <Route
+            path="programs/:id/edit"
+            element={<ProgramForm />}
+          />
 
+          {/* =================================================
+              EVENTS
+          ================================================= */}
 
-        {/* =================================================
-            EVENTS
-        ================================================= */}
+          <Route
+            path="events"
+            element={<AdminEvents />}
+          />
 
-        <Route
-          path="events"
-          element={<AdminEvents />}
-        />
+          <Route
+            path="events/new"
+            element={<EventForm />}
+          />
 
-        <Route
-          path="events/new"
-          element={<EventForm />}
-        />
+          <Route
+            path="events/:id/edit"
+            element={<EventForm />}
+          />
 
-        <Route
-          path="events/:id/edit"
-          element={<EventForm />}
-        />
+          {/* =================================================
+              GALLERY
+          ================================================= */}
 
+          <Route
+            path="gallery"
+            element={<AdminGallery />}
+          />
 
-        {/* =================================================
-            GALLERY
-        ================================================= */}
+          <Route
+            path="gallery/new"
+            element={<GalleryForm />}
+          />
 
-        <Route
-          path="gallery"
-          element={<AdminGallery />}
-        />
+          <Route
+            path="gallery/:id/edit"
+            element={<GalleryForm />}
+          />
 
-        <Route
-          path="gallery/new"
-          element={<GalleryForm />}
-        />
+          {/* =================================================
+              VOLUNTEERS
+          ================================================= */}
 
-        <Route
-          path="gallery/:id/edit"
-          element={<GalleryForm />}
-        />
+          <Route
+            path="volunteers"
+            element={<AdminVolunteers />}
+          />
 
+          {/* =================================================
+              PARTNERS
+          ================================================= */}
 
-        {/* =================================================
-            VOLUNTEERS
-        ================================================= */}
+          <Route
+            path="partners"
+            element={<AdminPartners />}
+          />
 
-        <Route
-          path="volunteers"
-          element={<AdminVolunteers />}
-        />
+          {/* =================================================
+              DONATIONS
+          ================================================= */}
 
+          <Route
+            path="donations"
+            element={<AdminDonations />}
+          />
 
-        {/* =================================================
-            PARTNERS
-        ================================================= */}
+          <Route
+            path="donations/:id"
+            element={<AdminDonationDetails />}
+          />
 
-        <Route
-          path="partners"
-          element={<AdminPartners />}
-        />
+          {/* =================================================
+              MESSAGES
+          ================================================= */}
 
+          <Route
+            path="messages"
+            element={<AdminMessages />}
+          />
 
-        {/* =================================================
-            DONATIONS
-        ================================================= */}
+          {/* =================================================
+              NEWSLETTER
+          ================================================= */}
 
-        <Route
-          path="donations"
-          element={<AdminDonations />}
-        />
+          <Route
+            path="newsletter"
+            element={<AdminNewsletter />}
+          />
 
-        <Route
-          path="donations/:id"
-          element={<AdminDonationDetails />}
-        />
+          {/* =================================================
+              SETTINGS
+          ================================================= */}
 
+          <Route
+            path="settings"
+            element={<AdminSettings />}
+          />
 
-        {/* =================================================
-            MESSAGES
-        ================================================= */}
+          {/* =================================================
+              ADMIN USERS
+          ================================================= */}
 
-        <Route
-          path="messages"
-          element={<AdminMessages />}
-        />
+          <Route
+            path="users"
+            element={<AdminUsers />}
+          />
 
-
-        {/* =================================================
-            NEWSLETTER
-        ================================================= */}
-
-        <Route
-          path="newsletter"
-          element={<AdminNewsletter />}
-        />
-
-
-        {/* =================================================
-            SETTINGS
-        ================================================= */}
-
-        <Route
-          path="settings"
-          element={<AdminSettings />}
-        />
+        </Route>
 
       </Route>
-
 
       {/* =================================================
           404 PAGE
@@ -442,7 +426,5 @@ export default function App() {
       />
 
     </Routes>
-
   );
-
 }

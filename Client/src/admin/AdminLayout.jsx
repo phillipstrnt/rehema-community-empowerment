@@ -1,13 +1,26 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
 import "./AdminLayout.css";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+
+import {
+  NavLink,
+  Outlet,
+  useNavigate,
+} from "react-router-dom";
 
 /* =========================================================
    API
 ========================================================= */
 
 const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:5000/api";
 
 /* =========================================================
    SIDEBAR MENUS
@@ -243,9 +256,41 @@ const formatRelativeTime = (dateValue) => {
 ========================================================= */
 
 export default function AdminLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  /* =======================================================
+     NAVIGATION
 
-  const [notifications, setNotifications] = useState([]);
+     IMPORTANT:
+     There is ONLY ONE useNavigate declaration.
+  ======================================================= */
+
+  const navigate = useNavigate();
+
+  /* =======================================================
+     AUTHENTICATION
+  ======================================================= */
+
+  const [isAuthenticated, setIsAuthenticated] =
+    useState(false);
+
+  const [checkingAuth, setCheckingAuth] =
+    useState(true);
+
+  const [adminUser, setAdminUser] =
+    useState(null);
+
+  /* =======================================================
+     SIDEBAR
+  ======================================================= */
+
+  const [sidebarOpen, setSidebarOpen] =
+    useState(false);
+
+  /* =======================================================
+     NOTIFICATIONS
+  ======================================================= */
+
+  const [notifications, setNotifications] =
+    useState([]);
 
   const [notificationsOpen, setNotificationsOpen] =
     useState(false);
@@ -256,65 +301,234 @@ export default function AdminLayout() {
   const [notificationError, setNotificationError] =
     useState("");
 
-  const [timeTick, setTimeTick] = useState(Date.now());
+  const [timeTick, setTimeTick] =
+    useState(Date.now());
 
-  const notificationRef = useRef(null);
+  const notificationRef =
+    useRef(null);
 
-  const navigate = useNavigate();
+  /* =======================================================
+     GET CURRENT ADMIN TOKEN
+     
+     Remember me:
+     localStorage
+
+     Session login:
+     sessionStorage
+  ======================================================= */
+
+  const getAdminToken = () => {
+    return (
+      localStorage.getItem(
+        "rehema_admin_token"
+      ) ||
+      sessionStorage.getItem(
+        "rehema_admin_token"
+      )
+    );
+  };
+
+  /* =======================================================
+     CHECK AUTHENTICATION
+  ======================================================= */
+
+  useEffect(() => {
+    const token = getAdminToken();
+
+    const storedUser =
+      localStorage.getItem(
+        "rehema_admin_user"
+      ) ||
+      sessionStorage.getItem(
+        "rehema_admin_user"
+      );
+
+    if (!token) {
+      setIsAuthenticated(false);
+      setCheckingAuth(false);
+
+      navigate("/admin/login", {
+        replace: true,
+      });
+
+      return;
+    }
+
+    /* -----------------------------------------------
+       Restore administrator information
+    ------------------------------------------------ */
+
+    if (storedUser) {
+      try {
+        setAdminUser(
+          JSON.parse(storedUser)
+        );
+      } catch (error) {
+        console.error(
+          "Unable to read stored admin user:",
+          error
+        );
+      }
+    }
+
+    setIsAuthenticated(true);
+    setCheckingAuth(false);
+  }, [navigate]);
+
+  /* =======================================================
+     AUTHENTICATED REQUEST HELPER
+  ======================================================= */
+
+  const authenticatedFetch =
+    useCallback(
+      async (url, options = {}) => {
+        const token = getAdminToken();
+
+        if (!token) {
+          setIsAuthenticated(false);
+
+          navigate("/admin/login", {
+            replace: true,
+          });
+
+          throw new Error(
+            "Administrator authentication required."
+          );
+        }
+
+        const response = await fetch(
+          url,
+          {
+            ...options,
+
+            headers: {
+              ...(options.headers || {}),
+              Authorization: `Bearer ${token}`,
+              "Content-Type":
+                "application/json",
+            },
+          }
+        );
+
+        /* ---------------------------------------------
+           Invalid or expired token
+        --------------------------------------------- */
+
+        if (
+          response.status === 401 ||
+          response.status === 403
+        ) {
+          localStorage.removeItem(
+            "rehema_admin_token"
+          );
+
+          localStorage.removeItem(
+            "rehema_admin_user"
+          );
+
+          sessionStorage.removeItem(
+            "rehema_admin_token"
+          );
+
+          sessionStorage.removeItem(
+            "rehema_admin_user"
+          );
+
+          setIsAuthenticated(false);
+          setAdminUser(null);
+
+          navigate("/admin/login", {
+            replace: true,
+          });
+        }
+
+        return response;
+      },
+      [navigate]
+    );
 
   /* =======================================================
      FETCH NOTIFICATIONS
   ======================================================= */
 
-  const fetchNotifications = useCallback(async () => {
-    try {
-      setNotificationsLoading(true);
-      setNotificationError("");
-
-      const response = await fetch(
-        `${API_URL}/notifications`
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Notification request failed: ${response.status}`
-        );
+  const fetchNotifications =
+    useCallback(async () => {
+      if (!isAuthenticated) {
+        return;
       }
 
-      const data = await response.json();
+      try {
+        setNotificationsLoading(true);
+        setNotificationError("");
 
-      setNotifications(
-        Array.isArray(data) ? data : []
-      );
-    } catch (error) {
-      console.error(
-        "Notification error:",
-        error
-      );
+        const response =
+          await authenticatedFetch(
+            `${API_URL}/notifications`
+          );
 
-      setNotificationError(
-        "Unable to load notifications."
-      );
-    } finally {
-      setNotificationsLoading(false);
+        if (!response.ok) {
+          throw new Error(
+            `Notification request failed: ${response.status}`
+          );
+        }
+
+        const data =
+          await response.json();
+
+        setNotifications(
+          Array.isArray(data)
+            ? data
+            : []
+        );
+
+      } catch (error) {
+
+        console.error(
+          "Notification error:",
+          error
+        );
+
+        if (
+          error.message !==
+          "Administrator authentication required."
+        ) {
+          setNotificationError(
+            "Unable to load notifications."
+          );
+        }
+
+      } finally {
+
+        setNotificationsLoading(false);
+
+      }
+    }, [
+      authenticatedFetch,
+      isAuthenticated,
+    ]);
+
+  /* =======================================================
+     INITIAL NOTIFICATION FETCH
+  ======================================================= */
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchNotifications();
     }
-  }, []);
+  }, [
+    isAuthenticated,
+    fetchNotifications,
+  ]);
 
   /* =======================================================
-     INITIAL FETCH
+     AUTO REFRESH NOTIFICATIONS
   ======================================================= */
 
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    if (!isAuthenticated) {
+      return;
+    }
 
-  /* =======================================================
-     AUTO REFRESH
-     
-     New notifications are checked every 30 seconds.
-  ======================================================= */
-
-  useEffect(() => {
     const interval = setInterval(() => {
       fetchNotifications();
     }, 30000);
@@ -322,16 +536,13 @@ export default function AdminLayout() {
     return () => {
       clearInterval(interval);
     };
-  }, [fetchNotifications]);
+  }, [
+    isAuthenticated,
+    fetchNotifications,
+  ]);
 
   /* =======================================================
      UPDATE RELATIVE TIME
-     
-     This makes:
-     "Just now"
-     → "30 seconds ago"
-     → "1 minute ago"
-     etc.
   ======================================================= */
 
   useEffect(() => {
@@ -345,7 +556,7 @@ export default function AdminLayout() {
   }, []);
 
   /* =======================================================
-     CLOSE NOTIFICATION WHEN CLICKING OUTSIDE
+     CLOSE NOTIFICATIONS ON OUTSIDE CLICK
   ======================================================= */
 
   useEffect(() => {
@@ -374,7 +585,7 @@ export default function AdminLayout() {
   }, []);
 
   /* =======================================================
-     LOCK BODY SCROLL WHEN MOBILE SIDEBAR IS OPEN
+     LOCK BODY SCROLL ON MOBILE SIDEBAR
   ======================================================= */
 
   useEffect(() => {
@@ -416,105 +627,140 @@ export default function AdminLayout() {
       return;
     }
 
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("adminUser");
+    /* -----------------------------------------------
+       Remove persistent authentication
+    ------------------------------------------------ */
 
-    navigate("/admin/login");
+    localStorage.removeItem(
+      "rehema_admin_token"
+    );
+
+    localStorage.removeItem(
+      "rehema_admin_user"
+    );
+
+    /* -----------------------------------------------
+       Remove session authentication
+    ------------------------------------------------ */
+
+    sessionStorage.removeItem(
+      "rehema_admin_token"
+    );
+
+    sessionStorage.removeItem(
+      "rehema_admin_user"
+    );
+
+    setIsAuthenticated(false);
+    setAdminUser(null);
+
+    navigate("/admin/login", {
+      replace: true,
+    });
   };
 
   /* =======================================================
      UNREAD COUNT
   ======================================================= */
 
-  const unreadCount = notifications.filter(
-    (notification) =>
-      notification.read !== true
-  ).length;
+  const unreadCount =
+    notifications.filter(
+      (notification) =>
+        notification.read !== true
+    ).length;
 
   /* =======================================================
      TOGGLE NOTIFICATIONS
   ======================================================= */
 
   const toggleNotifications = () => {
-    setNotificationsOpen((current) => {
-      const nextState = !current;
+    setNotificationsOpen(
+      (current) => {
+        const nextState = !current;
 
-      if (nextState) {
-        fetchNotifications();
+        if (nextState) {
+          fetchNotifications();
+        }
+
+        return nextState;
       }
-
-      return nextState;
-    });
+    );
   };
 
   /* =======================================================
      MARK ONE AS READ
   ======================================================= */
 
-  const handleNotificationClick = async (
-    notification
-  ) => {
-    try {
-      if (
-        !notification.read &&
-        notification._id
-      ) {
-        const response = await fetch(
-          `${API_URL}/notifications/${notification._id}/read`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
+  const handleNotificationClick =
+    async (notification) => {
+
+      try {
+
+        if (
+          !notification.read &&
+          notification._id
+        ) {
+
+          const response =
+            await authenticatedFetch(
+              `${API_URL}/notifications/${notification._id}/read`,
+              {
+                method: "PATCH",
+              }
+            );
+
+          if (!response.ok) {
+            throw new Error(
+              "Failed to mark notification as read"
+            );
           }
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Failed to mark notification as read:",
+          error
         );
 
-        if (!response.ok) {
-          throw new Error(
-            "Failed to mark notification as read"
-          );
-        }
       }
-    } catch (error) {
-      console.error(
-        "Failed to mark notification as read:",
-        error
+
+      setNotifications(
+        (current) =>
+          current.map((item) =>
+            item._id === notification._id
+              ? {
+                  ...item,
+                  read: true,
+                }
+              : item
+          )
       );
-    }
 
-    setNotifications((current) =>
-      current.map((item) =>
-        item._id === notification._id
-          ? {
-              ...item,
-              read: true,
-            }
-          : item
-      )
-    );
+      setNotificationsOpen(false);
 
-    setNotificationsOpen(false);
-
-    navigate(
-      getNotificationPath(notification)
-    );
-  };
+      navigate(
+        getNotificationPath(
+          notification
+        )
+      );
+    };
 
   /* =======================================================
      MARK ALL AS READ
   ======================================================= */
 
   const markAllAsRead = async () => {
+
     try {
-      const response = await fetch(
-        `${API_URL}/notifications/read-all`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+
+      const response =
+        await authenticatedFetch(
+          `${API_URL}/notifications/read-all`,
+          {
+            method: "PATCH",
+          }
+        );
 
       if (!response.ok) {
         throw new Error(
@@ -522,18 +768,24 @@ export default function AdminLayout() {
         );
       }
 
-      setNotifications((current) =>
-        current.map((notification) => ({
-          ...notification,
-          read: true,
-        }))
+      setNotifications(
+        (current) =>
+          current.map(
+            (notification) => ({
+              ...notification,
+              read: true,
+            })
+          )
       );
+
     } catch (error) {
+
       console.error(error);
 
       alert(
         "Failed to mark all notifications as read."
       );
+
     }
   };
 
@@ -542,7 +794,9 @@ export default function AdminLayout() {
   ======================================================= */
 
   const renderMenu = (items) => {
+
     return items.map((item) => (
+
       <NavLink
         key={item.path}
         to={item.path}
@@ -554,6 +808,7 @@ export default function AdminLayout() {
           }`
         }
       >
+
         <span className="admin-nav-icon">
           {item.icon}
         </span>
@@ -561,11 +816,58 @@ export default function AdminLayout() {
         <span className="admin-nav-label">
           {item.label}
         </span>
+
       </NavLink>
+
     ));
   };
 
+  /* =======================================================
+     AUTH CHECK SCREEN
+  ======================================================= */
+
+  if (checkingAuth) {
+
+    return (
+      <div className="admin-auth-loading">
+
+        <div className="login-spinner"></div>
+
+        <p>
+          Checking administrator access...
+        </p>
+
+      </div>
+    );
+  }
+
+  /* =======================================================
+     DO NOT RENDER DASHBOARD WITHOUT AUTH
+  ======================================================= */
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  /* =======================================================
+     DISPLAY NAME
+  ======================================================= */
+
+  const displayName =
+    adminUser?.name ||
+    "Administrator";
+
+  const displayRole =
+    adminUser?.role === "super_admin"
+      ? "Super Admin"
+      : "Admin";
+
+  /* =======================================================
+     RENDER
+  ======================================================= */
+
   return (
+
     <div className="admin-layout">
 
       {/* =================================================
@@ -619,7 +921,6 @@ export default function AdminLayout() {
 
           <nav className="admin-sidebar-nav">
 
-
             <div className="admin-nav-section">
 
               <div className="admin-nav-heading">
@@ -630,10 +931,7 @@ export default function AdminLayout() {
 
             </div>
 
-
-
             <div className="admin-nav-section">
-
 
               <div className="admin-nav-heading">
                 <span>COMMUNICATION</span>
@@ -644,8 +942,6 @@ export default function AdminLayout() {
               )}
 
             </div>
-
-
 
             <div className="admin-nav-section">
 
@@ -661,7 +957,6 @@ export default function AdminLayout() {
 
         </div>
 
-
         {/* SIDEBAR FOOTER */}
 
         <div className="admin-sidebar-footer">
@@ -669,17 +964,21 @@ export default function AdminLayout() {
           <div className="admin-sidebar-user">
 
             <div className="admin-user-avatar">
-              A
+              {displayName
+                .charAt(0)
+                .toUpperCase()}
             </div>
 
             <div className="admin-user-info">
+
               <strong>
-                Administrator
+                {displayName}
               </strong>
 
               <span>
-                System Admin
+                {displayRole}
               </span>
+
             </div>
 
           </div>
@@ -689,6 +988,7 @@ export default function AdminLayout() {
             className="admin-logout-button"
             onClick={handleLogout}
           >
+
             <span className="admin-logout-icon">
               ↪
             </span>
@@ -696,12 +996,12 @@ export default function AdminLayout() {
             <span>
               Logout
             </span>
+
           </button>
 
         </div>
 
       </aside>
-
 
       {/* =================================================
           MAIN AREA
@@ -744,7 +1044,9 @@ export default function AdminLayout() {
 
           </div>
 
-          {/* TOPBAR RIGHT */}
+          {/* =================================================
+              TOPBAR RIGHT
+          ================================================= */}
 
           <div className="admin-topbar-right">
 
@@ -760,7 +1062,9 @@ export default function AdminLayout() {
                 className="admin-topbar-icon"
                 aria-label="Notifications"
                 title="Notifications"
-                onClick={toggleNotifications}
+                onClick={
+                  toggleNotifications
+                }
               >
 
                 🔔
@@ -778,13 +1082,13 @@ export default function AdminLayout() {
               {/* NOTIFICATION PANEL */}
 
               {notificationsOpen && (
-                <div className="admin-notification-panel">
 
-                  {/* HEADER */}
+                <div className="admin-notification-panel">
 
                   <div className="admin-notification-header">
 
                     <div>
+
                       <strong>
                         Notifications
                       </strong>
@@ -794,25 +1098,29 @@ export default function AdminLayout() {
                           ? `${unreadCount} unread`
                           : "All caught up"}
                       </span>
+
                     </div>
 
                     {unreadCount > 0 && (
+
                       <button
                         type="button"
-                        onClick={markAllAsRead}
+                        onClick={
+                          markAllAsRead
+                        }
                         className="admin-mark-read"
                       >
                         Mark all read
                       </button>
+
                     )}
 
                   </div>
 
-                  {/* LIST */}
-
                   <div className="admin-notification-list">
 
                     {notificationsLoading ? (
+
                       <div className="admin-no-notifications">
 
                         <div>◷</div>
@@ -822,7 +1130,9 @@ export default function AdminLayout() {
                         </strong>
 
                       </div>
+
                     ) : notificationError ? (
+
                       <div className="admin-no-notifications">
 
                         <div>!</div>
@@ -833,14 +1143,18 @@ export default function AdminLayout() {
 
                         <button
                           type="button"
-                          onClick={fetchNotifications}
+                          onClick={
+                            fetchNotifications
+                          }
                           className="admin-notification-retry"
                         >
                           Try again
                         </button>
 
                       </div>
+
                     ) : notifications.length === 0 ? (
+
                       <div className="admin-no-notifications">
 
                         <div>✓</div>
@@ -859,6 +1173,7 @@ export default function AdminLayout() {
 
                       notifications.map(
                         (notification) => (
+
                           <button
                             type="button"
                             key={
@@ -902,11 +1217,6 @@ export default function AdminLayout() {
                               </span>
 
                               <small>
-                                {/*
-                                  timeTick is intentionally
-                                  referenced so React updates
-                                  relative timestamps.
-                                */}
                                 {timeTick &&
                                   formatRelativeTime(
                                     notification.createdAt
@@ -920,6 +1230,7 @@ export default function AdminLayout() {
                             )}
 
                           </button>
+
                         )
                       )
 
@@ -927,14 +1238,15 @@ export default function AdminLayout() {
 
                   </div>
 
-                  {/* FOOTER */}
-
                   <div className="admin-notification-footer">
 
                     <button
                       type="button"
                       onClick={() => {
-                        setNotificationsOpen(false);
+                        setNotificationsOpen(
+                          false
+                        );
+
                         navigate(
                           "/admin/messages"
                         );
@@ -961,17 +1273,19 @@ export default function AdminLayout() {
             >
 
               <div className="admin-profile-avatar">
-                A
+                {displayName
+                  .charAt(0)
+                  .toUpperCase()}
               </div>
 
               <div className="admin-profile-info">
 
                 <strong>
-                  Administrator
+                  {displayName}
                 </strong>
 
                 <span>
-                  Admin
+                  {displayRole}
                 </span>
 
               </div>
@@ -986,7 +1300,6 @@ export default function AdminLayout() {
 
         </header>
 
-
         {/* PAGE CONTENT */}
 
         <main className="admin-content">
@@ -997,5 +1310,4 @@ export default function AdminLayout() {
 
     </div>
   );
-
 }
