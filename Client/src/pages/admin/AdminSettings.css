@@ -1,0 +1,462 @@
+/* =========================================================
+   ADMIN SETTINGS
+========================================================= */
+
+.admin-settings-page {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.settings-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.settings-eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.settings-page-header h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.2;
+  color: #172033;
+}
+
+.settings-subtitle {
+  margin: 9px 0 0;
+  max-width: 650px;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.settings-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 13px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #4b5563;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.settings-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+/* =========================================================
+   LAYOUT
+========================================================= */
+
+.settings-layout {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+/* =========================================================
+   SETTINGS SIDEBAR
+========================================================= */
+
+.settings-sidebar {
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.settings-sidebar-title {
+  padding: 10px 12px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #9ca3af;
+}
+
+.settings-sidebar-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  margin-bottom: 4px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: #4b5563;
+}
+
+.settings-sidebar-item:hover {
+  background: #f8fafc;
+}
+
+.settings-sidebar-item.active {
+  background: #f1f5f9;
+  color: #172033;
+}
+
+.settings-sidebar-icon {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 30px;
+  border-radius: 7px;
+  background: #f3f4f6;
+  font-size: 14px;
+}
+
+.settings-sidebar-item.active
+.settings-sidebar-icon {
+  background: #e2e8f0;
+}
+
+.settings-sidebar-text {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-sidebar-text strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.settings-sidebar-text small {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.settings-sidebar-arrow {
+  color: #9ca3af;
+  font-size: 18px;
+}
+
+/* =========================================================
+   CONTENT CARD
+========================================================= */
+
+.settings-content {
+  min-width: 0;
+}
+
+.settings-card {
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.settings-card-header {
+  padding: 24px;
+  border-bottom: 1px solid #eef0f3;
+}
+
+.settings-card-header h2 {
+  margin: 0;
+  color: #172033;
+  font-size: 18px;
+}
+
+.settings-card-header p {
+  margin: 7px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.settings-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  padding: 24px;
+}
+
+.settings-field {
+  min-width: 0;
+}
+
+.settings-field.full {
+  grid-column: 1 / -1;
+}
+
+.settings-field label {
+  display: block;
+  margin-bottom: 7px;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.settings-field input {
+  width: 100%;
+  height: 43px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid #dfe3e8;
+  border-radius: 7px;
+  outline: none;
+  background: #ffffff;
+  color: #172033;
+  font-size: 13px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.settings-field input:focus {
+  border-color: #64748b;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
+}
+
+.settings-field input::placeholder {
+  color: #a1a8b3;
+}
+
+/* =========================================================
+   SECTION LABEL
+========================================================= */
+
+.settings-section-label {
+  padding: 20px 24px 0;
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+.notification-settings {
+  padding: 8px 24px 24px;
+}
+
+.notification-setting {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 17px 0;
+  border-bottom: 1px solid #eef0f3;
+  cursor: pointer;
+}
+
+.notification-setting:last-child {
+  border-bottom: 0;
+}
+
+.notification-setting > span:first-child {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notification-setting strong {
+  color: #374151;
+  font-size: 13px;
+}
+
+.notification-setting small {
+  color: #9ca3af;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.notification-setting input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.toggle {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  flex: 0 0 40px;
+  border-radius: 20px;
+  background: #d1d5db;
+  transition: background 0.2s;
+}
+
+.toggle::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: transform 0.2s;
+}
+
+.notification-setting input:checked + .toggle {
+  background: #172033;
+}
+
+.notification-setting input:checked + .toggle::after {
+  transform: translateX(18px);
+}
+
+/* =========================================================
+   SAVE BAR
+========================================================= */
+
+.settings-save-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 18px;
+  padding: 15px 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.settings-saved {
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.settings-save-button {
+  min-width: 125px;
+  height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 7px;
+  background: #172033;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.settings-save-button:hover {
+  opacity: 0.92;
+}
+
+.settings-save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
+
+  .admin-settings-page {
+    padding: 24px;
+  }
+
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-sidebar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .settings-sidebar-title {
+    grid-column: 1 / -1;
+  }
+
+  .settings-sidebar-item {
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 640px) {
+
+  .admin-settings-page {
+    padding: 16px;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .settings-page-header {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .settings-page-header h1 {
+    font-size: 26px;
+  }
+
+  .settings-status {
+    align-self: flex-start;
+  }
+
+  .settings-sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-form-grid {
+    grid-template-columns: 1fr;
+    padding: 18px;
+    gap: 16px;
+  }
+
+  .settings-field.full {
+    grid-column: auto;
+  }
+
+  .settings-card-header {
+    padding: 20px 18px;
+  }
+
+  .settings-section-label {
+    padding: 18px 18px 0;
+  }
+
+  .notification-settings {
+    padding: 6px 18px 18px;
+  }
+
+  .settings-save-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .settings-save-button {
+    width: 100%;
+  }
+}

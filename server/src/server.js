@@ -1,63 +1,102 @@
 import "dotenv/config";
 
-import uploadRoutes from "./upload.js";
-
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import rateLimit from "express-rate-limit";
+import adminAuthRoutes from "./adminAuth.js";
 
-import rateLimit from
-  "express-rate-limit";
-
-import {
-  connectDB
-} from "./db.js";
-
+import uploadRoutes from "./upload.js";
+import { connectDB } from "./db.js";
 import routes from "./routes.js";
 
-const app =
-  express();
+const app = express();
+
+const PORT = process.env.PORT || 5000;
 
 
-const PORT =
-  process.env.PORT || 5000;
-
-
-/* SECURITY */
+/* =========================================================
+   SECURITY
+========================================================= */
 
 app.use(
   helmet()
 );
 
 
-/* CORS */
+/* =========================================================
+   CORS
+========================================================= */
 
 app.use(
-
   cors({
-
     origin:
       process.env.CLIENT_URL ||
-      "http://localhost:5173"
+      "http://localhost:5173",
 
+    credentials: true,
   })
-
 );
 
 
-/* JSON */
+/* =========================================================
+   REQUEST BODY
+========================================================= */
 
 app.use(
-
   express.json({
-    limit: "1mb"
+    limit: "1mb",
   })
-
 );
 
 
-/* UPLOAD ROUTES */
+/* =========================================================
+   REQUEST LOGGING
+========================================================= */
+
+app.use(
+  morgan("dev")
+);
+
+
+/* =========================================================
+   RATE LIMITING
+========================================================= */
+
+/*
+  General API rate limiter.
+
+  This protects the API from excessive requests.
+  We will add a stricter limiter specifically
+  for admin login later.
+*/
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+
+  limit: 200,
+
+  standardHeaders: true,
+
+  legacyHeaders: false,
+
+  message: {
+    message:
+      "Too many requests. Please try again later.",
+  },
+});
+
+
+app.use(
+  "/api",
+  apiLimiter
+);
+
+
+/* =========================================================
+   UPLOAD ROUTES
+========================================================= */
 
 app.use(
   "/api/upload",
@@ -65,37 +104,20 @@ app.use(
 );
 
 
-/* LOGGING */
+/* =========================================================
+   ADMIN AUTHENTICATION
+========================================================= */
 
 app.use(
-  morgan("dev")
-);
-
-/* RATE LIMIT */
-
-app.use(
-  "/api",
-
-  rateLimit({
-
-    windowMs:
-      15 * 60 * 1000,
-
-    limit:
-      200,
-
-    standardHeaders:
-      true,
-
-    legacyHeaders:
-      false
-
-  })
-
+  "/api/admin",
+  adminAuthRoutes
 );
 
 
-/* ROUTES */
+
+/* =========================================================
+   API ROUTES
+========================================================= */
 
 app.use(
   "/api",
@@ -103,26 +125,44 @@ app.use(
 );
 
 
-/* 404 */
+/* =========================================================
+   HEALTH CHECK
+========================================================= */
 
-app.use(
+app.get(
+  "/",
   (_req, res) => {
 
-    res
-      .status(404)
-      .json({
-        message:
-          "Route not found"
-      });
+    res.json({
+      success: true,
+      message: "REHEMA API is running",
+    });
 
   }
 );
 
 
-/* ERROR HANDLER */
+/* =========================================================
+   404 HANDLER
+========================================================= */
 
 app.use(
+  (_req, res) => {
 
+    res.status(404).json({
+      success: false,
+      message: "Route not found",
+    });
+
+  }
+);
+
+
+/* =========================================================
+   GLOBAL ERROR HANDLER
+========================================================= */
+
+app.use(
   (
     error,
     _req,
@@ -130,24 +170,30 @@ app.use(
     _next
   ) => {
 
-    console.error(error);
+    console.error(
+      "SERVER ERROR:",
+      error
+    );
 
+    res.status(
+      error.status || 500
+    ).json({
 
-    res
-      .status(500)
-      .json({
+      success: false,
 
-        message:
-          "Server error. Please try again later."
+      message:
+        error.message ||
+        "Server error. Please try again later.",
 
-      });
+    });
 
   }
-
 );
 
 
-/* DATABASE + SERVER */
+/* =========================================================
+   DATABASE + SERVER
+========================================================= */
 
 connectDB()
 
@@ -155,30 +201,30 @@ connectDB()
 
     app.listen(
       PORT,
-
       () => {
 
         console.log(
           `REHEMA API running on port ${PORT}`
         );
 
-      }
+        console.log(
+          `API: http://localhost:${PORT}/api`
+        );
 
+      }
     );
 
   })
 
-  .catch(error => {
+  .catch(
+    (error) => {
 
-    console.error(
-      "Database connection failed:",
-      error.message
-    );
+      console.error(
+        "Database connection failed:",
+        error.message
+      );
 
-    process.exit(1);
+      process.exit(1);
 
-  });
-
-
-
-  
+    }
+  );

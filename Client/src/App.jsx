@@ -3,6 +3,10 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import AdminPartners from "./admin/AdminPartners";
 import AdminDonationDetails from "./pages/admin/AdminDonationDetails";
+import AdminMessages from "./pages/admin/AdminMessages";
+import AdminNewsletter from "./pages/admin/AdminNewsletter";
+import AdminSettings from "./pages/admin/AdminSettings";
+import AdminLogin from "./pages/admin/AdminLogin";
 
 /* =====================================================
    PUBLIC COMPONENTS
@@ -306,6 +310,26 @@ export default function App() {
         <Route
           path="/admin/donations/:id"
           element={<AdminDonationDetails />}
+        />
+
+        <Route
+         path="messages" 
+         element={<AdminMessages />} 
+        />
+
+        <Route
+         path="newsletter" 
+        element={<AdminNewsletter />} 
+        />
+
+        <Route
+          path="settings"
+          element={<AdminSettings />}
+        />
+
+        <Route
+          path="/admin/login"
+          element={<AdminLogin />}
         />
 
       </Route>

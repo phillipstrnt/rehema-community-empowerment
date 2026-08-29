@@ -1,6 +1,13 @@
-
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import "./AdminLayout.css";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+
+/* =========================================================
+   API
+========================================================= */
+
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 /* =========================================================
    SIDEBAR MENUS
@@ -76,54 +83,160 @@ const systemMenu = [
 ];
 
 /* =========================================================
-   INITIAL NOTIFICATIONS
+   NOTIFICATION PATH
 ========================================================= */
 
-const initialNotifications = [
-  {
-    id: 1,
-    type: "message",
-    icon: "✉",
-    title: "New message received",
-    text: "A visitor has submitted a new contact message.",
-    time: "Just now",
-    read: false,
-    path: "/admin/messages",
-  },
+const getNotificationPath = (notification) => {
+  if (notification?.link) {
+    return notification.link;
+  }
 
-  {
-    id: 2,
-    type: "volunteer",
-    icon: "♟",
-    title: "New volunteer application",
-    text: "A new volunteer has submitted an application.",
-    time: "10 minutes ago",
-    read: false,
-    path: "/admin/volunteers",
-  },
+  switch (notification?.type) {
+    case "message":
+      return "/admin/messages";
 
-  {
-    id: 3,
-    type: "donation",
-    icon: "◆",
-    title: "New donation received",
-    text: "A new donation has been recorded.",
-    time: "25 minutes ago",
-    read: false,
-    path: "/admin/donations",
-  },
+    case "volunteer":
+      return "/admin/volunteers";
 
-  {
-    id: 4,
-    type: "newsletter",
-    icon: "◎",
-    title: "New newsletter subscriber",
-    text: "Someone has subscribed to the REHEMA newsletter.",
-    time: "1 hour ago",
-    read: true,
-    path: "/admin/newsletter",
-  },
-];
+    case "donation":
+      return "/admin/donations";
+
+    case "newsletter":
+      return "/admin/newsletter";
+
+    case "partner":
+      return "/admin/partners";
+
+    case "event":
+      return "/admin/events";
+
+    case "program":
+      return "/admin/programs";
+
+    case "post":
+      return "/admin/posts";
+
+    case "gallery":
+      return "/admin/gallery";
+
+    default:
+      return "/admin";
+  }
+};
+
+/* =========================================================
+   NOTIFICATION ICON
+========================================================= */
+
+const getNotificationIcon = (type) => {
+  switch (type) {
+    case "message":
+      return "✉";
+
+    case "volunteer":
+      return "♟";
+
+    case "donation":
+      return "◆";
+
+    case "newsletter":
+      return "◎";
+
+    case "partner":
+      return "♣";
+
+    case "event":
+      return "▣";
+
+    case "program":
+      return "♥";
+
+    case "post":
+      return "📰";
+
+    case "gallery":
+      return "▧";
+
+    default:
+      return "●";
+  }
+};
+
+/* =========================================================
+   RELATIVE TIME
+========================================================= */
+
+const formatRelativeTime = (dateValue) => {
+  if (!dateValue) {
+    return "Just now";
+  }
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Just now";
+  }
+
+  const now = new Date();
+
+  const difference = Math.floor(
+    (now.getTime() - date.getTime()) / 1000
+  );
+
+  if (difference < 0 || difference < 10) {
+    return "Just now";
+  }
+
+  if (difference < 60) {
+    return `${difference} seconds ago`;
+  }
+
+  const minutes = Math.floor(difference / 60);
+
+  if (minutes === 1) {
+    return "1 minute ago";
+  }
+
+  if (minutes < 60) {
+    return `${minutes} minutes ago`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+
+  if (hours === 1) {
+    return "1 hour ago";
+  }
+
+  if (hours < 24) {
+    return `${hours} hours ago`;
+  }
+
+  const days = Math.floor(hours / 24);
+
+  if (days === 1) {
+    return "Yesterday";
+  }
+
+  if (days < 7) {
+    return `${days} days ago`;
+  }
+
+  const weeks = Math.floor(days / 7);
+
+  if (weeks === 1) {
+    return "1 week ago";
+  }
+
+  if (weeks < 5) {
+    return `${weeks} weeks ago`;
+  }
+
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
 
 /* =========================================================
    ADMIN LAYOUT
@@ -132,26 +245,116 @@ const initialNotifications = [
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [notifications, setNotifications] = useState(
-    initialNotifications
-  );
+  const [notifications, setNotifications] = useState([]);
 
   const [notificationsOpen, setNotificationsOpen] =
     useState(false);
+
+  const [notificationsLoading, setNotificationsLoading] =
+    useState(false);
+
+  const [notificationError, setNotificationError] =
+    useState("");
+
+  const [timeTick, setTimeTick] = useState(Date.now());
 
   const notificationRef = useRef(null);
 
   const navigate = useNavigate();
 
   /* =======================================================
-     CLOSE NOTIFICATION PANEL WHEN CLICKING OUTSIDE
+     FETCH NOTIFICATIONS
+  ======================================================= */
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setNotificationsLoading(true);
+      setNotificationError("");
+
+      const response = await fetch(
+        `${API_URL}/notifications`
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Notification request failed: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+
+      setNotifications(
+        Array.isArray(data) ? data : []
+      );
+    } catch (error) {
+      console.error(
+        "Notification error:",
+        error
+      );
+
+      setNotificationError(
+        "Unable to load notifications."
+      );
+    } finally {
+      setNotificationsLoading(false);
+    }
+  }, []);
+
+  /* =======================================================
+     INITIAL FETCH
+  ======================================================= */
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  /* =======================================================
+     AUTO REFRESH
+     
+     New notifications are checked every 30 seconds.
+  ======================================================= */
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 30000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [fetchNotifications]);
+
+  /* =======================================================
+     UPDATE RELATIVE TIME
+     
+     This makes:
+     "Just now"
+     → "30 seconds ago"
+     → "1 minute ago"
+     etc.
+  ======================================================= */
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeTick(Date.now());
+    }, 30000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  /* =======================================================
+     CLOSE NOTIFICATION WHEN CLICKING OUTSIDE
   ======================================================= */
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
         notificationRef.current &&
-        !notificationRef.current.contains(event.target)
+        !notificationRef.current.contains(
+          event.target
+        )
       ) {
         setNotificationsOpen(false);
       }
@@ -171,6 +374,28 @@ export default function AdminLayout() {
   }, []);
 
   /* =======================================================
+     LOCK BODY SCROLL WHEN MOBILE SIDEBAR IS OPEN
+  ======================================================= */
+
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.classList.add(
+        "admin-sidebar-open"
+      );
+    } else {
+      document.body.classList.remove(
+        "admin-sidebar-open"
+      );
+    }
+
+    return () => {
+      document.body.classList.remove(
+        "admin-sidebar-open"
+      );
+    };
+  }, [sidebarOpen]);
+
+  /* =======================================================
      SIDEBAR
   ======================================================= */
 
@@ -187,7 +412,9 @@ export default function AdminLayout() {
       "Are you sure you want to logout?"
     );
 
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
 
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminUser");
@@ -196,36 +423,118 @@ export default function AdminLayout() {
   };
 
   /* =======================================================
-     NOTIFICATION FUNCTIONS
+     UNREAD COUNT
   ======================================================= */
 
   const unreadCount = notifications.filter(
-    (notification) => !notification.read
+    (notification) =>
+      notification.read !== true
   ).length;
 
-  const handleNotificationClick = (notification) => {
+  /* =======================================================
+     TOGGLE NOTIFICATIONS
+  ======================================================= */
+
+  const toggleNotifications = () => {
+    setNotificationsOpen((current) => {
+      const nextState = !current;
+
+      if (nextState) {
+        fetchNotifications();
+      }
+
+      return nextState;
+    });
+  };
+
+  /* =======================================================
+     MARK ONE AS READ
+  ======================================================= */
+
+  const handleNotificationClick = async (
+    notification
+  ) => {
+    try {
+      if (
+        !notification.read &&
+        notification._id
+      ) {
+        const response = await fetch(
+          `${API_URL}/notifications/${notification._id}/read`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            "Failed to mark notification as read"
+          );
+        }
+      }
+    } catch (error) {
+      console.error(
+        "Failed to mark notification as read:",
+        error
+      );
+    }
+
     setNotifications((current) =>
       current.map((item) =>
-        item.id === notification.id
-          ? { ...item, read: true }
+        item._id === notification._id
+          ? {
+              ...item,
+              read: true,
+            }
           : item
       )
     );
 
     setNotificationsOpen(false);
 
-    if (notification.path) {
-      navigate(notification.path);
-    }
+    navigate(
+      getNotificationPath(notification)
+    );
   };
 
-  const markAllAsRead = () => {
-    setNotifications((current) =>
-      current.map((notification) => ({
-        ...notification,
-        read: true,
-      }))
-    );
+  /* =======================================================
+     MARK ALL AS READ
+  ======================================================= */
+
+  const markAllAsRead = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}/notifications/read-all`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "Failed to mark notifications as read"
+        );
+      }
+
+      setNotifications((current) =>
+        current.map((notification) => ({
+          ...notification,
+          read: true,
+        }))
+      );
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Failed to mark all notifications as read."
+      );
+    }
   };
 
   /* =======================================================
@@ -240,7 +549,9 @@ export default function AdminLayout() {
         end={item.path === "/admin"}
         onClick={closeSidebar}
         className={({ isActive }) =>
-          `admin-nav-link ${isActive ? "active" : ""}`
+          `admin-nav-link ${
+            isActive ? "active" : ""
+          }`
         }
       >
         <span className="admin-nav-icon">
@@ -302,8 +613,7 @@ export default function AdminLayout() {
 
         </div>
 
-
-        {/* SIDEBAR NAVIGATION */}
+        {/* NAVIGATION */}
 
         <div className="admin-sidebar-scroll">
 
@@ -329,7 +639,9 @@ export default function AdminLayout() {
                 <span>COMMUNICATION</span>
               </div>
 
-              {renderMenu(communicationMenu)}
+              {renderMenu(
+                communicationMenu
+              )}
 
             </div>
 
@@ -361,8 +673,13 @@ export default function AdminLayout() {
             </div>
 
             <div className="admin-user-info">
-              <strong>Administrator</strong>
-              <span>System Admin</span>
+              <strong>
+                Administrator
+              </strong>
+
+              <span>
+                System Admin
+              </span>
             </div>
 
           </div>
@@ -401,7 +718,9 @@ export default function AdminLayout() {
             <button
               type="button"
               className="admin-menu-button"
-              onClick={() => setSidebarOpen(true)}
+              onClick={() =>
+                setSidebarOpen(true)
+              }
               aria-label="Open navigation"
             >
               ☰
@@ -425,15 +744,11 @@ export default function AdminLayout() {
 
           </div>
 
-          {/* =================================================
-              TOPBAR RIGHT
-          ================================================= */}
+          {/* TOPBAR RIGHT */}
 
           <div className="admin-topbar-right">
 
-            {/* =================================================
-                NOTIFICATIONS
-            ================================================= */}
+            {/* NOTIFICATIONS */}
 
             <div
               className="admin-notification-wrapper"
@@ -445,11 +760,7 @@ export default function AdminLayout() {
                 className="admin-topbar-icon"
                 aria-label="Notifications"
                 title="Notifications"
-                onClick={() =>
-                  setNotificationsOpen(
-                    (current) => !current
-                  )
-                }
+                onClick={toggleNotifications}
               >
 
                 🔔
@@ -464,12 +775,12 @@ export default function AdminLayout() {
 
               </button>
 
-              {/* =================================================
-                  NOTIFICATION DROPDOWN
-              ================================================= */}
+              {/* NOTIFICATION PANEL */}
 
               {notificationsOpen && (
                 <div className="admin-notification-panel">
+
+                  {/* HEADER */}
 
                   <div className="admin-notification-header">
 
@@ -497,14 +808,42 @@ export default function AdminLayout() {
 
                   </div>
 
+                  {/* LIST */}
+
                   <div className="admin-notification-list">
 
-                    {notifications.length === 0 ? (
-
+                    {notificationsLoading ? (
                       <div className="admin-no-notifications">
-                        <div>
-                          ✓
-                        </div>
+
+                        <div>◷</div>
+
+                        <strong>
+                          Loading notifications...
+                        </strong>
+
+                      </div>
+                    ) : notificationError ? (
+                      <div className="admin-no-notifications">
+
+                        <div>!</div>
+
+                        <strong>
+                          {notificationError}
+                        </strong>
+
+                        <button
+                          type="button"
+                          onClick={fetchNotifications}
+                          className="admin-notification-retry"
+                        >
+                          Try again
+                        </button>
+
+                      </div>
+                    ) : notifications.length === 0 ? (
+                      <div className="admin-no-notifications">
+
+                        <div>✓</div>
 
                         <strong>
                           No notifications
@@ -513,6 +852,7 @@ export default function AdminLayout() {
                         <span>
                           You're all caught up.
                         </span>
+
                       </div>
 
                     ) : (
@@ -521,7 +861,10 @@ export default function AdminLayout() {
                         (notification) => (
                           <button
                             type="button"
-                            key={notification.id}
+                            key={
+                              notification._id ||
+                              notification.id
+                            }
                             className={`admin-notification-item ${
                               !notification.read
                                 ? "unread"
@@ -535,23 +878,39 @@ export default function AdminLayout() {
                           >
 
                             <span
-                              className={`admin-notification-icon ${notification.type}`}
+                              className={`admin-notification-icon ${
+                                notification.type ||
+                                "default"
+                              }`}
                             >
-                              {notification.icon}
+                              {getNotificationIcon(
+                                notification.type
+                              )}
                             </span>
 
                             <span className="admin-notification-content">
 
                               <strong>
-                                {notification.title}
+                                {notification.title ||
+                                  "Notification"}
                               </strong>
 
                               <span>
-                                {notification.text}
+                                {notification.message ||
+                                  notification.text ||
+                                  ""}
                               </span>
 
                               <small>
-                                {notification.time}
+                                {/*
+                                  timeTick is intentionally
+                                  referenced so React updates
+                                  relative timestamps.
+                                */}
+                                {timeTick &&
+                                  formatRelativeTime(
+                                    notification.createdAt
+                                  )}
                               </small>
 
                             </span>
@@ -568,13 +927,17 @@ export default function AdminLayout() {
 
                   </div>
 
+                  {/* FOOTER */}
+
                   <div className="admin-notification-footer">
 
                     <button
                       type="button"
                       onClick={() => {
                         setNotificationsOpen(false);
-                        navigate("/admin/messages");
+                        navigate(
+                          "/admin/messages"
+                        );
                       }}
                     >
                       View communication center →
@@ -602,6 +965,7 @@ export default function AdminLayout() {
               </div>
 
               <div className="admin-profile-info">
+
                 <strong>
                   Administrator
                 </strong>
@@ -609,6 +973,7 @@ export default function AdminLayout() {
                 <span>
                   Admin
                 </span>
+
               </div>
 
               <span className="admin-profile-arrow">
@@ -632,5 +997,5 @@ export default function AdminLayout() {
 
     </div>
   );
-  
+
 }

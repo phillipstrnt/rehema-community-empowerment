@@ -670,3 +670,266 @@
     padding: 0 15px;
   }
 }
+
+
+
+
+/* =========================================================
+   RESPONSIVE DONATIONS PAGE
+========================================================= */
+
+.admin-donations-page {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.donations-page-header {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+
+  .donations-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .donations-page-header h1 {
+    font-size: 28px;
+  }
+
+  .donations-subtitle {
+    max-width: 100%;
+  }
+
+  .donations-refresh-button {
+    width: 100%;
+  }
+
+}
+
+
+/* =========================================================
+   STATISTICS
+========================================================= */
+
+.donations-stat-grid {
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 900px) {
+
+  .donations-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+@media (max-width: 550px) {
+
+  .donations-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
+
+.donations-toolbar {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.donation-search {
+  min-width: 0;
+  width: 100%;
+}
+
+.donation-search input {
+  min-width: 0;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+
+  .donations-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .donation-filters {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .donation-filters select {
+    width: 100%;
+  }
+
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.donations-table-card {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.donations-table-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.donations-table {
+  min-width: 900px;
+}
+
+
+/* =========================================================
+   MOBILE TABLE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .donations-table-header {
+    padding: 16px;
+  }
+
+  .donations-table-wrapper {
+    border-radius: 0;
+  }
+
+}
+
+
+/* =========================================================
+   LONG TEXT PROTECTION
+========================================================= */
+
+.reference-text,
+.donor-cell strong,
+.donor-cell span {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.donation-actions {
+  white-space: nowrap;
+}
+
+
+
+
+/* =========================================================
+   DONATION DETAILS
+========================================================= */
+
+.admin-donation-details-page {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.donation-details-header {
+  width: 100%;
+  max-width: 100%;
+}
+
+.donation-details-card {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.detail-item {
+  min-width: 0;
+}
+
+.detail-item strong {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.donor-message {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+
+  .details-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+  .admin-donation-details-page {
+    padding: 0;
+  }
+
+  .donation-details-header {
+    padding: 0;
+  }
+
+  .donation-details-header h1 {
+    font-size: 26px;
+  }
+
+  .donation-details-card {
+    border-radius: 10px;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .detail-item {
+    width: 100%;
+  }
+
+}
