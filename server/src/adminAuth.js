@@ -1,3 +1,4 @@
+
 import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -8,41 +9,72 @@ const router = express.Router();
 
 /* =========================================================
    ADMIN LOGIN
+   POST /api/admin/login
 ========================================================= */
 
 router.post("/login", async (req, res) => {
   try {
+    /* -------------------------------------------------------
+       GET LOGIN DATA
+    ------------------------------------------------------- */
+
     const { email, password } = req.body;
 
-    /* Validate input */
+    /* -------------------------------------------------------
+       VALIDATE INPUT
+    ------------------------------------------------------- */
 
     if (!email || !password) {
       return res.status(400).json({
+        success: false,
         message: "Email and password are required.",
       });
     }
 
-    /* Find admin */
+    const normalizedEmail = email.toLowerCase().trim();
+
+    /* -------------------------------------------------------
+       CHECK JWT SECRET
+    ------------------------------------------------------- */
+
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is missing from .env");
+
+      return res.status(500).json({
+        success: false,
+        message: "Server authentication configuration is missing.",
+      });
+    }
+
+    /* -------------------------------------------------------
+       FIND ADMINISTRATOR
+    ------------------------------------------------------- */
 
     const admin = await AdminUser.findOne({
-      email: email.toLowerCase().trim(),
+      email: normalizedEmail,
     });
 
     if (!admin) {
       return res.status(401).json({
+        success: false,
         message: "Invalid email or password.",
       });
     }
 
-    /* Check account status */
+    /* -------------------------------------------------------
+       CHECK ACCOUNT STATUS
+    ------------------------------------------------------- */
 
-    if (!admin.active) {
+    if (admin.active !== true) {
       return res.status(403).json({
+        success: false,
         message: "This administrator account is inactive.",
       });
     }
 
-    /* Compare password */
+    /* -------------------------------------------------------
+       VERIFY PASSWORD
+    ------------------------------------------------------- */
 
     const passwordMatch = await bcrypt.compare(
       password,
@@ -51,11 +83,14 @@ router.post("/login", async (req, res) => {
 
     if (!passwordMatch) {
       return res.status(401).json({
+        success: false,
         message: "Invalid email or password.",
       });
     }
 
-    /* Create JWT */
+    /* -------------------------------------------------------
+       CREATE JWT TOKEN
+    ------------------------------------------------------- */
 
     const token = jwt.sign(
       {
@@ -69,13 +104,28 @@ router.post("/login", async (req, res) => {
       }
     );
 
-    /* Send response */
+    /* -------------------------------------------------------
+       UPDATE LAST LOGIN
+       Only if your model contains lastLogin.
+    ------------------------------------------------------- */
 
-    res.json({
+    if ("lastLogin" in admin.schema.paths) {
+      admin.lastLogin = new Date();
+      await admin.save();
+    }
+
+    /* -------------------------------------------------------
+       LOGIN SUCCESS
+    ------------------------------------------------------- */
+
+    return res.status(200).json({
+      success: true,
       message: "Login successful.",
+
       token,
+
       admin: {
-        id: admin._id,
+        id: admin._id.toString(),
         name: admin.name,
         email: admin.email,
         role: admin.role,
@@ -85,10 +135,33 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Admin login error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
+      success: false,
       message: "Login failed. Please try again.",
     });
   }
 });
+
+
+/* =========================================================
+   ADMIN LOGOUT
+   POST /api/admin/logout
+
+   JWT authentication is stateless, so the frontend removes
+   the stored token. This endpoint is provided for a clean
+   logout API response.
+========================================================= */
+
+router.post("/logout", (req, res) => {
+  return res.status(200).json({
+    success: true,
+    message: "Logout successful.",
+  });
+});
+
+
+/* =========================================================
+   EXPORT ROUTER
+========================================================= */
 
 export default router;

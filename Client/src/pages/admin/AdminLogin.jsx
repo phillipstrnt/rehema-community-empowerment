@@ -1,6 +1,15 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminLogin.css";
+
+/* =========================================================
+   API
+========================================================= */
+
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -15,6 +24,11 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+
+  /* =======================================================
+     HANDLE INPUT CHANGES
+  ======================================================= */
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -26,61 +40,157 @@ export default function AdminLogin() {
     setError("");
   };
 
+
+  /* =======================================================
+     LOGIN
+  ======================================================= */
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     setError("");
 
-    if (!formData.email || !formData.password) {
-      setError("Please enter your email and password.");
+    const email = formData.email.trim();
+    const password = formData.password;
+
+    if (!email || !password) {
+      setError(
+        "Please enter your email and password."
+      );
       return;
     }
 
     try {
       setLoading(true);
 
-      /*
-        AUTHENTICATION WILL BE CONNECTED HERE.
+      /* ---------------------------------------------------
+         SEND LOGIN REQUEST TO SERVER
+      --------------------------------------------------- */
 
-        For now, this is only the login interface.
-        We will replace this section with the real
-        API request after creating the authentication
-        routes on the server.
-      */
+      const response = await fetch(
+        `${API_URL}/admin/login`,
+        {
+          method: "POST",
 
-      console.log("Login details:", {
-        email: formData.email,
-        password: formData.password,
-        rememberMe,
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
+
+
+      /* ---------------------------------------------------
+         READ SERVER RESPONSE
+      --------------------------------------------------- */
+
+      const data = await response.json();
+
+
+      /* ---------------------------------------------------
+         HANDLE LOGIN FAILURE
+      --------------------------------------------------- */
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Invalid email or password."
+        );
+      }
+
+
+      /* ---------------------------------------------------
+         MAKE SURE TOKEN WAS RETURNED
+      --------------------------------------------------- */
+
+      if (!data.token) {
+        throw new Error(
+          "Login succeeded, but no authentication token was received."
+        );
+      }
+
+
+      /* ---------------------------------------------------
+         SAVE ADMIN LOGIN
+         
+         Remember me checked:
+         → localStorage
+
+         Remember me unchecked:
+         → sessionStorage
+      --------------------------------------------------- */
+
+      if (rememberMe) {
+
+        localStorage.setItem(
+          "adminToken",
+          data.token
+        );
+
+        localStorage.setItem(
+          "adminUser",
+          JSON.stringify(data.admin || {})
+        );
+
+        sessionStorage.removeItem("adminToken");
+        sessionStorage.removeItem("adminUser");
+
+      } else {
+
+        sessionStorage.setItem(
+          "adminToken",
+          data.token
+        );
+
+        sessionStorage.setItem(
+          "adminUser",
+          JSON.stringify(data.admin || {})
+        );
+
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("adminUser");
+      }
+
+
+      /* ---------------------------------------------------
+         LOGIN SUCCESSFUL
+      --------------------------------------------------- */
+
+      navigate("/admin", {
+        replace: true,
       });
 
-      /*
-        Temporary navigation for UI testing only.
-
-        REMOVE this when real authentication
-        is connected.
-      */
-
-      setTimeout(() => {
-        navigate("/admin");
-      }, 500);
-
     } catch (error) {
-      console.error("Login error:", error);
+
+      console.error(
+        "Admin login error:",
+        error
+      );
 
       setError(
-        "Unable to sign in. Please try again."
+        error.message ||
+          "Unable to sign in. Please try again."
       );
 
     } finally {
+
       setLoading(false);
+
     }
   };
+
 
   return (
     <div className="admin-login-page">
 
-      {/* LEFT SIDE */}
+      {/* =================================================
+          LEFT SIDE
+      ================================================= */}
+
       <div className="admin-login-brand">
 
         <div className="admin-login-brand-content">
@@ -111,6 +221,7 @@ export default function AdminLogin() {
             </span>
 
             <div>
+
               <strong>
                 Secure Administration
               </strong>
@@ -118,6 +229,7 @@ export default function AdminLogin() {
               <p>
                 Authorized personnel only
               </p>
+
             </div>
 
           </div>
@@ -127,7 +239,10 @@ export default function AdminLogin() {
       </div>
 
 
-      {/* RIGHT SIDE */}
+      {/* =================================================
+          RIGHT SIDE
+      ================================================= */}
+
       <div className="admin-login-panel">
 
         <div className="admin-login-card">
@@ -150,17 +265,28 @@ export default function AdminLogin() {
           </div>
 
 
-          {/* ERROR MESSAGE */}
+          {/* =================================================
+              ERROR MESSAGE
+          ================================================= */}
 
           {error && (
             <div className="admin-login-error">
-              <span>⚠</span>
-              <p>{error}</p>
+
+              <span>
+                ⚠
+              </span>
+
+              <p>
+                {error}
+              </p>
+
             </div>
           )}
 
 
-          {/* LOGIN FORM */}
+          {/* =================================================
+              LOGIN FORM
+          ================================================= */}
 
           <form onSubmit={handleSubmit}>
 
@@ -186,6 +312,8 @@ export default function AdminLogin() {
                   onChange={handleChange}
                   placeholder="admin@example.com"
                   autoComplete="email"
+                  disabled={loading}
+                  required
                 />
 
               </div>
@@ -208,9 +336,10 @@ export default function AdminLogin() {
                   className="forgot-password"
                   onClick={() =>
                     alert(
-                      "Password recovery will be connected after authentication is implemented."
+                      "Password recovery has not been implemented yet."
                     )
                   }
+                  disabled={loading}
                 >
                   Forgot password?
                 </button>
@@ -236,6 +365,8 @@ export default function AdminLogin() {
                   onChange={handleChange}
                   placeholder="Enter your password"
                   autoComplete="current-password"
+                  disabled={loading}
+                  required
                 />
 
                 <button
@@ -243,7 +374,8 @@ export default function AdminLogin() {
                   className="password-toggle"
                   onClick={() =>
                     setShowPassword(
-                      (previous) => !previous
+                      (previous) =>
+                        !previous
                     )
                   }
                   aria-label={
@@ -251,8 +383,11 @@ export default function AdminLogin() {
                       ? "Hide password"
                       : "Show password"
                   }
+                  disabled={loading}
                 >
-                  {showPassword ? "◉" : "○"}
+                  {showPassword
+                    ? "◉"
+                    : "○"}
                 </button>
 
               </div>
@@ -260,7 +395,9 @@ export default function AdminLogin() {
             </div>
 
 
-            {/* REMEMBER ME */}
+            {/* =================================================
+                REMEMBER ME
+            ================================================= */}
 
             <div className="admin-login-options">
 
@@ -274,6 +411,7 @@ export default function AdminLogin() {
                       e.target.checked
                     )
                   }
+                  disabled={loading}
                 />
 
                 <span>
@@ -285,7 +423,9 @@ export default function AdminLogin() {
             </div>
 
 
-            {/* SUBMIT */}
+            {/* =================================================
+                SUBMIT BUTTON
+            ================================================= */}
 
             <button
               type="submit"
@@ -294,21 +434,33 @@ export default function AdminLogin() {
             >
 
               {loading ? (
+
                 <>
                   <span className="login-spinner"></span>
+
                   Signing in...
                 </>
+
               ) : (
+
                 <>
                   Sign in
-                  <span>→</span>
+
+                  <span>
+                    →
+                  </span>
                 </>
+
               )}
 
             </button>
 
           </form>
 
+
+          {/* =================================================
+              FOOTER
+          ================================================= */}
 
           <div className="admin-login-footer">
 

@@ -1,12 +1,6 @@
 
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import AdminPartners from "./admin/AdminPartners";
-import AdminDonationDetails from "./pages/admin/AdminDonationDetails";
-import AdminMessages from "./pages/admin/AdminMessages";
-import AdminNewsletter from "./pages/admin/AdminNewsletter";
-import AdminSettings from "./pages/admin/AdminSettings";
-import AdminLogin from "./pages/admin/AdminLogin";
 
 /* =====================================================
    PUBLIC COMPONENTS
@@ -32,6 +26,12 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
 /* =====================================================
+   ADMIN LOGIN
+===================================================== */
+
+import AdminLogin from "./pages/admin/AdminLogin";
+
+/* =====================================================
    ADMIN LAYOUT
 ===================================================== */
 
@@ -47,6 +47,7 @@ import AdminPrograms from "./admin/AdminPrograms";
 import AdminEvents from "./admin/AdminEvents";
 import AdminGallery from "./admin/AdminGallery";
 import AdminVolunteers from "./admin/AdminVolunteers";
+import AdminPartners from "./admin/AdminPartners";
 
 /* =====================================================
    ADMIN FORMS
@@ -56,11 +57,22 @@ import PostForm from "./admin/PostForm";
 import ProgramForm from "./admin/ProgramForm";
 import EventForm from "./admin/EventForm";
 import GalleryForm from "./admin/GalleryForm";
+
+/* =====================================================
+   ADMIN MANAGEMENT PAGES
+===================================================== */
+
 import AdminDonations from "./pages/admin/AdminDonations";
+import AdminDonationDetails from "./pages/admin/AdminDonationDetails";
+import AdminMessages from "./pages/admin/AdminMessages";
+import AdminNewsletter from "./pages/admin/AdminNewsletter";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 
 export default function App() {
+
   return (
+
     <Routes>
 
       {/* =================================================
@@ -72,122 +84,157 @@ export default function App() {
         element={
           <>
             <Navbar />
+
             <main>
               <Home />
             </main>
+
             <Footer />
+
             <WhatsAppButton />
           </>
         }
       />
+
 
       <Route
         path="/about"
         element={
           <>
             <Navbar />
+
             <main>
               <About />
             </main>
+
             <Footer />
+
             <WhatsAppButton />
           </>
         }
       />
+
 
       <Route
         path="/programs"
         element={
           <>
             <Navbar />
+
             <main>
               <Programs />
             </main>
+
             <Footer />
+
             <WhatsAppButton />
           </>
         }
       />
+
 
       <Route
         path="/news"
         element={
           <>
             <Navbar />
+
             <main>
               <News />
             </main>
+
             <Footer />
+
             <WhatsAppButton />
           </>
         }
       />
+
 
       <Route
         path="/news/:slug"
         element={
           <>
             <Navbar />
+
             <main>
               <Post />
             </main>
+
             <Footer />
+
             <WhatsAppButton />
           </>
         }
       />
+
 
       <Route
         path="/gallery"
         element={
           <>
             <Navbar />
+
             <main>
               <Gallery />
             </main>
+
             <Footer />
+
             <WhatsAppButton />
           </>
         }
       />
+
 
       <Route
         path="/get-involved"
         element={
           <>
             <Navbar />
+
             <main>
               <GetInvolved />
             </main>
+
             <Footer />
+
             <WhatsAppButton />
           </>
         }
       />
+
 
       <Route
         path="/donate"
         element={
           <>
             <Navbar />
+
             <main>
               <Donate />
             </main>
+
             <Footer />
+
             <WhatsAppButton />
           </>
         }
       />
+
 
       <Route
         path="/contact"
         element={
           <>
             <Navbar />
+
             <main>
               <Contact />
             </main>
+
             <Footer />
+
             <WhatsAppButton />
           </>
         }
@@ -195,16 +242,36 @@ export default function App() {
 
 
       {/* =================================================
+          ADMIN LOGIN
+
+          IMPORTANT:
+          This is OUTSIDE AdminLayout.
+      ================================================= */}
+
+      <Route
+        path="/admin/login"
+        element={<AdminLogin />}
+      />
+
+
+      {/* =================================================
           ADMIN DASHBOARD
       ================================================= */}
 
-      <Route path="/admin" element={<AdminLayout />}>
+      <Route
+        path="/admin"
+        element={<AdminLayout />}
+      >
 
-        {/* Dashboard */}
+        {/* =================================================
+            DASHBOARD
+        ================================================= */}
+
         <Route
           index
           element={<AdminDashboard />}
         />
+
 
         {/* =================================================
             NEWS & STORIES
@@ -295,41 +362,59 @@ export default function App() {
           element={<AdminVolunteers />}
         />
 
-        {/* PARTNERS */}
+
+        {/* =================================================
+            PARTNERS
+        ================================================= */}
 
         <Route
           path="partners"
           element={<AdminPartners />}
         />
 
+
+        {/* =================================================
+            DONATIONS
+        ================================================= */}
+
         <Route
-          path="/admin/donations"
+          path="donations"
           element={<AdminDonations />}
         />
 
         <Route
-          path="/admin/donations/:id"
+          path="donations/:id"
           element={<AdminDonationDetails />}
         />
 
-        <Route
-         path="messages" 
-         element={<AdminMessages />} 
-        />
+
+        {/* =================================================
+            MESSAGES
+        ================================================= */}
 
         <Route
-         path="newsletter" 
-        element={<AdminNewsletter />} 
+          path="messages"
+          element={<AdminMessages />}
         />
+
+
+        {/* =================================================
+            NEWSLETTER
+        ================================================= */}
+
+        <Route
+          path="newsletter"
+          element={<AdminNewsletter />}
+        />
+
+
+        {/* =================================================
+            SETTINGS
+        ================================================= */}
 
         <Route
           path="settings"
           element={<AdminSettings />}
-        />
-
-        <Route
-          path="/admin/login"
-          element={<AdminLogin />}
         />
 
       </Route>
@@ -344,10 +429,13 @@ export default function App() {
         element={
           <>
             <Navbar />
+
             <main>
               <NotFound />
             </main>
+
             <Footer />
+
             <WhatsAppButton />
           </>
         }

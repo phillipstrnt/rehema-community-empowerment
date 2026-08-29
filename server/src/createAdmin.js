@@ -1,49 +1,174 @@
+
 import "dotenv/config";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-import { connectDB } from "./db.js";
 import { AdminUser } from "./adminUserModel.js";
+
+
+/* =========================================================
+   CREATE OR UPDATE ADMINISTRATOR
+========================================================= */
 
 const createAdmin = async () => {
   try {
-    await connectDB();
 
-    const existingAdmin = await AdminUser.findOne({
-      email: "admin@rehemafoundation.org",
-    });
+    /* -------------------------------------------------------
+       CHECK MONGODB CONNECTION STRING
+    ------------------------------------------------------- */
 
-    if (existingAdmin) {
-      console.log("Admin account already exists.");
-      process.exit(0);
+    if (!process.env.MONGO_URI) {
+      throw new Error(
+        "MONGO_URI is missing from the .env file."
+      );
     }
 
+
+    /* -------------------------------------------------------
+       CHECK JWT SECRET
+    ------------------------------------------------------- */
+
+    if (!process.env.JWT_SECRET) {
+      console.warn(
+        "WARNING: JWT_SECRET is missing from the .env file."
+      );
+    }
+
+
+    /* -------------------------------------------------------
+       CONNECT TO MONGODB
+    ------------------------------------------------------- */
+
+    await mongoose.connect(process.env.MONGO_URI);
+
+    console.log("MongoDB connected.");
+
+
+    /* -------------------------------------------------------
+       ADMIN DETAILS
+
+       CHANGE THESE VALUES WHENEVER YOU WANT TO CHANGE
+       THE ADMIN LOGIN DETAILS.
+    ------------------------------------------------------- */
+
+    const name = "REHEMA Administrator";
+
+    const email = "rehemainfo@gmail.com";
+
+    const password = "SYDney9425#";
+
+    const role = "super_admin";
+
+
+    /* -------------------------------------------------------
+       NORMALIZE EMAIL
+    ------------------------------------------------------- */
+
+    const normalizedEmail = email
+      .toLowerCase()
+      .trim();
+
+
+    /* -------------------------------------------------------
+       HASH PASSWORD
+    ------------------------------------------------------- */
+
     const hashedPassword = await bcrypt.hash(
-      "ChangeThisPassword123!",
+      password,
       12
     );
 
-    const admin = await AdminUser.create({
-      name: "REHEMA Administrator",
-      email: "admin@rehemafoundation.org",
+
+    /* -------------------------------------------------------
+       FIND EXISTING ADMIN
+
+       We search by the CURRENT email first.
+    ------------------------------------------------------- */
+
+    let admin = await AdminUser.findOne({
+      email: normalizedEmail,
+    });
+
+
+    /* -------------------------------------------------------
+       IF ADMIN EXISTS
+       UPDATE ACCOUNT
+    ------------------------------------------------------- */
+
+    if (admin) {
+
+      admin.name = name;
+      admin.email = normalizedEmail;
+      admin.password = hashedPassword;
+      admin.role = role;
+      admin.active = true;
+
+      await admin.save();
+
+      console.log("");
+      console.log("==========================================");
+      console.log(" ADMINISTRATOR UPDATED SUCCESSFULLY");
+      console.log("==========================================");
+      console.log(`Name:  ${admin.name}`);
+      console.log(`Email: ${admin.email}`);
+      console.log(`Role:  ${admin.role}`);
+      console.log("Password: updated successfully");
+      console.log("Status: ACTIVE");
+      console.log("==========================================");
+      console.log("");
+
+      return;
+    }
+
+
+    /* -------------------------------------------------------
+       CREATE NEW ADMIN
+    ------------------------------------------------------- */
+
+    admin = await AdminUser.create({
+      name,
+      email: normalizedEmail,
       password: hashedPassword,
-      role: "super_admin",
+      role,
       active: true,
     });
 
-    console.log("=================================");
-    console.log("ADMIN ACCOUNT CREATED");
-    console.log("=================================");
-    console.log("Email:", admin.email);
-    console.log("Password: ChangeThisPassword123!");
-    console.log("Role:", admin.role);
-    console.log("=================================");
 
-    process.exit(0);
+    /* -------------------------------------------------------
+       SUCCESS MESSAGE
+    ------------------------------------------------------- */
+
+    console.log("");
+    console.log("==========================================");
+    console.log(" ADMINISTRATOR CREATED SUCCESSFULLY");
+    console.log("==========================================");
+    console.log(`Name:  ${admin.name}`);
+    console.log(`Email: ${admin.email}`);
+    console.log(`Role:  ${admin.role}`);
+    console.log("Password: set successfully");
+    console.log("Status: ACTIVE");
+    console.log("==========================================");
+    console.log("");
+
+
   } catch (error) {
-    console.error("Failed to create admin:", error);
-    process.exit(1);
+
+    console.error(
+      "Failed to create/update administrator:",
+      error.message
+    );
+
+  } finally {
+
+    /* -------------------------------------------------------
+       CLOSE DATABASE CONNECTION
+    ------------------------------------------------------- */
+
+    await mongoose.connection.close();
+
+    console.log("MongoDB connection closed.");
   }
 };
+
 
 createAdmin();
