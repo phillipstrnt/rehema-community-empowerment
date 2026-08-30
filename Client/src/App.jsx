@@ -76,9 +76,7 @@ import AdminSettings from "./pages/admin/AdminSettings";
 
 
 export default function App() {
-
   return (
-
     <Routes>
 
       {/* =================================================
@@ -213,10 +211,6 @@ export default function App() {
 
       {/* =================================================
           ADMIN LOGIN
-
-          IMPORTANT:
-          This MUST remain outside ProtectedRoute
-          and AdminLayout.
       ================================================= */}
 
       <Route
@@ -226,18 +220,6 @@ export default function App() {
 
       {/* =================================================
           PROTECTED ADMIN AREA
-
-          ProtectedRoute checks authentication first.
-
-          If authenticated:
-              ProtectedRoute
-                    ↓
-              AdminLayout
-                    ↓
-              Admin page
-
-          If NOT authenticated:
-              /admin/login
       ================================================= */}
 
       <Route element={<ProtectedRoute />}>

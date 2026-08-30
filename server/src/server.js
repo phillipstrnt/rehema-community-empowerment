@@ -5,15 +5,19 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
+
 import adminAuthRoutes from "./adminAuth.js";
+import adminUserRoutes from "./routes/adminUserRoutes.js";
 
 import uploadRoutes from "./upload.js";
 import { connectDB } from "./db.js";
 import routes from "./routes.js";
 
+
 const app = express();
 
-const PORT = process.env.PORT || 5000;
+const PORT =
+  process.env.PORT || 5000;
 
 
 /* =========================================================
@@ -64,28 +68,22 @@ app.use(
    RATE LIMITING
 ========================================================= */
 
-/*
-  General API rate limiter.
+const apiLimiter =
+  rateLimit({
+    windowMs:
+      15 * 60 * 1000,
 
-  This protects the API from excessive requests.
-  We will add a stricter limiter specifically
-  for admin login later.
-*/
+    limit: 200,
 
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+    standardHeaders: true,
 
-  limit: 200,
+    legacyHeaders: false,
 
-  standardHeaders: true,
-
-  legacyHeaders: false,
-
-  message: {
-    message:
-      "Too many requests. Please try again later.",
-  },
-});
+    message: {
+      message:
+        "Too many requests. Please try again later.",
+    },
+  });
 
 
 app.use(
@@ -105,6 +103,16 @@ app.use(
 
 
 /* =========================================================
+   ADMIN USER MANAGEMENT
+========================================================= */
+
+app.use(
+  "/api/admin/users",
+  adminUserRoutes
+);
+
+
+/* =========================================================
    ADMIN AUTHENTICATION
 ========================================================= */
 
@@ -114,9 +122,8 @@ app.use(
 );
 
 
-
 /* =========================================================
-   API ROUTES
+   GENERAL API ROUTES
 ========================================================= */
 
 app.use(
@@ -132,12 +139,11 @@ app.use(
 app.get(
   "/",
   (_req, res) => {
-
     res.json({
       success: true,
-      message: "REHEMA API is running",
+      message:
+        "REHEMA API is running",
     });
-
   }
 );
 
@@ -148,12 +154,11 @@ app.get(
 
 app.use(
   (_req, res) => {
-
     res.status(404).json({
       success: false,
-      message: "Route not found",
+      message:
+        "Route not found",
     });
-
   }
 );
 
@@ -178,15 +183,11 @@ app.use(
     res.status(
       error.status || 500
     ).json({
-
       success: false,
-
       message:
         error.message ||
         "Server error. Please try again later.",
-
     });
-
   }
 );
 

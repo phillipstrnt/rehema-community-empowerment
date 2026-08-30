@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
 
+/* =========================================================
+   ADMIN USER SCHEMA
+========================================================= */
+
 const adminUserSchema = new mongoose.Schema(
   {
     name: {
@@ -37,7 +41,14 @@ const adminUserSchema = new mongoose.Schema(
   }
 );
 
-export const AdminUser = mongoose.model(
-  "AdminUser",
-  adminUserSchema
-);
+
+/* =========================================================
+   ADMIN USER MODEL
+========================================================= */
+
+export const AdminUser =
+  mongoose.models.AdminUser ||
+  mongoose.model(
+    "AdminUser",
+    adminUserSchema
+  );

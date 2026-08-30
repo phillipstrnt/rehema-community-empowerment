@@ -1,0 +1,652 @@
+/* =========================================================
+   ADMIN USERS PAGE
+========================================================= */
+
+.admin-users-page {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.admin-users-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 28px;
+}
+
+.admin-users-eyebrow {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #6b7280;
+}
+
+.admin-users-header h1 {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.1;
+  font-weight: 800;
+  color: #172033;
+}
+
+.admin-users-header p:last-child {
+  margin: 10px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   ADD BUTTON
+========================================================= */
+
+.admin-users-add-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border: none;
+  border-radius: 10px;
+  padding: 13px 18px;
+  background: #172033;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-users-add-button:hover {
+  transform: translateY(-1px);
+  background: #0f172a;
+}
+
+.admin-users-add-button span {
+  font-size: 20px;
+  line-height: 1;
+}
+
+
+/* =========================================================
+   ALERTS
+========================================================= */
+
+.admin-users-alert {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 13px 16px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.admin-users-alert.error {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #be123c;
+}
+
+.admin-users-alert.success {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+}
+
+
+/* =========================================================
+   FORM CARD
+========================================================= */
+
+.admin-users-form-card,
+.admin-users-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 5px 25px rgba(15, 23, 42, 0.05);
+}
+
+
+/* =========================================================
+   FORM HEADER
+========================================================= */
+
+.admin-users-form-card {
+  margin-bottom: 25px;
+}
+
+.admin-users-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 22px 25px;
+  border-bottom: 1px solid #eef0f3;
+}
+
+.admin-users-form-header span,
+.admin-users-card-header > div > span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #7b8494;
+}
+
+.admin-users-form-header h2,
+.admin-users-card-header h2 {
+  margin: 0;
+  color: #172033;
+  font-size: 21px;
+}
+
+.admin-users-close-button {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  background: #f3f4f6;
+  color: #4b5563;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.admin-users-form {
+  padding: 25px;
+}
+
+.admin-users-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.admin-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-form-field label {
+  color: #374151;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-form-field label small {
+  display: block;
+  margin-top: 4px;
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.admin-form-field input,
+.admin-form-field select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d9dee7;
+  border-radius: 9px;
+  padding: 12px 13px;
+  background: #fff;
+  color: #172033;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.admin-form-field input:focus,
+.admin-form-field select:focus {
+  border-color: #172033;
+  box-shadow: 0 0 0 3px rgba(23, 32, 51, 0.07);
+}
+
+
+/* =========================================================
+   ACTIVE TOGGLE
+========================================================= */
+
+.admin-active-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 25px;
+  padding: 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.admin-active-toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.admin-toggle-box {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  color: white;
+  font-size: 12px;
+}
+
+.admin-active-toggle input:checked + .admin-toggle-box {
+  background: #172033;
+  border-color: #172033;
+}
+
+.admin-active-toggle span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.admin-active-toggle strong {
+  font-size: 13px;
+  color: #374151;
+}
+
+.admin-active-toggle small {
+  color: #6b7280;
+}
+
+
+/* =========================================================
+   FORM ACTIONS
+========================================================= */
+
+.admin-users-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.admin-users-cancel,
+.admin-users-save {
+  border: none;
+  border-radius: 9px;
+  padding: 11px 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-users-cancel {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.admin-users-save {
+  background: #172033;
+  color: white;
+}
+
+.admin-users-save:disabled,
+.admin-users-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   USERS CARD
+========================================================= */
+
+.admin-users-card {
+  overflow: hidden;
+}
+
+.admin-users-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 25px;
+  border-bottom: 1px solid #eef0f3;
+}
+
+.admin-users-count {
+  min-width: 35px;
+  height: 35px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
+
+.admin-users-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 17px 25px;
+  border-bottom: 1px solid #eef0f3;
+}
+
+.admin-users-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  max-width: 390px;
+  border: 1px solid #d9dee7;
+  border-radius: 9px;
+  padding: 0 12px;
+}
+
+.admin-users-search span {
+  color: #9ca3af;
+  font-size: 18px;
+}
+
+.admin-users-search input {
+  width: 100%;
+  border: none;
+  outline: none;
+  padding: 11px 0;
+  font-size: 14px;
+}
+
+.admin-users-refresh {
+  border: 1px solid #d9dee7;
+  background: white;
+  color: #374151;
+  border-radius: 9px;
+  padding: 0 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.admin-users-table-wrapper {
+  overflow-x: auto;
+}
+
+.admin-users-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.admin-users-table th {
+  padding: 13px 20px;
+  text-align: left;
+  background: #fafafa;
+  color: #7b8494;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.admin-users-table td {
+  padding: 17px 20px;
+  border-top: 1px solid #eef0f3;
+  vertical-align: middle;
+}
+
+
+/* =========================================================
+   USER
+========================================================= */
+
+.admin-table-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-table-avatar {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #eef2f7;
+  color: #172033;
+  font-weight: 800;
+}
+
+.admin-table-user > div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.admin-table-user strong {
+  color: #172033;
+  font-size: 13px;
+}
+
+.admin-table-user span {
+  color: #7b8494;
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.admin-role-badge,
+.admin-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 6px 9px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.admin-role-badge.admin {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.admin-role-badge.super-admin {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.admin-status-badge.active {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.admin-status-badge.inactive {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.admin-status-badge i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+
+/* =========================================================
+   CREATED
+========================================================= */
+
+.admin-created-date {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.admin-user-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-user-actions button {
+  border: none;
+  border-radius: 7px;
+  padding: 7px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-action-edit {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.admin-action-status {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.admin-action-delete {
+  background: #fff1f2;
+  color: #be123c;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.admin-users-empty {
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 30px;
+}
+
+.admin-users-empty-icon {
+  width: 55px;
+  height: 55px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 24px;
+  margin-bottom: 13px;
+}
+
+.admin-users-empty strong {
+  color: #374151;
+}
+
+.admin-users-empty p {
+  margin: 7px 0 18px;
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+.admin-users-empty-button {
+  border: none;
+  border-radius: 8px;
+  background: #172033;
+  color: white;
+  padding: 10px 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   LOADING SPINNER
+========================================================= */
+
+.admin-users-spinner {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 13px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #172033;
+  border-radius: 50%;
+  animation: adminUsersSpin 0.8s linear infinite;
+}
+
+@keyframes adminUsersSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .admin-users-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-users-header h1 {
+    font-size: 28px;
+  }
+
+  .admin-users-add-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .admin-users-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-users-toolbar {
+    flex-direction: column;
+  }
+
+  .admin-users-search {
+    max-width: none;
+  }
+
+  .admin-users-refresh {
+    min-height: 42px;
+  }
+
+  .admin-users-form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .admin-users-cancel,
+  .admin-users-save {
+    width: 100%;
+  }
+}
