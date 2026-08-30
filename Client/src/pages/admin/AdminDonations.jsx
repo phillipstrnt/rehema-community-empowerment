@@ -5,6 +5,37 @@ import "./AdminDonations.css";
 const API_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
+
+/* =========================================================
+   GET ADMIN AUTH TOKEN
+========================================================= */
+
+const getAdminToken = () => {
+  return (
+    localStorage.getItem("rehema_admin_token") ||
+    sessionStorage.getItem("rehema_admin_token")
+  );
+};
+
+
+/* =========================================================
+   AUTHENTICATED FETCH
+========================================================= */
+
+const adminFetch = async (url, options = {}) => {
+  const token = getAdminToken();
+
+  return fetch(url, {
+    ...options,
+
+    headers: {
+      ...(options.headers || {}),
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+};
+
 export default function AdminDonations() {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +57,9 @@ export default function AdminDonations() {
       setLoading(true);
       setError("");
 
-      const response = await fetch(`${API_URL}/donations`);
+      const response = await adminFetch(
+        `${API_URL}/donations`
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch donations");
@@ -58,13 +91,10 @@ export default function AdminDonations() {
     try {
       setUpdatingId(id);
 
-      const response = await fetch(
+      const response = await adminFetch(
         `${API_URL}/donations/${id}/status`,
         {
           method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
           body: JSON.stringify({ status }),
         }
       );
@@ -105,7 +135,7 @@ export default function AdminDonations() {
     try {
       setDeletingId(id);
 
-      const response = await fetch(
+      const response = await adminFetch(
         `${API_URL}/donations/${id}`,
         {
           method: "DELETE",

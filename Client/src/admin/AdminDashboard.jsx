@@ -1,13 +1,222 @@
-import React from "react";
 
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+/* =========================================================
+   API
+========================================================= */
+
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:5000/api";
+
+
+/* =========================================================
+   GET SAVED ADMIN TOKEN
+========================================================= */
+
+const getAdminToken = () => {
+  return (
+    localStorage.getItem("rehema_admin_token") ||
+    sessionStorage.getItem("rehema_admin_token")
+  );
+};
+
+
+/* =========================================================
+   ADMIN DASHBOARD
+========================================================= */
 
 export default function AdminDashboard() {
+
+  /* =======================================================
+     STATE
+  ======================================================= */
+
+  const [stats, setStats] = useState({
+    posts: 0,
+    programs: 0,
+    events: 0,
+    gallery: 0,
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  const [error, setError] = useState("");
+
+
+  /* =======================================================
+     FETCH DASHBOARD STATISTICS
+  ======================================================= */
+
+  useEffect(() => {
+
+    const loadDashboardData = async () => {
+
+      try {
+
+        setLoading(true);
+        setError("");
+
+        const token = getAdminToken();
+
+        if (!token) {
+          setError("Administrator authentication is required.");
+          setLoading(false);
+          return;
+        }
+
+
+        /* ---------------------------------------------------
+           COMMON REQUEST OPTIONS
+        --------------------------------------------------- */
+
+        const requestOptions = {
+          method: "GET",
+
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+
+
+        /* ---------------------------------------------------
+           FETCH ALL FOUR RESOURCES
+        --------------------------------------------------- */
+
+        const [
+          postsResponse,
+          programsResponse,
+          eventsResponse,
+          galleryResponse,
+        ] = await Promise.all([
+          fetch(
+            `${API_URL}/posts`,
+            requestOptions
+          ),
+
+          fetch(
+            `${API_URL}/programs`,
+            requestOptions
+          ),
+
+          fetch(
+            `${API_URL}/events`,
+            requestOptions
+          ),
+
+          fetch(
+            `${API_URL}/gallery`,
+            requestOptions
+          ),
+        ]);
+
+
+        /* ---------------------------------------------------
+           CHECK RESPONSES
+        --------------------------------------------------- */
+
+        if (!postsResponse.ok) {
+          throw new Error("Failed to load news stories.");
+        }
+
+        if (!programsResponse.ok) {
+          throw new Error("Failed to load programs.");
+        }
+
+        if (!eventsResponse.ok) {
+          throw new Error("Failed to load events.");
+        }
+
+        if (!galleryResponse.ok) {
+          throw new Error("Failed to load gallery.");
+        }
+
+
+        /* ---------------------------------------------------
+           CONVERT RESPONSES TO JSON
+        --------------------------------------------------- */
+
+        const posts =
+          await postsResponse.json();
+
+        const programs =
+          await programsResponse.json();
+
+        const events =
+          await eventsResponse.json();
+
+        const gallery =
+          await galleryResponse.json();
+
+
+        /* ---------------------------------------------------
+           UPDATE DASHBOARD
+        --------------------------------------------------- */
+
+        setStats({
+          posts: Array.isArray(posts)
+            ? posts.length
+            : 0,
+
+          programs: Array.isArray(programs)
+            ? programs.length
+            : 0,
+
+          events: Array.isArray(events)
+            ? events.length
+            : 0,
+
+          gallery: Array.isArray(gallery)
+            ? gallery.length
+            : 0,
+        });
+
+      } catch (error) {
+
+        console.error(
+          "Dashboard loading error:",
+          error
+        );
+
+        setError(
+          error.message ||
+          "Unable to load dashboard statistics."
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    };
+
+
+    loadDashboardData();
+
+  }, []);
+
+
+  /* =======================================================
+     DISPLAY NUMBER
+  ======================================================= */
+
+  const displayNumber = (value) => {
+
+    if (loading) {
+      return "…";
+    }
+
+    return value;
+
+  };
+
 
   return (
 
     <div className="dashboard">
+
 
       {/* =====================================================
           DASHBOARD HEADER CARD
@@ -33,6 +242,7 @@ export default function AdminDashboard() {
 
         </div>
 
+
         <div className="dashboard-welcome-mark">
           R
         </div>
@@ -41,12 +251,39 @@ export default function AdminDashboard() {
 
 
       {/* =====================================================
+          ERROR MESSAGE
+      ===================================================== */}
+
+      {error && (
+
+        <div
+          className="dashboard-error"
+          role="alert"
+        >
+
+          <span>
+            ⚠️
+          </span>
+
+          <span>
+            {error}
+          </span>
+
+        </div>
+
+      )}
+
+
+      {/* =====================================================
           STATISTICS
       ===================================================== */}
 
       <section className="dashboard-stats">
 
-        {/* NEWS */}
+
+        {/* =================================================
+            NEWS
+        ================================================= */}
 
         <div className="stat-card">
 
@@ -62,6 +299,7 @@ export default function AdminDashboard() {
 
           </div>
 
+
           <div className="stat-card-body">
 
             <span className="stat-label">
@@ -69,7 +307,7 @@ export default function AdminDashboard() {
             </span>
 
             <strong className="stat-number">
-              --
+              {displayNumber(stats.posts)}
             </strong>
 
             <small>
@@ -81,7 +319,9 @@ export default function AdminDashboard() {
         </div>
 
 
-        {/* PROGRAMS */}
+        {/* =================================================
+            PROGRAMS
+        ================================================= */}
 
         <div className="stat-card">
 
@@ -97,6 +337,7 @@ export default function AdminDashboard() {
 
           </div>
 
+
           <div className="stat-card-body">
 
             <span className="stat-label">
@@ -104,7 +345,7 @@ export default function AdminDashboard() {
             </span>
 
             <strong className="stat-number">
-              --
+              {displayNumber(stats.programs)}
             </strong>
 
             <small>
@@ -116,7 +357,9 @@ export default function AdminDashboard() {
         </div>
 
 
-        {/* EVENTS */}
+        {/* =================================================
+            EVENTS
+        ================================================= */}
 
         <div className="stat-card">
 
@@ -132,6 +375,7 @@ export default function AdminDashboard() {
 
           </div>
 
+
           <div className="stat-card-body">
 
             <span className="stat-label">
@@ -139,7 +383,7 @@ export default function AdminDashboard() {
             </span>
 
             <strong className="stat-number">
-              --
+              {displayNumber(stats.events)}
             </strong>
 
             <small>
@@ -151,7 +395,9 @@ export default function AdminDashboard() {
         </div>
 
 
-        {/* GALLERY */}
+        {/* =================================================
+            GALLERY
+        ================================================= */}
 
         <div className="stat-card">
 
@@ -167,6 +413,7 @@ export default function AdminDashboard() {
 
           </div>
 
+
           <div className="stat-card-body">
 
             <span className="stat-label">
@@ -174,7 +421,7 @@ export default function AdminDashboard() {
             </span>
 
             <strong className="stat-number">
-              --
+              {displayNumber(stats.gallery)}
             </strong>
 
             <small>
@@ -388,6 +635,8 @@ export default function AdminDashboard() {
           <div className="quick-actions">
 
 
+            {/* ADD NEWS */}
+
             <Link
               to="/admin/posts/new"
               className="quick-action"
@@ -398,6 +647,7 @@ export default function AdminDashboard() {
               </span>
 
               <span className="quick-action-text">
+
                 <strong>
                   Add News Story
                 </strong>
@@ -405,6 +655,7 @@ export default function AdminDashboard() {
                 <small>
                   Publish a new story
                 </small>
+
               </span>
 
               <span className="quick-action-arrow">
@@ -413,6 +664,8 @@ export default function AdminDashboard() {
 
             </Link>
 
+
+            {/* ADD PROGRAM */}
 
             <Link
               to="/admin/programs/new"
@@ -424,6 +677,7 @@ export default function AdminDashboard() {
               </span>
 
               <span className="quick-action-text">
+
                 <strong>
                   Add Program
                 </strong>
@@ -431,6 +685,7 @@ export default function AdminDashboard() {
                 <small>
                   Create a community program
                 </small>
+
               </span>
 
               <span className="quick-action-arrow">
@@ -439,6 +694,8 @@ export default function AdminDashboard() {
 
             </Link>
 
+
+            {/* ADD EVENT */}
 
             <Link
               to="/admin/events/new"
@@ -450,6 +707,7 @@ export default function AdminDashboard() {
               </span>
 
               <span className="quick-action-text">
+
                 <strong>
                   Add Event
                 </strong>
@@ -457,6 +715,7 @@ export default function AdminDashboard() {
                 <small>
                   Schedule an upcoming event
                 </small>
+
               </span>
 
               <span className="quick-action-arrow">
@@ -465,6 +724,8 @@ export default function AdminDashboard() {
 
             </Link>
 
+
+            {/* ADD GALLERY */}
 
             <Link
               to="/admin/gallery/new"
@@ -476,6 +737,7 @@ export default function AdminDashboard() {
               </span>
 
               <span className="quick-action-text">
+
                 <strong>
                   Add Gallery Media
                 </strong>
@@ -483,6 +745,7 @@ export default function AdminDashboard() {
                 <small>
                   Upload photos or videos
                 </small>
+
               </span>
 
               <span className="quick-action-arrow">
@@ -498,6 +761,7 @@ export default function AdminDashboard() {
       </div>
 
     </div>
+
   );
 
 }

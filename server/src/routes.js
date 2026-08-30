@@ -2,14 +2,6 @@
 import express from "express";
 
 import {
-  createNotification
-} from "./notificationHelper.js";
-
-import {
-  requireAdmin
-} from "./authMiddleware.js";
-
-import {
   Program,
   Post,
   Event,
@@ -19,152 +11,209 @@ import {
   Donation,
   Newsletter,
   Contact,
-  Notification
 } from "./models.js";
 
 
-const router = express.Router();
+const router =
+  express.Router();
 
 
 /* =========================================================
    POSTS / NEWS
 ========================================================= */
 
-// PUBLIC: GET all posts
-router.get("/posts", async (req, res) => {
 
-  try {
+/* GET ALL POSTS */
 
-    const posts = await Post
-      .find()
-      .sort({ publishedAt: -1, createdAt: -1 });
-
-    res.json(posts);
-
-  } catch (error) {
-
-    console.error(error);
-
-    res.status(500).json({
-      message: "Failed to fetch posts"
-    });
-
-  }
-
-});
-
-
-// PUBLIC: GET single post by slug
-router.get("/posts/:slug", async (req, res) => {
-
-  try {
-
-    const post = await Post.findOne({
-      slug: req.params.slug
-    });
-
-    if (!post) {
-
-      return res.status(404).json({
-        message: "Post not found"
-      });
-
-    }
-
-    res.json(post);
-
-  } catch (error) {
-
-    console.error(error);
-
-    res.status(500).json({
-      message: "Failed to fetch post"
-    });
-
-  }
-
-});
-
-
-// 🔒 ADMIN: CREATE post
-router.post(
+router.get(
   "/posts",
-  requireAdmin,
   async (req, res) => {
+
     try {
-      const post = await Post.create(req.body);
 
-      res.status(201).json(post);
+      const posts =
+        await Post.find()
+          .sort({
+            publishedAt: -1,
+            createdAt: -1,
+          });
+
+
+      res.json(posts);
+
     } catch (error) {
-      console.error(error);
 
-      res.status(400).json({
-        message: error.message
-      });
-    }
-  }
-);
-
-
-// 🔒 ADMIN: UPDATE post
-router.put(
-  "/posts/:id",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const post = await Post.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        {
-          new: true,
-          runValidators: true
-        }
-      );
-
-      if (!post) {
-        return res.status(404).json({
-          message: "Post not found"
-        });
-      }
-
-      res.json(post);
-    } catch (error) {
-      console.error(error);
-
-      res.status(400).json({
-        message: error.message
-      });
-    }
-  }
-);
-
-
-// 🔒 ADMIN: DELETE post
-router.delete(
-  "/posts/:id",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const post = await Post.findByIdAndDelete(
-        req.params.id
-      );
-
-      if (!post) {
-        return res.status(404).json({
-          message: "Post not found"
-        });
-      }
-
-      res.json({
-        message: "Post deleted successfully"
-      });
-    } catch (error) {
       console.error(error);
 
       res.status(500).json({
-        message: "Failed to delete post"
+        message:
+          "Failed to fetch posts",
       });
+
     }
+
+  }
+);
+
+
+/* GET SINGLE POST */
+
+router.get(
+  "/posts/:slug",
+  async (req, res) => {
+
+    try {
+
+      const post =
+        await Post.findOne({
+          slug: req.params.slug,
+        });
+
+
+      if (!post) {
+
+        return res.status(404).json({
+          message:
+            "Post not found",
+        });
+
+      }
+
+
+      res.json(post);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        message:
+          "Failed to fetch post",
+      });
+
+    }
+
+  }
+);
+
+
+/* CREATE POST */
+
+router.post(
+  "/posts",
+  async (req, res) => {
+
+    try {
+
+      const post =
+        await Post.create(
+          req.body
+        );
+
+
+      res.status(201).json(post);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(400).json({
+        message:
+          error.message,
+      });
+
+    }
+
+  }
+);
+
+
+/* UPDATE POST */
+
+router.put(
+  "/posts/:id",
+  async (req, res) => {
+
+    try {
+
+      const post =
+        await Post.findByIdAndUpdate(
+          req.params.id,
+          req.body,
+          {
+            new: true,
+            runValidators: true,
+          }
+        );
+
+
+      if (!post) {
+
+        return res.status(404).json({
+          message:
+            "Post not found",
+        });
+
+      }
+
+
+      res.json(post);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(400).json({
+        message:
+          error.message,
+      });
+
+    }
+
+  }
+);
+
+
+/* DELETE POST */
+
+router.delete(
+  "/posts/:id",
+  async (req, res) => {
+
+    try {
+
+      const post =
+        await Post.findByIdAndDelete(
+          req.params.id
+        );
+
+
+      if (!post) {
+
+        return res.status(404).json({
+          message:
+            "Post not found",
+        });
+
+      }
+
+
+      res.json({
+        message:
+          "Post deleted successfully",
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        message:
+          "Failed to delete post",
+      });
+
+    }
+
   }
 );
 
@@ -173,144 +222,197 @@ router.delete(
    PROGRAMS
 ========================================================= */
 
-// PUBLIC: GET programs
-router.get("/programs", async (req, res) => {
 
-  try {
+/* GET PROGRAMS */
 
-    const programs = await Program.find()
-      .sort({ createdAt: -1 });
-
-    res.json(programs);
-
-  } catch (error) {
-
-    console.error(error);
-
-    res.status(500).json({
-      message: "Failed to fetch programs"
-    });
-
-  }
-
-});
-
-
-// PUBLIC: GET single program
-router.get("/programs/:id", async (req, res) => {
-
-  try {
-
-    const program = await Program.findById(
-      req.params.id
-    );
-
-    if (!program) {
-
-      return res.status(404).json({
-        message: "Program not found"
-      });
-
-    }
-
-    res.json(program);
-
-  } catch (error) {
-
-    console.error(error);
-
-    res.status(500).json({
-      message: "Failed to fetch program"
-    });
-
-  }
-
-});
-
-
-// 🔒 ADMIN: CREATE program
-router.post(
+router.get(
   "/programs",
-  requireAdmin,
   async (req, res) => {
-    try {
-      const program = await Program.create(
-        req.body
-      );
 
-      res.status(201).json(program);
+    try {
+
+      const programs =
+        await Program.find()
+          .sort({
+            createdAt: -1,
+          });
+
+
+      res.json(programs);
+
     } catch (error) {
+
       console.error(error);
 
-      res.status(400).json({
-        message: error.message
+      res.status(500).json({
+        message:
+          "Failed to fetch programs",
       });
+
     }
+
   }
 );
 
 
-// 🔒 ADMIN: UPDATE program
+/* GET SINGLE PROGRAM */
+
+router.get(
+  "/programs/:id",
+  async (req, res) => {
+
+    try {
+
+      const program =
+        await Program.findById(
+          req.params.id
+        );
+
+
+      if (!program) {
+
+        return res.status(404).json({
+          message:
+            "Program not found",
+        });
+
+      }
+
+
+      res.json(program);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        message:
+          "Failed to fetch program",
+      });
+
+    }
+
+  }
+);
+
+
+/* CREATE PROGRAM */
+
+router.post(
+  "/programs",
+  async (req, res) => {
+
+    try {
+
+      const program =
+        await Program.create(
+          req.body
+        );
+
+
+      res.status(201).json(program);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(400).json({
+        message:
+          error.message,
+      });
+
+    }
+
+  }
+);
+
+
+/* UPDATE PROGRAM */
+
 router.put(
   "/programs/:id",
-  requireAdmin,
   async (req, res) => {
+
     try {
+
       const program =
         await Program.findByIdAndUpdate(
           req.params.id,
           req.body,
           {
             new: true,
-            runValidators: true
+            runValidators: true,
           }
         );
 
+
       if (!program) {
+
         return res.status(404).json({
-          message: "Program not found"
+          message:
+            "Program not found",
         });
+
       }
 
+
       res.json(program);
+
     } catch (error) {
+
       console.error(error);
 
       res.status(400).json({
-        message: error.message
+        message:
+          error.message,
       });
+
     }
+
   }
 );
 
 
-// 🔒 ADMIN: DELETE program
+/* DELETE PROGRAM */
+
 router.delete(
   "/programs/:id",
-  requireAdmin,
   async (req, res) => {
+
     try {
+
       const program =
         await Program.findByIdAndDelete(
           req.params.id
         );
 
+
       if (!program) {
+
         return res.status(404).json({
-          message: "Program not found"
+          message:
+            "Program not found",
         });
+
       }
 
+
       res.json({
-        message: "Program deleted successfully"
+        message:
+          "Program deleted successfully",
       });
+
     } catch (error) {
+
       console.error(error);
 
       res.status(500).json({
-        message: "Failed to delete program"
+        message:
+          "Failed to delete program",
       });
+
     }
+
   }
 );
 
@@ -319,144 +421,197 @@ router.delete(
    EVENTS
 ========================================================= */
 
-// PUBLIC: GET events
-router.get("/events", async (req, res) => {
 
-  try {
+/* GET EVENTS */
 
-    const events = await Event.find()
-      .sort({ date: 1 });
-
-    res.json(events);
-
-  } catch (error) {
-
-    console.error(error);
-
-    res.status(500).json({
-      message: "Failed to fetch events"
-    });
-
-  }
-
-});
-
-
-// PUBLIC: GET single event
-router.get("/events/:id", async (req, res) => {
-
-  try {
-
-    const event = await Event.findById(
-      req.params.id
-    );
-
-    if (!event) {
-
-      return res.status(404).json({
-        message: "Event not found"
-      });
-
-    }
-
-    res.json(event);
-
-  } catch (error) {
-
-    console.error(error);
-
-    res.status(500).json({
-      message: "Failed to fetch event"
-    });
-
-  }
-
-});
-
-
-// 🔒 ADMIN: CREATE event
-router.post(
+router.get(
   "/events",
-  requireAdmin,
   async (req, res) => {
-    try {
-      const event = await Event.create(
-        req.body
-      );
 
-      res.status(201).json(event);
+    try {
+
+      const events =
+        await Event.find()
+          .sort({
+            date: 1,
+          });
+
+
+      res.json(events);
+
     } catch (error) {
+
       console.error(error);
 
-      res.status(400).json({
-        message: error.message
+      res.status(500).json({
+        message:
+          "Failed to fetch events",
       });
+
     }
+
   }
 );
 
 
-// 🔒 ADMIN: UPDATE event
+/* GET SINGLE EVENT */
+
+router.get(
+  "/events/:id",
+  async (req, res) => {
+
+    try {
+
+      const event =
+        await Event.findById(
+          req.params.id
+        );
+
+
+      if (!event) {
+
+        return res.status(404).json({
+          message:
+            "Event not found",
+        });
+
+      }
+
+
+      res.json(event);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        message:
+          "Failed to fetch event",
+      });
+
+    }
+
+  }
+);
+
+
+/* CREATE EVENT */
+
+router.post(
+  "/events",
+  async (req, res) => {
+
+    try {
+
+      const event =
+        await Event.create(
+          req.body
+        );
+
+
+      res.status(201).json(event);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(400).json({
+        message:
+          error.message,
+      });
+
+    }
+
+  }
+);
+
+
+/* UPDATE EVENT */
+
 router.put(
   "/events/:id",
-  requireAdmin,
   async (req, res) => {
+
     try {
+
       const event =
         await Event.findByIdAndUpdate(
           req.params.id,
           req.body,
           {
             new: true,
-            runValidators: true
+            runValidators: true,
           }
         );
 
+
       if (!event) {
+
         return res.status(404).json({
-          message: "Event not found"
+          message:
+            "Event not found",
         });
+
       }
 
+
       res.json(event);
+
     } catch (error) {
+
       console.error(error);
 
       res.status(400).json({
-        message: error.message
+        message:
+          error.message,
       });
+
     }
+
   }
 );
 
 
-// 🔒 ADMIN: DELETE event
+/* DELETE EVENT */
+
 router.delete(
   "/events/:id",
-  requireAdmin,
   async (req, res) => {
+
     try {
+
       const event =
         await Event.findByIdAndDelete(
           req.params.id
         );
 
+
       if (!event) {
+
         return res.status(404).json({
-          message: "Event not found"
+          message:
+            "Event not found",
         });
+
       }
 
+
       res.json({
-        message: "Event deleted successfully"
+        message:
+          "Event deleted successfully",
       });
+
     } catch (error) {
+
       console.error(error);
 
       res.status(500).json({
-        message: "Failed to delete event"
+        message:
+          "Failed to delete event",
       });
+
     }
+
   }
 );
 
@@ -465,342 +620,279 @@ router.delete(
    GALLERY
 ========================================================= */
 
-// PUBLIC: GET gallery
-router.get("/gallery", async (req, res) => {
 
-  try {
+/* GET GALLERY */
 
-    const gallery = await Gallery.find()
-      .sort({ date: -1, createdAt: -1 });
-
-    res.json(gallery);
-
-  } catch (error) {
-
-    console.error(error);
-
-    res.status(500).json({
-      message: "Failed to fetch gallery"
-    });
-
-  }
-
-});
-
-
-// PUBLIC: GET single gallery item
-router.get("/gallery/:id", async (req, res) => {
-
-  try {
-
-    const item = await Gallery.findById(
-      req.params.id
-    );
-
-    if (!item) {
-
-      return res.status(404).json({
-        message: "Gallery item not found"
-      });
-
-    }
-
-    res.json(item);
-
-  } catch (error) {
-
-    console.error(error);
-
-    res.status(500).json({
-      message: "Failed to fetch gallery item"
-    });
-
-  }
-
-});
-
-
-// 🔒 ADMIN: CREATE gallery item
-router.post(
+router.get(
   "/gallery",
-  requireAdmin,
   async (req, res) => {
-    try {
-      const item = await Gallery.create(
-        req.body
-      );
 
-      res.status(201).json(item);
+    try {
+
+      const gallery =
+        await Gallery.find()
+          .sort({
+            date: -1,
+            createdAt: -1,
+          });
+
+
+      res.json(gallery);
+
     } catch (error) {
+
       console.error(error);
 
-      res.status(400).json({
-        message: error.message
+      res.status(500).json({
+        message:
+          "Failed to fetch gallery",
       });
+
     }
+
   }
 );
 
 
-// 🔒 ADMIN: UPDATE gallery item
+/* GET SINGLE GALLERY ITEM */
+
+router.get(
+  "/gallery/:id",
+  async (req, res) => {
+
+    try {
+
+      const item =
+        await Gallery.findById(
+          req.params.id
+        );
+
+
+      if (!item) {
+
+        return res.status(404).json({
+          message:
+            "Gallery item not found",
+        });
+
+      }
+
+
+      res.json(item);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        message:
+          "Failed to fetch gallery item",
+      });
+
+    }
+
+  }
+);
+
+
+/* CREATE GALLERY ITEM */
+
+router.post(
+  "/gallery",
+  async (req, res) => {
+
+    try {
+
+      const item =
+        await Gallery.create(
+          req.body
+        );
+
+
+      res.status(201).json(item);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(400).json({
+        message:
+          error.message,
+      });
+
+    }
+
+  }
+);
+
+
+/* UPDATE GALLERY ITEM */
+
 router.put(
   "/gallery/:id",
-  requireAdmin,
   async (req, res) => {
+
     try {
+
       const item =
         await Gallery.findByIdAndUpdate(
           req.params.id,
           req.body,
           {
             new: true,
-            runValidators: true
+            runValidators: true,
           }
         );
 
+
       if (!item) {
+
         return res.status(404).json({
-          message: "Gallery item not found"
+          message:
+            "Gallery item not found",
         });
+
       }
 
+
       res.json(item);
+
     } catch (error) {
+
       console.error(error);
 
       res.status(400).json({
-        message: error.message
+        message:
+          error.message,
       });
+
     }
+
   }
 );
 
 
-// 🔒 ADMIN: DELETE gallery item
+/* DELETE GALLERY ITEM */
+
 router.delete(
   "/gallery/:id",
-  requireAdmin,
   async (req, res) => {
+
     try {
+
       const item =
         await Gallery.findByIdAndDelete(
           req.params.id
         );
 
+
       if (!item) {
+
         return res.status(404).json({
-          message: "Gallery item not found"
+          message:
+            "Gallery item not found",
         });
+
       }
 
+
       res.json({
-        message: "Gallery item deleted successfully"
+        message:
+          "Gallery item deleted successfully",
       });
+
     } catch (error) {
+
       console.error(error);
 
       res.status(500).json({
-        message: "Failed to delete gallery item"
+        message:
+          "Failed to delete gallery item",
       });
+
     }
+
   }
 );
-
 
 
 /* =========================================================
    VOLUNTEERS
 ========================================================= */
 
-// 🔒 ADMIN: GET volunteers
+
+/* GET VOLUNTEERS */
+
 router.get(
   "/volunteers",
-  requireAdmin,
   async (req, res) => {
+
     try {
-      const volunteers = await Volunteer.find()
-        .sort({ createdAt: -1 });
+
+      const volunteers =
+        await Volunteer.find()
+          .sort({
+            createdAt: -1,
+          });
+
 
       res.json(volunteers);
+
     } catch (error) {
+
       console.error(error);
 
       res.status(500).json({
-        message: "Failed to fetch volunteers"
-      });
-    }
-  }
-);
-
-
-// 🔒 ADMIN: GET single volunteer
-router.get(
-  "/volunteers/:id",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const volunteer =
-        await Volunteer.findById(
-          req.params.id
-        );
-
-      if (!volunteer) {
-        return res.status(404).json({
-          message: "Volunteer not found"
-        });
-      }
-
-      res.json(volunteer);
-    } catch (error) {
-      console.error(error);
-
-      res.status(500).json({
-        message: "Failed to fetch volunteer"
-      });
-    }
-  }
-);
-
-
-// PUBLIC: CREATE volunteer application
-router.post(
-  "/volunteers",
-  async (req, res) => {
-    try {
-      const volunteer =
-        await Volunteer.create({
-          name: req.body.name,
-          email: req.body.email,
-          phone: req.body.phone,
-          skills: req.body.skills,
-          message: req.body.message,
-          status: "new"
-        });
-
-      await createNotification({
-        type: "volunteer",
-        title: "New volunteer application",
         message:
-          `${volunteer.name} submitted a volunteer application.`,
-        link: "/admin/volunteers"
+          "Failed to fetch volunteers",
       });
 
-      res.status(201).json(volunteer);
-    } catch (error) {
-      console.error(error);
-
-      res.status(400).json({
-        message: error.message
-      });
     }
+
   }
 );
 
 
-// 🔒 ADMIN: UPDATE volunteer
-router.put(
-  "/volunteers/:id",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const volunteer =
-        await Volunteer.findByIdAndUpdate(
-          req.params.id,
-          {
-            name: req.body.name,
-            email: req.body.email,
-            phone: req.body.phone,
-            skills: req.body.skills,
-            message: req.body.message,
-            status: req.body.status
-          },
-          {
-            new: true,
-            runValidators: true
-          }
-        );
+/* DELETE VOLUNTEER */
 
-      if (!volunteer) {
-        return res.status(404).json({
-          message: "Volunteer not found"
-        });
-      }
-
-      res.json(volunteer);
-    } catch (error) {
-      console.error(error);
-
-      res.status(400).json({
-        message: error.message
-      });
-    }
-  }
-);
-
-
-// 🔒 ADMIN: UPDATE volunteer status
-router.patch(
-  "/volunteers/:id/status",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const volunteer =
-        await Volunteer.findByIdAndUpdate(
-          req.params.id,
-          {
-            status: req.body.status
-          },
-          {
-            new: true,
-            runValidators: true
-          }
-        );
-
-      if (!volunteer) {
-        return res.status(404).json({
-          message: "Volunteer not found"
-        });
-      }
-
-      res.json(volunteer);
-    } catch (error) {
-      console.error(error);
-
-      res.status(400).json({
-        message: error.message
-      });
-    }
-  }
-);
-
-
-// 🔒 ADMIN: DELETE volunteer
 router.delete(
   "/volunteers/:id",
-  requireAdmin,
   async (req, res) => {
+
     try {
+
       const volunteer =
         await Volunteer.findByIdAndDelete(
           req.params.id
         );
 
+
       if (!volunteer) {
+
         return res.status(404).json({
-          message: "Volunteer not found"
+          message:
+            "Volunteer not found",
         });
+
       }
 
+
       res.json({
-        message: "Volunteer deleted successfully"
+        message:
+          "Volunteer deleted successfully",
       });
+
     } catch (error) {
+
       console.error(error);
 
       res.status(500).json({
-        message: "Failed to delete volunteer"
+        message:
+          "Failed to delete volunteer",
       });
+
     }
+
   }
 );
 
@@ -809,651 +901,470 @@ router.delete(
    PARTNERS
 ========================================================= */
 
-// 🔒 ADMIN: GET partners
+
+/* GET PARTNERS */
+
 router.get(
   "/partners",
-  requireAdmin,
   async (req, res) => {
+
     try {
-      const partners = await Partner.find()
-        .sort({ createdAt: -1 });
+
+      const partners =
+        await Partner.find()
+          .sort({
+            createdAt: -1,
+          });
+
 
       res.json(partners);
+
     } catch (error) {
-      console.error(error);
+
+      console.error(
+        "Partners GET error:",
+        error
+      );
 
       res.status(500).json({
-        message: "Failed to fetch partners"
+        message:
+          "Failed to fetch partners",
       });
+
     }
+
   }
 );
 
 
-// 🔒 ADMIN: GET single partner
+/* GET SINGLE PARTNER */
+
 router.get(
   "/partners/:id",
-  requireAdmin,
   async (req, res) => {
+
     try {
+
       const partner =
         await Partner.findById(
           req.params.id
         );
 
+
       if (!partner) {
+
         return res.status(404).json({
-          message: "Partner not found"
+          message:
+            "Partner not found",
         });
+
       }
 
+
       res.json(partner);
+
     } catch (error) {
+
       console.error(error);
 
       res.status(500).json({
-        message: "Failed to fetch partner"
+        message:
+          "Failed to fetch partner",
       });
+
     }
+
   }
 );
 
 
-// PUBLIC: CREATE partner application
+/* CREATE PARTNER */
+
 router.post(
   "/partners",
   async (req, res) => {
-    try {
-      const partner =
-        await Partner.create({
-          organization: req.body.organization,
-          type: req.body.type,
-          contactName: req.body.contactName,
-          email: req.body.email,
-          phone: req.body.phone,
-          website: req.body.website,
-          description: req.body.description,
-          logo: req.body.logo,
-          status: "Active"
-        });
 
-      await createNotification({
-        type: "partner",
-        title: "New partner application",
-        message:
-          `${partner.organization} has submitted a partnership application.`,
-        link: "/admin/partners"
-      });
+    try {
+
+      const partner =
+        await Partner.create(
+          req.body
+        );
+
 
       res.status(201).json(partner);
+
     } catch (error) {
-      console.error(error);
+
+      console.error(
+        "Partner creation error:",
+        error
+      );
 
       res.status(400).json({
-        message: error.message
+        message:
+          error.message,
       });
+
     }
+
   }
 );
 
 
-// 🔒 ADMIN: UPDATE partner
+/* UPDATE PARTNER */
+
 router.put(
   "/partners/:id",
-  requireAdmin,
   async (req, res) => {
+
     try {
+
       const partner =
         await Partner.findByIdAndUpdate(
           req.params.id,
-          {
-            organization: req.body.organization,
-            type: req.body.type,
-            contactName: req.body.contactName,
-            email: req.body.email,
-            phone: req.body.phone,
-            website: req.body.website,
-            description: req.body.description,
-            logo: req.body.logo,
-            status: req.body.status
-          },
+          req.body,
           {
             new: true,
-            runValidators: true
+            runValidators: true,
           }
         );
 
+
       if (!partner) {
+
         return res.status(404).json({
-          message: "Partner not found"
+          message:
+            "Partner not found",
         });
+
       }
 
+
       res.json(partner);
+
     } catch (error) {
-      console.error(error);
+
+      console.error(
+        "Partner update error:",
+        error
+      );
 
       res.status(400).json({
-        message: error.message
+        message:
+          error.message,
       });
+
     }
+
   }
 );
 
 
-// 🔒 ADMIN: DELETE partner
+/* DELETE PARTNER */
+
 router.delete(
   "/partners/:id",
-  requireAdmin,
   async (req, res) => {
+
     try {
+
       const partner =
         await Partner.findByIdAndDelete(
           req.params.id
         );
 
+
       if (!partner) {
+
         return res.status(404).json({
-          message: "Partner not found"
+          message:
+            "Partner not found",
         });
+
       }
+
 
       res.json({
-        message: "Partner deleted successfully"
-      });
-    } catch (error) {
-      console.error(error);
-
-      res.status(500).json({
-        message: "Failed to delete partner"
-      });
-    }
-  }
-);
-
-
-/* =========================================================
-   DONATIONS
-========================================================= */
-
-// 🔒 ADMIN: GET donations
-router.get(
-  "/donations",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const donations = await Donation.find()
-        .sort({ createdAt: -1 });
-
-      res.json(donations);
-    } catch (error) {
-      console.error(error);
-
-      res.status(500).json({
-        message: "Failed to fetch donations"
-      });
-    }
-  }
-);
-
-
-// 🔒 ADMIN: GET single donation
-router.get(
-  "/donations/:id",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const donation =
-        await Donation.findById(
-          req.params.id
-        );
-
-      if (!donation) {
-        return res.status(404).json({
-          message: "Donation not found"
-        });
-      }
-
-      res.json(donation);
-    } catch (error) {
-      console.error(error);
-
-      res.status(500).json({
-        message: "Failed to fetch donation"
-      });
-    }
-  }
-);
-
-
-// PUBLIC: CREATE donation
-router.post(
-  "/donations",
-  async (req, res) => {
-    try {
-      const donation =
-        await Donation.create({
-          donorName: req.body.donorName,
-          email: req.body.email,
-          phone: req.body.phone,
-          amount: req.body.amount,
-          method: req.body.method,
-          reference: req.body.reference,
-          message: req.body.message,
-          status: "pending"
-        });
-
-      await createNotification({
-        type: "donation",
-        title: "New donation received",
         message:
-          `A donation of UGX ${Number(
-            donation.amount
-          ).toLocaleString()} was submitted.`,
-        link: "/admin/donations"
+          "Partner deleted successfully",
       });
-
-      res.status(201).json(donation);
-    } catch (error) {
-      console.error(error);
-
-      res.status(400).json({
-        message: error.message
-      });
-    }
-  }
-
-);
-
-
-
-
-
-
-// 🔒 ADMIN: UPDATE donation status
-router.patch(
-  "/donations/:id/status",
-  requireAdmin,
-  async (req, res) => {
-
-    try {
-
-      const donation =
-        await Donation.findByIdAndUpdate(
-          req.params.id,
-          {
-            status: req.body.status
-          },
-          {
-            new: true,
-            runValidators: true
-          }
-        );
-
-      if (!donation) {
-
-        return res.status(404).json({
-          message: "Donation not found"
-        });
-
-      }
-
-      res.json(donation);
 
     } catch (error) {
 
-      console.error(error);
-
-      res.status(400).json({
-        message: error.message
-      });
-
-    }
-
-  }
-);
-
-
-// 🔒 ADMIN: DELETE donation
-router.delete(
-  "/donations/:id",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const donation =
-        await Donation.findByIdAndDelete(
-          req.params.id
-        );
-
-      if (!donation) {
-        return res.status(404).json({
-          message: "Donation not found"
-        });
-      }
-
-      res.json({
-        message: "Donation deleted successfully"
-      });
-    } catch (error) {
-      console.error(error);
-
-      res.status(500).json({
-        message: "Failed to delete donation"
-      });
-    }
-  }
-);
-
-
-/* =========================================================
-   NOTIFICATIONS
-========================================================= */
-
-// 🔒 ADMIN: GET notifications
-router.get(
-  "/notifications",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const notifications =
-        await Notification.find()
-          .sort({ createdAt: -1 })
-          .limit(50);
-
-      res.json(notifications);
-    } catch (error) {
-      console.error(error);
-
-      res.status(500).json({
-        message: "Failed to fetch notifications"
-      });
-    }
-  }
-);
-
-
-// 🔒 ADMIN: GET unread count
-router.get(
-  "/notifications/unread-count",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const count =
-        await Notification.countDocuments({
-          read: false
-        });
-
-      res.json({
-        count
-      });
-    } catch (error) {
-      console.error(error);
-
-      res.status(500).json({
-        message:
-          "Failed to fetch unread notification count"
-      });
-    }
-  }
-);
-
-
-// 🔒 ADMIN: MARK notification as read
-router.patch(
-  "/notifications/:id/read",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const notification =
-        await Notification.findByIdAndUpdate(
-          req.params.id,
-          {
-            read: true
-          },
-          {
-            new: true
-          }
-        );
-
-      if (!notification) {
-        return res.status(404).json({
-          message: "Notification not found"
-        });
-      }
-
-      res.json(notification);
-    } catch (error) {
-      console.error(error);
-
-      res.status(400).json({
-        message:
-          "Failed to mark notification as read"
-      });
-    }
-  }
-);
-
-
-// 🔒 ADMIN: MARK ALL notifications as read
-router.patch(
-  "/notifications/read-all",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      await Notification.updateMany(
-        {
-          read: false
-        },
-        {
-          $set: {
-            read: true
-          }
-        }
+      console.error(
+        "Partner deletion error:",
+        error
       );
 
-      res.json({
-        message:
-          "All notifications marked as read"
-      });
-    } catch (error) {
-      console.error(error);
-
       res.status(500).json({
         message:
-          "Failed to mark notifications as read"
+          "Failed to delete partner",
       });
+
     }
-  }
-);
 
-
-// 🔒 ADMIN: DELETE notification
-router.delete(
-  "/notifications/:id",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const notification =
-        await Notification.findByIdAndDelete(
-          req.params.id
-        );
-
-      if (!notification) {
-        return res.status(404).json({
-          message: "Notification not found"
-        });
-      }
-
-      res.json({
-        message:
-          "Notification deleted successfully"
-      });
-    } catch (error) {
-      console.error(error);
-
-      res.status(500).json({
-        message:
-          "Failed to delete notification"
-      });
-    }
   }
 );
 
 
 /* =========================================================
-   CONTACT MESSAGES
+   MESSAGES / CONTACT ENQUIRIES
 ========================================================= */
 
-// 🔒 ADMIN: GET messages
+
+/* GET ALL MESSAGES */
+
 router.get(
   "/messages",
-  requireAdmin,
   async (req, res) => {
-    try {
-      const messages = await Contact.find()
-        .sort({ createdAt: -1 });
 
-      res.json(messages);
+    try {
+
+      const messages =
+        await Contact.find()
+          .sort({
+            createdAt: -1,
+          });
+
+
+      /*
+        Normalize the contact documents so
+        the frontend can consistently use
+        read/status.
+      */
+
+      const normalized =
+        messages.map(
+          (message) => {
+
+            const item =
+              message.toObject();
+
+
+            const isRead =
+              item.read === true ||
+              item.status === "read";
+
+
+            return {
+              ...item,
+              read: isRead,
+              status:
+                isRead
+                  ? "read"
+                  : item.status ||
+                    "new",
+            };
+
+          }
+        );
+
+
+      res.json(normalized);
+
     } catch (error) {
-      console.error(error);
+
+      console.error(
+        "Messages GET error:",
+        error
+      );
 
       res.status(500).json({
-        message: "Failed to fetch messages"
+        message:
+          "Failed to fetch messages",
       });
+
     }
+
   }
 );
 
 
-// 🔒 ADMIN: GET single message
+/* GET SINGLE MESSAGE */
+
 router.get(
   "/messages/:id",
-  requireAdmin,
   async (req, res) => {
+
     try {
+
       const message =
         await Contact.findById(
           req.params.id
         );
 
+
       if (!message) {
+
         return res.status(404).json({
-          message: "Message not found"
+          message:
+            "Message not found",
         });
+
       }
 
+
       res.json(message);
+
     } catch (error) {
+
       console.error(error);
 
       res.status(500).json({
-        message: "Failed to fetch message"
-      });
-    }
-  }
-);
-
-
-// PUBLIC: CREATE contact message
-router.post(
-  "/messages",
-  async (req, res) => {
-    try {
-      const message =
-        await Contact.create({
-          name: req.body.name,
-          email: req.body.email,
-          phone: req.body.phone,
-          subject: req.body.subject,
-          message: req.body.message,
-          status: "new"
-        });
-
-      await createNotification({
-        type: "message",
-        title: "New contact message",
         message:
-          `${message.name} sent a new message.`,
-        link: "/admin/messages"
+          "Failed to fetch message",
       });
 
-      res.status(201).json(message);
-    } catch (error) {
-      console.error(error);
-
-      res.status(400).json({
-        message: error.message
-      });
     }
+
   }
 );
 
 
-// 🔒 ADMIN: UPDATE message status
+/* MARK MESSAGE AS READ */
+
 router.patch(
-  "/messages/:id/status",
-  requireAdmin,
+  "/messages/:id/read",
   async (req, res) => {
+
     try {
+
       const message =
         await Contact.findByIdAndUpdate(
           req.params.id,
           {
-            status: req.body.status
+            read: true,
+            status: "read",
           },
           {
             new: true,
-            runValidators: true
           }
         );
 
+
       if (!message) {
+
         return res.status(404).json({
-          message: "Message not found"
+          message:
+            "Message not found",
         });
+
       }
 
-      res.json(message);
-    } catch (error) {
-      console.error(error);
 
-      res.status(400).json({
-        message: error.message
+      res.json(message);
+
+    } catch (error) {
+
+      console.error(
+        "Mark message read error:",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Failed to mark message as read",
       });
+
     }
+
   }
 );
 
 
-// 🔒 ADMIN: DELETE message
+/* DELETE MESSAGE */
+
 router.delete(
   "/messages/:id",
-  requireAdmin,
   async (req, res) => {
+
     try {
+
       const message =
         await Contact.findByIdAndDelete(
           req.params.id
         );
 
+
       if (!message) {
+
         return res.status(404).json({
-          message: "Message not found"
+          message:
+            "Message not found",
         });
+
       }
+
 
       res.json({
         message:
-          "Message deleted successfully"
+          "Message deleted successfully",
       });
+
     } catch (error) {
-      console.error(error);
+
+      console.error(
+        "Delete message error:",
+        error
+      );
 
       res.status(500).json({
         message:
-          "Failed to delete message"
+          "Failed to delete message",
       });
+
     }
+
+  }
+);
+
+
+/* =========================================================
+   PUBLIC CONTACT FORM
+========================================================= */
+
+
+/* CREATE CONTACT MESSAGE */
+
+router.post(
+  "/messages",
+  async (req, res) => {
+
+    try {
+
+      const message =
+        await Contact.create({
+          name:
+            req.body.name,
+          email:
+            req.body.email,
+          phone:
+            req.body.phone,
+          subject:
+            req.body.subject,
+          message:
+            req.body.message,
+          status:
+            "new",
+        });
+
+
+      res.status(201).json(
+        message
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(400).json({
+        message:
+          error.message,
+      });
+
+    }
+
   }
 );
 
@@ -1462,96 +1373,398 @@ router.delete(
    NEWSLETTER
 ========================================================= */
 
-// 🔒 ADMIN: GET subscribers
-router.get(
-  "/newsletter",
-  requireAdmin,
+
+/* PUBLIC NEWSLETTER SUBSCRIPTION */
+
+router.post(
+  "/newsletter/subscribe",
   async (req, res) => {
+
     try {
+
+      const email =
+        req.body.email
+          ?.trim()
+          .toLowerCase();
+
+
+      if (!email) {
+
+        return res.status(400).json({
+          message:
+            "Email address is required.",
+        });
+
+      }
+
+
+      const existing =
+        await Newsletter.findOne({
+          email,
+        });
+
+
+      if (existing) {
+
+        return res.status(409).json({
+          message:
+            "This email is already subscribed.",
+        });
+
+      }
+
+
+      const subscriber =
+        await Newsletter.create({
+          email,
+        });
+
+
+      res.status(201).json({
+        success: true,
+        message:
+          "Successfully subscribed to the newsletter.",
+        subscriber,
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Newsletter subscription error:",
+        error
+      );
+
+
+      /*
+        MongoDB duplicate-key protection
+      */
+
+      if (
+        error.code === 11000
+      ) {
+
+        return res.status(409).json({
+          message:
+            "This email is already subscribed.",
+        });
+
+      }
+
+
+      res.status(400).json({
+        message:
+          error.message,
+      });
+
+    }
+
+  }
+);
+
+
+/* GET NEWSLETTER SUBSCRIBERS */
+
+router.get(
+  "/newsletter/subscribers",
+  async (req, res) => {
+
+    try {
+
       const subscribers =
         await Newsletter.find()
-          .sort({ createdAt: -1 });
+          .sort({
+            createdAt: -1,
+          });
 
-      res.json(subscribers);
+
+      res.json(
+        subscribers
+      );
+
     } catch (error) {
+
+      console.error(
+        "Newsletter subscribers GET error:",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Failed to fetch newsletter subscribers",
+      });
+
+    }
+
+  }
+);
+
+
+/* GET SINGLE SUBSCRIBER */
+
+router.get(
+  "/newsletter/subscribers/:id",
+  async (req, res) => {
+
+    try {
+
+      const subscriber =
+        await Newsletter.findById(
+          req.params.id
+        );
+
+
+      if (!subscriber) {
+
+        return res.status(404).json({
+          message:
+            "Subscriber not found",
+        });
+
+      }
+
+
+      res.json(
+        subscriber
+      );
+
+    } catch (error) {
+
       console.error(error);
 
       res.status(500).json({
         message:
-          "Failed to fetch newsletter subscribers"
+          "Failed to fetch subscriber",
       });
+
     }
+
   }
 );
 
 
-// PUBLIC: CREATE subscriber
-router.post(
-  "/newsletter",
-  async (req, res) => {
-    try {
-      const subscriber =
-        await Newsletter.create({
-          email: req.body.email
-        });
+/* DELETE SUBSCRIBER */
 
-      await createNotification({
-        type: "newsletter",
-        title: "New newsletter subscriber",
-        message:
-          `${subscriber.email} subscribed to the newsletter.`,
-        link: "/admin/newsletter"
-      });
-
-      res.status(201).json(subscriber);
-    } catch (error) {
-      console.error(error);
-
-      if (error.code === 11000) {
-        return res.status(409).json({
-          message:
-            "Email is already subscribed."
-        });
-      }
-
-      res.status(400).json({
-        message: error.message
-      });
-    }
-  }
-);
-
-
-// 🔒 ADMIN: DELETE subscriber
 router.delete(
-  "/newsletter/:id",
-  requireAdmin,
+  "/newsletter/subscribers/:id",
   async (req, res) => {
+
     try {
+
       const subscriber =
         await Newsletter.findByIdAndDelete(
           req.params.id
         );
 
+
       if (!subscriber) {
+
         return res.status(404).json({
           message:
-            "Subscriber not found"
+            "Subscriber not found",
         });
+
       }
+
 
       res.json({
         message:
-          "Subscriber deleted successfully"
+          "Subscriber removed successfully",
       });
+
     } catch (error) {
+
+      console.error(
+        "Delete subscriber error:",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Failed to delete subscriber",
+      });
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   DONATIONS
+========================================================= */
+
+
+/* GET DONATIONS */
+
+router.get(
+  "/donations",
+  async (req, res) => {
+
+    try {
+
+      const donations =
+        await Donation.find()
+          .sort({
+            createdAt: -1,
+          });
+
+
+      res.json(donations);
+
+    } catch (error) {
+
       console.error(error);
 
       res.status(500).json({
         message:
-          "Failed to delete subscriber"
+          "Failed to fetch donations",
       });
+
     }
+
+  }
+);
+
+
+/* CREATE DONATION */
+
+router.post(
+  "/donations",
+  async (req, res) => {
+
+    try {
+
+      const donation =
+        await Donation.create({
+          donorName:
+            req.body.donorName,
+          email:
+            req.body.email,
+          phone:
+            req.body.phone,
+          amount:
+            req.body.amount,
+          method:
+            req.body.method,
+          reference:
+            req.body.reference,
+          message:
+            req.body.message,
+          status:
+            "pending",
+        });
+
+
+      res.status(201).json(
+        donation
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(400).json({
+        message:
+          error.message,
+      });
+
+    }
+
+  }
+);
+
+
+/* UPDATE DONATION STATUS */
+
+router.patch(
+  "/donations/:id/status",
+  async (req, res) => {
+
+    try {
+
+      const donation =
+        await Donation.findByIdAndUpdate(
+          req.params.id,
+          {
+            status:
+              req.body.status,
+          },
+          {
+            new: true,
+            runValidators: true,
+          }
+        );
+
+
+      if (!donation) {
+
+        return res.status(404).json({
+          message:
+            "Donation not found",
+        });
+
+      }
+
+
+      res.json(
+        donation
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(400).json({
+        message:
+          error.message,
+      });
+
+    }
+
+  }
+);
+
+
+/* DELETE DONATION */
+
+router.delete(
+  "/donations/:id",
+  async (req, res) => {
+
+    try {
+
+      const donation =
+        await Donation.findByIdAndDelete(
+          req.params.id
+        );
+
+
+      if (!donation) {
+
+        return res.status(404).json({
+          message:
+            "Donation not found",
+        });
+
+      }
+
+
+      res.json({
+        message:
+          "Donation deleted successfully",
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        message:
+          "Failed to delete donation",
+      });
+
+    }
+
   }
 );
 
@@ -1560,15 +1773,22 @@ router.delete(
    HEALTH CHECK
 ========================================================= */
 
-// PUBLIC: health check
-router.get("/health", (req, res) => {
+router.get(
+  "/health",
+  (req, res) => {
 
-  res.json({
-    success: true,
-    message: "REHEMA API is working"
-  });
-  
-});
+    res.json({
+      success: true,
+      message:
+        "REHEMA API is working",
+    });
 
+  }
+);
+
+
+/* =========================================================
+   EXPORT
+========================================================= */
 
 export default router;

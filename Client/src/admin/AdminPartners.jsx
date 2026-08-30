@@ -1,6 +1,18 @@
-import React, { useEffect, useMemo, useState } from "react";
 
-const API_URL = "http://localhost:5000/api";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import api from "../utils/api";
+
+import "./AdminPartners.css";
+
+
+/* =========================================================
+   EMPTY FORM
+========================================================= */
 
 const emptyForm = {
   organization: "",
@@ -14,109 +26,175 @@ const emptyForm = {
   status: "Active",
 };
 
+
+/* =========================================================
+   ADMIN PARTNERS
+========================================================= */
+
 export default function AdminPartners() {
+
+  /* =======================================================
+     STATE
+  ======================================================= */
+
   const [partners, setPartners] = useState([]);
 
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] =
+    useState(false);
 
-  const [editingId, setEditingId] = useState(null);
+  const [editingId, setEditingId] =
+    useState(null);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
 
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] =
+    useState(false);
 
-  const [error, setError] = useState("");
+  const [deletingId, setDeletingId] =
+    useState(null);
 
-  const [formData, setFormData] = useState(emptyForm);
+  const [error, setError] =
+    useState("");
+
+  const [formData, setFormData] =
+    useState({
+      ...emptyForm,
+    });
 
 
-  /* =====================================================
+  /* =======================================================
      LOAD PARTNERS
-  ===================================================== */
+  ======================================================= */
 
   const fetchPartners = async () => {
+
     try {
+
       setLoading(true);
       setError("");
 
-      const response = await fetch(
-        `${API_URL}/partners`
-      );
+      const data =
+        await api("/partners");
 
-      if (!response.ok) {
-        throw new Error(
-          "Failed to load partners."
-        );
+
+      /*
+        Support either:
+
+        [
+          {...},
+          {...}
+        ]
+
+        OR:
+
+        {
+          partners: [...]
+        }
+
+        OR:
+
+        {
+          data: [...]
+        }
+      */
+
+      let partnerList = [];
+
+      if (Array.isArray(data)) {
+
+        partnerList = data;
+
+      } else if (
+        Array.isArray(data.partners)
+      ) {
+
+        partnerList = data.partners;
+
+      } else if (
+        Array.isArray(data.data)
+      ) {
+
+        partnerList = data.data;
+
       }
 
-      const data = await response.json();
 
-      setPartners(data);
+      setPartners(partnerList);
+
     } catch (err) {
-      console.error(err);
+
+      console.error(
+        "Fetch partners error:",
+        err
+      );
 
       setError(
-        "Unable to load partners. Please check that the server is running."
+        err.message ||
+        "Unable to load partners."
       );
+
     } finally {
+
       setLoading(false);
+
     }
   };
 
 
+  /* =======================================================
+     INITIAL LOAD
+  ======================================================= */
+
   useEffect(() => {
+
     fetchPartners();
+
   }, []);
 
 
-  /* =====================================================
-     FORM
-  ===================================================== */
+  /* =======================================================
+     FORM INPUT
+  ======================================================= */
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
+    const {
+      name,
+      value,
+    } = e.target;
+
+    setFormData((previous) => ({
+      ...previous,
       [name]: value,
     }));
+
+    /*
+      Clear previous error when
+      user starts editing again.
+    */
+
+    if (error) {
+      setError("");
+    }
   };
 
+
+  /* =======================================================
+     OPEN ADD FORM
+  ======================================================= */
 
   const openAddForm = () => {
+
     setEditingId(null);
-    setFormData(emptyForm);
-    setShowForm(true);
-    setError("");
-  };
-
-
-  const openEditForm = (partner) => {
-    setEditingId(partner._id);
 
     setFormData({
-      organization: partner.organization || "",
-      type:
-        partner.type ||
-        "NGO / Organization",
-      contactName:
-        partner.contactName || "",
-      email:
-        partner.email || "",
-      phone:
-        partner.phone || "",
-      website:
-        partner.website || "",
-      description:
-        partner.description || "",
-      logo:
-        partner.logo || "",
-      status:
-        partner.status || "Active",
+      ...emptyForm,
     });
 
-    setShowForm(true);
     setError("");
+
+    setShowForm(true);
 
     window.scrollTo({
       top: 0,
@@ -125,154 +203,354 @@ export default function AdminPartners() {
   };
 
 
-  const closeForm = () => {
-    setShowForm(false);
-    setEditingId(null);
-    setFormData(emptyForm);
+  /* =======================================================
+     OPEN EDIT FORM
+  ======================================================= */
+
+  const openEditForm = (partner) => {
+
+    setEditingId(
+      partner._id
+    );
+
+    setFormData({
+
+      organization:
+        partner.organization || "",
+
+      type:
+        partner.type ||
+        "NGO / Organization",
+
+      contactName:
+        partner.contactName || "",
+
+      email:
+        partner.email || "",
+
+      phone:
+        partner.phone || "",
+
+      website:
+        partner.website || "",
+
+      description:
+        partner.description || "",
+
+      logo:
+        partner.logo || "",
+
+      status:
+        partner.status || "Active",
+
+    });
+
+    setError("");
+
+    setShowForm(true);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
 
-  /* =====================================================
+  /* =======================================================
+     CLOSE FORM
+  ======================================================= */
+
+  const closeForm = () => {
+
+    if (saving) {
+      return;
+    }
+
+    setShowForm(false);
+
+    setEditingId(null);
+
+    setFormData({
+      ...emptyForm,
+    });
+
+    setError("");
+  };
+
+
+  /* =======================================================
      SAVE PARTNER
-  ===================================================== */
+  ======================================================= */
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
 
+    if (saving) {
+      return;
+    }
+
+    setError("");
+
+
+    /* -----------------------------------------------------
+       BASIC VALIDATION
+    ----------------------------------------------------- */
+
+    if (
+      !formData.organization.trim()
+    ) {
+
+      setError(
+        "Organization name is required."
+      );
+
+      return;
+    }
+
+
     try {
+
       setSaving(true);
-      setError("");
 
-      const url = editingId
-        ? `${API_URL}/partners/${editingId}`
-        : `${API_URL}/partners`;
 
-      const method = editingId
-        ? "PUT"
-        : "POST";
+      /* ---------------------------------------------------
+         CREATE
+      --------------------------------------------------- */
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      if (!editingId) {
 
-      const data = await response.json();
+        await api(
+          "/partners",
+          {
+            method: "POST",
 
-      if (!response.ok) {
-        throw new Error(
-          data.message ||
-            "Failed to save partner."
+            body: JSON.stringify(
+              formData
+            ),
+          }
         );
+
       }
+
+
+      /* ---------------------------------------------------
+         UPDATE
+      --------------------------------------------------- */
+
+      else {
+
+        await api(
+          `/partners/${editingId}`,
+          {
+            method: "PUT",
+
+            body: JSON.stringify(
+              formData
+            ),
+          }
+        );
+
+      }
+
+
+      /* ---------------------------------------------------
+         REFRESH LIST
+      --------------------------------------------------- */
 
       await fetchPartners();
 
-      closeForm();
+
+      /* ---------------------------------------------------
+         CLOSE FORM
+      --------------------------------------------------- */
+
+      setShowForm(false);
+
+      setEditingId(null);
+
+      setFormData({
+        ...emptyForm,
+      });
+
+
     } catch (err) {
-      console.error(err);
+
+      console.error(
+        "Save partner error:",
+        err
+      );
 
       setError(
         err.message ||
-          "Failed to save partner."
+        "Failed to save partner."
       );
+
     } finally {
+
       setSaving(false);
+
     }
   };
 
 
-  /* =====================================================
-     DELETE
-  ===================================================== */
+  /* =======================================================
+     DELETE PARTNER
+  ======================================================= */
 
   const handleDelete = async (id) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this partner?"
-    );
 
-    if (!confirmed) return;
+    const confirmed =
+      window.confirm(
+        "Are you sure you want to delete this partner? This action cannot be undone."
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
 
     try {
+
+      setDeletingId(id);
+
       setError("");
 
-      const response = await fetch(
-        `${API_URL}/partners/${id}`,
+
+      await api(
+        `/partners/${id}`,
         {
           method: "DELETE",
         }
       );
 
-      const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(
-          data.message ||
-            "Failed to delete partner."
-        );
-      }
+      /*
+        Remove immediately from UI.
+      */
 
-      setPartners((prev) =>
-        prev.filter(
+      setPartners((previous) =>
+        previous.filter(
           (partner) =>
             partner._id !== id
         )
       );
+
+
     } catch (err) {
-      console.error(err);
+
+      console.error(
+        "Delete partner error:",
+        err
+      );
 
       setError(
         err.message ||
-          "Failed to delete partner."
+        "Failed to delete partner."
       );
+
+    } finally {
+
+      setDeletingId(null);
+
     }
   };
 
 
-  /* =====================================================
+  /* =======================================================
      STATISTICS
-  ===================================================== */
+  ======================================================= */
 
   const statistics = useMemo(() => {
-    return {
-      total: partners.length,
 
-      active: partners.filter(
+    const active =
+      partners.filter(
         (partner) =>
           partner.status === "Active"
-      ).length,
+      );
 
-      ngo: partners.filter(
+    const ngo =
+      partners.filter(
         (partner) =>
           partner.type ===
           "NGO / Organization"
-      ).length,
+      );
 
-      corporate: partners.filter(
+    const corporate =
+      partners.filter(
         (partner) =>
-          partner.type === "Corporate"
-      ).length,
+          partner.type ===
+          "Corporate"
+      );
+
+    return {
+
+      total:
+        partners.length,
+
+      active:
+        active.length,
+
+      ngo:
+        ngo.length,
+
+      corporate:
+        corporate.length,
+
     };
+
   }, [partners]);
 
 
-  /* =====================================================
+  /* =======================================================
+     FORMAT DATE
+  ======================================================= */
+
+  const formatDate = (date) => {
+
+    if (!date) {
+      return "—";
+    }
+
+    const parsedDate =
+      new Date(date);
+
+    if (
+      Number.isNaN(
+        parsedDate.getTime()
+      )
+    ) {
+      return "—";
+    }
+
+    return parsedDate.toLocaleDateString(
+      "en-GB",
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }
+    );
+  };
+
+
+  /* =======================================================
      RENDER
-  ===================================================== */
+  ======================================================= */
 
   return (
+
     <div className="admin-page">
 
-      {/* =================================================
+
+      {/* ===================================================
           PAGE HEADER
-      ================================================= */}
+      =================================================== */}
 
       <div className="admin-page-header">
 
         <div>
+
           <p className="admin-eyebrow">
             PARTNERS
           </p>
@@ -287,41 +565,75 @@ export default function AdminPartners() {
             partners working with REHEMA
             Foundation.
           </p>
+
         </div>
 
-        <button
-          type="button"
-          className="admin-primary-button"
-          onClick={
-            showForm
-              ? closeForm
-              : openAddForm
-          }
+
+        <div
+          className="admin-page-header-actions"
         >
-          {showForm
-            ? "Close Form"
-            : "+ Add Partner"}
-        </button>
+
+          <button
+            type="button"
+            className="admin-secondary-button"
+            onClick={fetchPartners}
+            disabled={loading}
+          >
+            {loading
+              ? "Refreshing..."
+              : "↻ Refresh"}
+          </button>
+
+
+          <button
+            type="button"
+            className="admin-primary-button"
+            onClick={
+              showForm
+                ? closeForm
+                : openAddForm
+            }
+          >
+            {showForm
+              ? "Close Form"
+              : "+ Add Partner"}
+          </button>
+
+        </div>
 
       </div>
 
 
-      {/* =================================================
+      {/* ===================================================
           ERROR
-      ================================================= */}
+      =================================================== */}
 
       {error && (
-        <div className="admin-alert admin-alert-error">
+
+        <div
+          className="admin-alert admin-alert-error"
+          role="alert"
+        >
+
+          <strong>
+            Attention:
+          </strong>{" "}
+
           {error}
+
         </div>
+
       )}
 
 
-      {/* =================================================
+      {/* ===================================================
           STATISTICS
-      ================================================= */}
+      =================================================== */}
 
       <div className="admin-stats-grid">
+
+
+        {/* TOTAL */}
 
         <div className="admin-stat-card">
 
@@ -330,15 +642,21 @@ export default function AdminPartners() {
           </div>
 
           <div>
-            <span>Total Partners</span>
+
+            <span>
+              Total Partners
+            </span>
 
             <strong>
               {statistics.total}
             </strong>
+
           </div>
 
         </div>
 
+
+        {/* ACTIVE */}
 
         <div className="admin-stat-card">
 
@@ -347,15 +665,21 @@ export default function AdminPartners() {
           </div>
 
           <div>
-            <span>Active Partners</span>
+
+            <span>
+              Active Partners
+            </span>
 
             <strong>
               {statistics.active}
             </strong>
+
           </div>
 
         </div>
 
+
+        {/* NGO */}
 
         <div className="admin-stat-card">
 
@@ -364,15 +688,21 @@ export default function AdminPartners() {
           </div>
 
           <div>
-            <span>NGO / Organizations</span>
+
+            <span>
+              NGO / Organizations
+            </span>
 
             <strong>
               {statistics.ngo}
             </strong>
+
           </div>
 
         </div>
 
+
+        {/* CORPORATE */}
 
         <div className="admin-stat-card">
 
@@ -381,11 +711,15 @@ export default function AdminPartners() {
           </div>
 
           <div>
-            <span>Corporate Partners</span>
+
+            <span>
+              Corporate Partners
+            </span>
 
             <strong>
               {statistics.corporate}
             </strong>
+
           </div>
 
         </div>
@@ -393,43 +727,59 @@ export default function AdminPartners() {
       </div>
 
 
-      {/* =================================================
+      {/* ===================================================
           ADD / EDIT FORM
-      ================================================= */}
+      =================================================== */}
 
       {showForm && (
-        <div className="admin-card partner-form-card">
+
+        <div
+          className="admin-card partner-form-card"
+        >
+
+
+          {/* FORM HEADER */}
 
           <div className="admin-card-header">
 
             <div>
+
               <p className="admin-eyebrow">
+
                 {editingId
                   ? "EDIT PARTNER"
                   : "NEW PARTNER"}
+
               </p>
 
               <h2>
+
                 {editingId
                   ? "Edit Partner"
                   : "Add Partner"}
+
               </h2>
 
               <p>
                 Enter the organization's
                 information below.
               </p>
+
             </div>
 
           </div>
 
+
+          {/* FORM */}
 
           <form
             className="admin-form"
             onSubmit={handleSubmit}
           >
 
+
             <div className="admin-form-grid">
+
 
               {/* ORGANIZATION */}
 
@@ -449,12 +799,13 @@ export default function AdminPartners() {
                   onChange={handleChange}
                   placeholder="e.g. UNICEF Uganda"
                   required
+                  disabled={saving}
                 />
 
               </div>
 
 
-              {/* PARTNER TYPE */}
+              {/* TYPE */}
 
               <div className="admin-form-group">
 
@@ -465,8 +816,11 @@ export default function AdminPartners() {
                 <select
                   id="type"
                   name="type"
-                  value={formData.type}
+                  value={
+                    formData.type
+                  }
                   onChange={handleChange}
+                  disabled={saving}
                 >
 
                   <option value="NGO / Organization">
@@ -511,6 +865,7 @@ export default function AdminPartners() {
                   }
                   onChange={handleChange}
                   placeholder="Full name"
+                  disabled={saving}
                 />
 
               </div>
@@ -528,9 +883,12 @@ export default function AdminPartners() {
                   id="email"
                   name="email"
                   type="email"
-                  value={formData.email}
+                  value={
+                    formData.email
+                  }
                   onChange={handleChange}
                   placeholder="partner@example.org"
+                  disabled={saving}
                 />
 
               </div>
@@ -548,9 +906,12 @@ export default function AdminPartners() {
                   id="phone"
                   name="phone"
                   type="tel"
-                  value={formData.phone}
+                  value={
+                    formData.phone
+                  }
                   onChange={handleChange}
                   placeholder="+256..."
+                  disabled={saving}
                 />
 
               </div>
@@ -573,6 +934,7 @@ export default function AdminPartners() {
                   }
                   onChange={handleChange}
                   placeholder="https://example.org"
+                  disabled={saving}
                 />
 
               </div>
@@ -580,7 +942,9 @@ export default function AdminPartners() {
 
               {/* DESCRIPTION */}
 
-              <div className="admin-form-group admin-form-full">
+              <div
+                className="admin-form-group admin-form-full"
+              >
 
                 <label htmlFor="description">
                   Description
@@ -595,6 +959,7 @@ export default function AdminPartners() {
                   onChange={handleChange}
                   placeholder="Describe the partnership..."
                   rows="5"
+                  disabled={saving}
                 />
 
               </div>
@@ -602,7 +967,9 @@ export default function AdminPartners() {
 
               {/* LOGO */}
 
-              <div className="admin-form-group admin-form-full">
+              <div
+                className="admin-form-group admin-form-full"
+              >
 
                 <label htmlFor="logo">
                   Logo URL
@@ -612,14 +979,17 @@ export default function AdminPartners() {
                   id="logo"
                   name="logo"
                   type="url"
-                  value={formData.logo}
+                  value={
+                    formData.logo
+                  }
                   onChange={handleChange}
                   placeholder="https://..."
+                  disabled={saving}
                 />
 
                 <small>
-                  Cloudinary logo upload can
-                  be connected here next.
+                  You can connect Cloudinary
+                  image uploads here later.
                 </small>
 
               </div>
@@ -640,6 +1010,7 @@ export default function AdminPartners() {
                     formData.status
                   }
                   onChange={handleChange}
+                  disabled={saving}
                 >
 
                   <option value="Active">
@@ -657,7 +1028,7 @@ export default function AdminPartners() {
             </div>
 
 
-            {/* ACTIONS */}
+            {/* FORM ACTIONS */}
 
             <div className="admin-form-actions">
 
@@ -670,16 +1041,19 @@ export default function AdminPartners() {
                 Cancel
               </button>
 
+
               <button
                 type="submit"
                 className="admin-primary-button"
                 disabled={saving}
               >
+
                 {saving
                   ? "Saving..."
                   : editingId
                   ? "Update Partner"
                   : "Save Partner"}
+
               </button>
 
             </div>
@@ -687,18 +1061,23 @@ export default function AdminPartners() {
           </form>
 
         </div>
+
       )}
 
 
-      {/* =================================================
-          PARTNERS TABLE
-      ================================================= */}
+      {/* ===================================================
+          PARTNERS DIRECTORY
+      =================================================== */}
 
       <div className="admin-card">
+
+
+        {/* TABLE HEADER */}
 
         <div className="admin-card-header">
 
           <div>
+
             <p className="admin-eyebrow">
               DIRECTORY
             </p>
@@ -711,10 +1090,15 @@ export default function AdminPartners() {
               View and manage all REHEMA
               Foundation partners.
             </p>
+
           </div>
 
         </div>
 
+
+        {/* =================================================
+            LOADING
+        ================================================= */}
 
         {loading ? (
 
@@ -735,7 +1119,14 @@ export default function AdminPartners() {
 
           </div>
 
-        ) : partners.length === 0 ? (
+        )
+
+
+        /* =================================================
+           EMPTY
+        ================================================= */
+
+        : partners.length === 0 ? (
 
           <div className="admin-empty-state">
 
@@ -762,11 +1153,21 @@ export default function AdminPartners() {
 
           </div>
 
-        ) : (
+        )
+
+
+        /* =================================================
+           TABLE
+        ================================================= */
+
+        : (
 
           <div className="admin-table-wrapper">
 
             <table className="admin-table">
+
+
+              {/* TABLE HEADER */}
 
               <thead>
 
@@ -805,20 +1206,27 @@ export default function AdminPartners() {
               </thead>
 
 
+              {/* TABLE BODY */}
+
               <tbody>
 
                 {partners.map(
                   (partner) => (
 
                     <tr
-                      key={partner._id}
+                      key={
+                        partner._id
+                      }
                     >
+
 
                       {/* ORGANIZATION */}
 
                       <td>
 
-                        <div className="partner-table-name">
+                        <div
+                          className="partner-table-name"
+                        >
 
                           {partner.logo ? (
 
@@ -827,35 +1235,52 @@ export default function AdminPartners() {
                                 partner.logo
                               }
                               alt={
-                                partner.organization
+                                partner.organization ||
+                                "Partner logo"
                               }
                               className="partner-logo"
+                              onError={(e) => {
+                                e.currentTarget.style.display =
+                                  "none";
+                              }}
                             />
 
                           ) : (
 
-                            <div className="partner-logo-placeholder">
+                            <div
+                              className="partner-logo-placeholder"
+                            >
+
                               {partner.organization
                                 ?.charAt(0)
-                                ?.toUpperCase()}
+                                ?.toUpperCase() ||
+                                "P"}
+
                             </div>
 
                           )}
+
 
                           <div>
 
                             <strong>
                               {
-                                partner.organization
+                                partner.organization ||
+                                "Unnamed Partner"
                               }
                             </strong>
 
+
                             {partner.description && (
-                              <div className="admin-table-description">
+
+                              <div
+                                className="admin-table-description"
+                              >
                                 {
                                   partner.description
                                 }
                               </div>
+
                             )}
 
                           </div>
@@ -869,9 +1294,13 @@ export default function AdminPartners() {
 
                       <td>
 
-                        <span className="partner-type-badge">
-                          {partner.type ||
-                            "—"}
+                        <span
+                          className="partner-type-badge"
+                        >
+                          {
+                            partner.type ||
+                            "—"
+                          }
                         </span>
 
                       </td>
@@ -888,20 +1317,26 @@ export default function AdminPartners() {
                           }
                         </strong>
 
+
                         {partner.email && (
+
                           <div>
                             {
                               partner.email
                             }
                           </div>
+
                         )}
 
+
                         {partner.phone && (
+
                           <div>
                             {
                               partner.phone
                             }
                           </div>
+
                         )}
 
                       </td>
@@ -918,13 +1353,15 @@ export default function AdminPartners() {
                               partner.website
                             }
                             target="_blank"
-                            rel="noreferrer"
+                            rel="noopener noreferrer"
                           >
                             Visit Website
                           </a>
 
                         ) : (
+
                           "—"
+
                         )}
 
                       </td>
@@ -942,9 +1379,12 @@ export default function AdminPartners() {
                               : "inactive"
                           }`}
                         >
+
                           {
-                            partner.status
+                            partner.status ||
+                            "Inactive"
                           }
+
                         </span>
 
                       </td>
@@ -954,13 +1394,11 @@ export default function AdminPartners() {
 
                       <td>
 
-                        {partner.createdAt
-                          ? new Date(
-                              partner.createdAt
-                            ).toLocaleDateString(
-                              "en-GB"
-                            )
-                          : "—"}
+                        {
+                          formatDate(
+                            partner.createdAt
+                          )
+                        }
 
                       </td>
 
@@ -969,7 +1407,9 @@ export default function AdminPartners() {
 
                       <td>
 
-                        <div className="admin-table-actions">
+                        <div
+                          className="admin-table-actions"
+                        >
 
                           <button
                             type="button"
@@ -979,9 +1419,14 @@ export default function AdminPartners() {
                                 partner
                               )
                             }
+                            disabled={
+                              deletingId !==
+                              null
+                            }
                           >
                             Edit
                           </button>
+
 
                           <button
                             type="button"
@@ -991,8 +1436,17 @@ export default function AdminPartners() {
                                 partner._id
                               )
                             }
+                            disabled={
+                              deletingId ===
+                              partner._id
+                            }
                           >
-                            Delete
+
+                            {deletingId ===
+                            partner._id
+                              ? "Deleting..."
+                              : "Delete"}
+
                           </button>
 
                         </div>
@@ -1015,5 +1469,6 @@ export default function AdminPartners() {
       </div>
 
     </div>
+
   );
 }

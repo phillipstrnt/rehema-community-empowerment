@@ -2,42 +2,83 @@ const API =
   import.meta.env.VITE_API_URL ||
   "http://localhost:5000/api";
 
+/* =========================================================
+   GET STORED ADMIN TOKEN
+========================================================= */
 
-export async function api(
-  path,
-  options = {}
-) {
+function getAdminToken() {
+  return (
+    localStorage.getItem("rehema_admin_token") ||
+    sessionStorage.getItem("rehema_admin_token")
+  );
+}
 
+
+/* =========================================================
+   ADMIN API HELPER
+========================================================= */
+
+export async function api(path, options = {}) {
   const isFormData =
     options.body instanceof FormData;
-
 
   const headers = {
     ...(options.headers || {}),
   };
 
 
-  /*
-  Only use JSON Content-Type when
-  the request is NOT FormData.
-  */
+  /* -------------------------------------------------------
+     AUTHENTICATION
+  ------------------------------------------------------- */
 
-  if (!isFormData) {
+  const token = getAdminToken();
 
-    headers["Content-Type"] =
-      "application/json";
-
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
   }
 
 
-  const response = await fetch(
-    `${API}${path}`,
-    {
-      ...options,
-      headers,
-    }
-  );
+  /* -------------------------------------------------------
+     CONTENT TYPE
+     
+     Do NOT set Content-Type manually for FormData.
+     The browser needs to create the multipart boundary.
+  ------------------------------------------------------- */
 
+  if (!isFormData) {
+    headers["Content-Type"] = "application/json";
+  }
+
+
+  /* -------------------------------------------------------
+     REQUEST
+  ------------------------------------------------------- */
+
+  let response;
+
+  try {
+    response = await fetch(
+      `${API}${path}`,
+      {
+        ...options,
+        headers,
+      }
+    );
+  } catch (error) {
+    console.error(
+      "API connection error:",
+      error
+    );
+
+    throw new Error(
+      "Unable to connect to the server. Please make sure the server is running."
+    );
+  }
+
+
+  /* -------------------------------------------------------
+     RESPONSE
+  ------------------------------------------------------- */
 
   const data =
     await response
@@ -45,16 +86,43 @@ export async function api(
       .catch(() => ({}));
 
 
-  if (!response.ok) {
+  /* -------------------------------------------------------
+     AUTHENTICATION FAILURE
+  ------------------------------------------------------- */
+
+  if (response.status === 401) {
+
+    /*
+      Do not immediately redirect here.
+      Let the page decide what to do with
+      the authentication error.
+    */
 
     throw new Error(
       data.message ||
-      "Request failed"
+      "Authentication required. Please log in again."
     );
+  }
 
+
+  /* -------------------------------------------------------
+     OTHER SERVER ERRORS
+  ------------------------------------------------------- */
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+      "Request failed."
+    );
   }
 
 
   return data;
-
 }
+
+
+/* =========================================================
+   DEFAULT EXPORT
+========================================================= */
+
+export default api;
