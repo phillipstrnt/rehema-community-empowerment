@@ -8576,4 +8576,157 @@ body {
 
 
 
+/* =========================================================
+   REHEMA NAVBAR
+========================================================= */
 
+.nav {
+  width: 100%;
+  background: #073b2a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.nav-inner {
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+/* =========================================================
+   LOGO
+========================================================= */
+
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logo-image {
+  width: 155px;
+  height: 62px;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+
+/* =========================================================
+   NAVIGATION LINKS
+========================================================= */
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.nav-links a {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.25s ease;
+}
+
+.nav-links a:hover {
+  color: #b7e4c7;
+}
+
+.nav-links a.active {
+  color: #b7e4c7;
+}
+
+
+
+/* =========================================================
+   DONATE BUTTON
+========================================================= */
+
+.nav-links .nav-donate {
+  background: #ffffff;
+  color: #073b2a !important;
+  border: 2px solid #ffffff;
+  padding: 11px 22px;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+
+.nav-links .nav-donate:hover {
+  background: #b7e4c7;
+  border-color: #b7e4c7;
+  color: #073b2a !important;
+}
+
+
+/* =========================================================
+   MOBILE MENU
+========================================================= */
+
+.menu {
+  display: none;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 900px) {
+
+  .nav-inner {
+    min-height: 70px;
+  }
+
+  .logo-image {
+    width: 135px;
+    height: 55px;
+  }
+
+  .menu {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: #073b2a;
+    padding: 15px 20px 25px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .nav-links a {
+    padding: 15px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .nav-links .btn.small {
+    margin-top: 15px;
+    text-align: center;
+  }
+}

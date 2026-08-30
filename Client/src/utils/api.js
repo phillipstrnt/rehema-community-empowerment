@@ -9,26 +9,21 @@ const API =
 ========================================================= */
 
 function getAdminToken() {
-
   return (
-    localStorage.getItem("adminToken") ||
-    sessionStorage.getItem("adminToken") ||
     localStorage.getItem("rehema_admin_token") ||
     sessionStorage.getItem("rehema_admin_token") ||
     null
   );
-
 }
 
 
 /* =========================================================
-   API REQUEST HELPER
+   ADMIN API REQUEST
 ========================================================= */
 
-export async function api(
-  path,
-  options = {}
-) {
+async function adminFetch(path, options = {}) {
+
+  const token = getAdminToken();
 
   const isFormData =
     options.body instanceof FormData;
@@ -41,62 +36,36 @@ export async function api(
 
   /* -------------------------------------------------------
      JSON CONTENT TYPE
+     Do not manually set this for FormData.
   ------------------------------------------------------- */
 
   if (!isFormData) {
-
     headers["Content-Type"] =
       "application/json";
-
   }
 
 
   /* -------------------------------------------------------
-     ADMIN AUTHENTICATION
-     
-     Automatically attach JWT token.
+     AUTHENTICATION
   ------------------------------------------------------- */
-
-  const token =
-    getAdminToken();
-
 
   if (token) {
-
     headers.Authorization =
       `Bearer ${token}`;
-
   }
 
 
   /* -------------------------------------------------------
-     SEND REQUEST
+     REQUEST
   ------------------------------------------------------- */
 
-  let response;
-
-  try {
-
-    response = await fetch(
-      `${API}${path}`,
-      {
-        ...options,
-        headers,
-      }
-    );
-
-  } catch (error) {
-
-    console.error(
-      "API connection error:",
-      error
-    );
-
-    throw new Error(
-      "Unable to connect to the server. Please make sure the server is running."
-    );
-
-  }
+  const response = await fetch(
+    `${API}${path}`,
+    {
+      ...options,
+      headers,
+    }
+  );
 
 
   /* -------------------------------------------------------
@@ -116,31 +85,15 @@ export async function api(
   if (response.status === 401) {
 
     /*
-      Do not immediately remove the token.
-
-      This allows the page to display the actual
-      authentication error.
+     Do not automatically redirect here.
+     The page can decide how to handle
+     an expired authentication session.
     */
 
     throw new Error(
       data.message ||
-      "Authentication required. Please log in again."
+      "Authentication required."
     );
-
-  }
-
-
-  /* -------------------------------------------------------
-     HANDLE FORBIDDEN
-  ------------------------------------------------------- */
-
-  if (response.status === 403) {
-
-    throw new Error(
-      data.message ||
-      "You do not have permission to perform this action."
-    );
-
   }
 
 
@@ -154,67 +107,29 @@ export async function api(
       data.message ||
       "Request failed."
     );
-
   }
 
 
-  /* -------------------------------------------------------
-     RETURN DATA
-  ------------------------------------------------------- */
-
   return data;
-
 }
 
 
 /* =========================================================
-   GET CURRENT ADMIN TOKEN
+   DEFAULT EXPORT
 ========================================================= */
 
-export function getToken() {
-
-  return getAdminToken();
-
-}
+export default adminFetch;
 
 
 /* =========================================================
-   LOGOUT
+   NAMED EXPORT
+   Allows either:
+
+   import adminFetch from "../utils/api";
+
+   OR
+
+   import { api } from "../utils/api";
 ========================================================= */
 
-export function logoutAdmin() {
-
-  localStorage.removeItem(
-    "adminToken"
-  );
-
-  localStorage.removeItem(
-    "adminUser"
-  );
-
-  localStorage.removeItem(
-    "rehema_admin_token"
-  );
-
-  localStorage.removeItem(
-    "rehema_admin_user"
-  );
-
-
-  sessionStorage.removeItem(
-    "adminToken"
-  );
-
-  sessionStorage.removeItem(
-    "adminUser"
-  );
-
-  sessionStorage.removeItem(
-    "rehema_admin_token"
-  );
-
-  sessionStorage.removeItem(
-    "rehema_admin_user"
-  );
-
-}
+export const api = adminFetch;

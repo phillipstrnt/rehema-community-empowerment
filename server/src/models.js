@@ -1,8 +1,11 @@
+
 import mongoose from "mongoose";
 
-// ===============================
-// PROGRAM
-// ===============================
+
+/* =========================================================
+   PROGRAM
+========================================================= */
+
 const programSchema = new mongoose.Schema(
   {
     title: {
@@ -43,9 +46,11 @@ const programSchema = new mongoose.Schema(
   }
 );
 
-// ===============================
-// POST / BLOG
-// ===============================
+
+/* =========================================================
+   POST / NEWS
+========================================================= */
+
 const postSchema = new mongoose.Schema(
   {
     title: {
@@ -79,6 +84,7 @@ const postSchema = new mongoose.Schema(
     author: {
       type: String,
       trim: true,
+      default: "REHEMA Foundation",
     },
 
     publishedAt: {
@@ -90,15 +96,54 @@ const postSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    /* =====================================================
+       FACEBOOK PUBLISHING
+    ===================================================== */
+
+    facebook: {
+      published: {
+        type: Boolean,
+        default: false,
+      },
+
+      status: {
+        type: String,
+        enum: [
+          "not_published",
+          "published",
+          "failed",
+        ],
+        default: "not_published",
+      },
+
+      postId: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+
+      publishedAt: {
+        type: Date,
+      },
+
+      error: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+    },
   },
   {
     timestamps: true,
   }
 );
 
-// ===============================
-// EVENT
-// ===============================
+
+/* =========================================================
+   EVENT
+========================================================= */
+
 const eventSchema = new mongoose.Schema(
   {
     title: {
@@ -141,9 +186,11 @@ const eventSchema = new mongoose.Schema(
   }
 );
 
-// ===============================
-// GALLERY
-// ===============================
+
+/* =========================================================
+   GALLERY
+========================================================= */
+
 const gallerySchema = new mongoose.Schema(
   {
     title: {
@@ -153,7 +200,10 @@ const gallerySchema = new mongoose.Schema(
 
     type: {
       type: String,
-      enum: ["image", "video"],
+      enum: [
+        "image",
+        "video",
+      ],
       default: "image",
     },
 
@@ -177,9 +227,11 @@ const gallerySchema = new mongoose.Schema(
   }
 );
 
-// ===============================
-// VOLUNTEER
-// ===============================
+
+/* =========================================================
+   VOLUNTEER
+========================================================= */
+
 const volunteerSchema = new mongoose.Schema(
   {
     name: {
@@ -212,6 +264,12 @@ const volunteerSchema = new mongoose.Schema(
 
     status: {
       type: String,
+      enum: [
+        "new",
+        "reviewed",
+        "accepted",
+        "rejected",
+      ],
       default: "new",
     },
   },
@@ -221,9 +279,10 @@ const volunteerSchema = new mongoose.Schema(
 );
 
 
-// ===============================
-// PARTNER
-// ===============================
+/* =========================================================
+   PARTNER
+========================================================= */
+
 const partnerSchema = new mongoose.Schema(
   {
     organization: {
@@ -275,9 +334,18 @@ const partnerSchema = new mongoose.Schema(
       trim: true,
     },
 
+    message: {
+      type: String,
+      trim: true,
+    },
+
     status: {
       type: String,
-      enum: ["Active", "Inactive"],
+      enum: [
+        "Active",
+        "Inactive",
+        "new",
+      ],
       default: "Active",
     },
   },
@@ -287,12 +355,105 @@ const partnerSchema = new mongoose.Schema(
 );
 
 
-// ===============================
-// DONATION
-// ===============================
+/* =========================================================
+   DONATION
+========================================================= */
+
 const donationSchema = new mongoose.Schema(
   {
     donorName: {
+      type: String,
+      trim: true,
+    },
+
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
+
+    phone: {
+      type: String,
+      trim: true,
+    },
+
+    amount: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+
+    method: {
+      type: String,
+      enum: [
+        "mobile_money",
+        "bank",
+      ],
+      required: true,
+    },
+
+    reference: {
+      type: String,
+      trim: true,
+    },
+
+    message: {
+      type: String,
+      trim: true,
+    },
+
+    status: {
+      type: String,
+      enum: [
+        "pending",
+        "confirmed",
+        "cancelled",
+      ],
+      default: "pending",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+
+/* =========================================================
+   NEWSLETTER
+========================================================= */
+
+const newsletterSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+
+    status: {
+      type: String,
+      enum: [
+        "active",
+        "unsubscribed",
+      ],
+      default: "active",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+
+/* =========================================================
+   CONTACT / MESSAGES
+========================================================= */
+
+const contactSchema = new mongoose.Schema(
+  {
+    name: {
       type: String,
       required: true,
       trim: true,
@@ -307,187 +468,17 @@ const donationSchema = new mongoose.Schema(
 
     phone: {
       type: String,
-      required: true,
       trim: true,
     },
 
-    amount: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
-
-    currency: {
+    subject: {
       type: String,
-      default: "UGX",
-      uppercase: true,
-      trim: true,
-    },
-
-    method: {
-      type: String,
-      enum: [
-        "card",
-        "mobile_money",
-        "bank",
-      ],
-      required: true,
-    },
-
-    reference: {
-      type: String,
-      unique: true,
-      sparse: true,
-      trim: true,
-    },
-
-    transactionId: {
-      type: String,
-      trim: true,
-    },
-
-    status: {
-      type: String,
-      enum: [
-        "pending",
-        "successful",
-        "failed",
-        "cancelled",
-      ],
-      default: "pending",
-    },
-
-    message: {
-      type: String,
-      trim: true,
-    },
-
-    paidAt: {
-      type: Date,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
-
-// ===============================
-// NEWSLETTER
-// ===============================
-const newsletterSchema = new mongoose.Schema(
-  {
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
-
-
-{/*======================================
-         CONTACT
-  ======================================*/}
-const contactSchema =
-  new mongoose.Schema(
-    {
-      name: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-
-      email: {
-        type: String,
-        required: true,
-        trim: true,
-        lowercase: true,
-      },
-
-      phone: {
-        type: String,
-        trim: true,
-      },
-
-      subject: {
-        type: String,
-        trim: true,
-      },
-
-      message: {
-        type: String,
-        required: true,
-      },
-
-      read: {
-        type: Boolean,
-        default: false,
-      },
-
-      status: {
-        type: String,
-        enum: [
-          "new",
-          "read",
-        ],
-        default: "new",
-      },
-    },
-
-    {
-      timestamps: true,
-    }
-  );
-
-
-export const Contact =
-  mongoose.model(
-    "Contact",
-    contactSchema
-  );
-
-
-// ===============================
-// NOTIFICATION
-// ===============================
-const notificationSchema = new mongoose.Schema(
-  {
-    type: {
-      type: String,
-      enum: [
-        "volunteer",
-        "donation",
-        "message",
-        "newsletter",
-        "partner",
-        "program",
-        "event",
-        "post",
-        "gallery",
-        "system",
-      ],
-      required: true,
-    },
-
-    title: {
-      type: String,
-      required: true,
       trim: true,
     },
 
     message: {
       type: String,
       required: true,
-      trim: true,
-    },
-
-    link: {
-      type: String,
       trim: true,
     },
 
@@ -495,50 +486,93 @@ const notificationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    status: {
+      type: String,
+      enum: [
+        "new",
+        "read",
+      ],
+      default: "new",
+    },
   },
   {
     timestamps: true,
   }
 );
 
-// ===============================
-// MODELS
-// ===============================
 
-export const Program = mongoose.model("Program", programSchema);
+/* =========================================================
+   MONGOOSE MODELS
+========================================================= */
 
-export const Post = mongoose.model("Post", postSchema);
+export const Program =
+  mongoose.models.Program ||
+  mongoose.model(
+    "Program",
+    programSchema
+  );
 
-export const Event = mongoose.model("Event", eventSchema);
 
-export const Gallery = mongoose.model("Gallery", gallerySchema);
+export const Post =
+  mongoose.models.Post ||
+  mongoose.model(
+    "Post",
+    postSchema
+  );
 
-export const Volunteer = mongoose.model(
-  "Volunteer",
-  volunteerSchema
-);
 
-export const Partner = mongoose.model(
-  "Partner",
-  partnerSchema
-);
+export const Event =
+  mongoose.models.Event ||
+  mongoose.model(
+    "Event",
+    eventSchema
+  );
 
-export const Donation = mongoose.model(
-  "Donation",
-  donationSchema
-);
 
-export const Newsletter = mongoose.model(
-  "Newsletter",
-  newsletterSchema
-);
+export const Gallery =
+  mongoose.models.Gallery ||
+  mongoose.model(
+    "Gallery",
+    gallerySchema
+  );
 
-export const Contact = mongoose.model(
-  "Contact",
-  contactSchema
-);
 
-export const Notification = mongoose.model(
-  "Notification",
-  notificationSchema
-);
+export const Volunteer =
+  mongoose.models.Volunteer ||
+  mongoose.model(
+    "Volunteer",
+    volunteerSchema
+  );
+
+
+export const Partner =
+  mongoose.models.Partner ||
+  mongoose.model(
+    "Partner",
+    partnerSchema
+  );
+
+
+export const Donation =
+  mongoose.models.Donation ||
+  mongoose.model(
+    "Donation",
+    donationSchema
+  );
+
+
+export const Newsletter =
+  mongoose.models.Newsletter ||
+  mongoose.model(
+    "Newsletter",
+    newsletterSchema
+  );
+
+
+export const Contact =
+  mongoose.models.Contact ||
+  mongoose.model(
+    "Contact",
+    contactSchema
+  );

@@ -1,38 +1,37 @@
-import React from "react";
+
+import React, { useState } from "react";
 
 import {
   Link,
   NavLink
 } from "react-router-dom";
 
-import {
-  useState
-} from "react";
-
 
 export default function Navbar() {
 
-  const [open, setOpen] =
-    useState(false);
+  const [open, setOpen] = useState(false);
 
 
   const links = [
-
     ["/", "Home"],
-
     ["/about", "About"],
-
     ["/programs", "Programs"],
-
     ["/news", "News"],
-
     ["/gallery", "Gallery"],
-
     ["/get-involved", "Get Involved"],
-
     ["/contact", "Contact"]
-
   ];
+
+
+  function closeMenu() {
+    setOpen(false);
+
+    // Always return the page to the top
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }
 
 
   return (
@@ -41,22 +40,47 @@ export default function Navbar() {
 
       <div className="container nav-inner">
 
+
+        {/* =====================================================
+            REHEMA LOGO
+        ===================================================== */}
+
         <Link
           to="/"
           className="logo"
+          onClick={() => setOpen(false)}
         >
-          REHEMA<span>.</span>
+          <img
+            src="/images/rehema/logo.png"
+            alt="REHEMA Foundation"
+            className="logo-image"
+          />
         </Link>
 
+        {/* =====================================================
+            MOBILE MENU BUTTON
+        ===================================================== */}
 
         <button
+          type="button"
           className="menu"
           onClick={() => setOpen(!open)}
-          aria-label="Toggle navigation"
+          aria-label={
+            open
+              ? "Close navigation menu"
+              : "Open navigation menu"
+          }
+          aria-expanded={open}
         >
-          ☰
+
+          {open ? "✕" : "☰"}
+
         </button>
 
+
+        {/* =====================================================
+            NAVIGATION
+        ===================================================== */}
 
         <nav
           className={
@@ -72,13 +96,12 @@ export default function Navbar() {
               <NavLink
                 key={to}
                 to={to}
-                onClick={() => setOpen(false)}
+                onClick={closeMenu}
 
-                className={
-                  ({ isActive }) =>
-                    isActive
-                      ? "active"
-                      : ""
+                className={({ isActive }) =>
+                  isActive
+                    ? "active"
+                    : ""
                 }
               >
 
@@ -90,12 +113,18 @@ export default function Navbar() {
           )}
 
 
+          {/* ===================================================
+              DONATE BUTTON
+          =================================================== */}
+
           <Link
-            className="btn small"
+            className="btn small nav-donate"
             to="/donate"
-            onClick={() => setOpen(false)}
+            onClick={closeMenu}
           >
+
             Donate
+
           </Link>
 
         </nav>

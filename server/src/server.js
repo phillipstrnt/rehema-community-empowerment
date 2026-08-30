@@ -1,3 +1,4 @@
+
 import "dotenv/config";
 
 import express from "express";
@@ -10,6 +11,8 @@ import adminAuthRoutes from "./adminAuth.js";
 import adminUserRoutes from "./routes/adminUserRoutes.js";
 
 import uploadRoutes from "./upload.js";
+import facebookRoutes from "./facebook.js";
+
 import { connectDB } from "./db.js";
 import routes from "./routes.js";
 
@@ -123,6 +126,16 @@ app.use(
 
 
 /* =========================================================
+   FACEBOOK PUBLISHING
+========================================================= */
+
+app.use(
+  "/api/admin/facebook",
+  facebookRoutes
+);
+
+
+/* =========================================================
    GENERAL API ROUTES
 ========================================================= */
 
@@ -139,11 +152,14 @@ app.use(
 app.get(
   "/",
   (_req, res) => {
+
     res.json({
       success: true,
+
       message:
         "REHEMA API is running",
     });
+
   }
 );
 
@@ -154,11 +170,14 @@ app.get(
 
 app.use(
   (_req, res) => {
+
     res.status(404).json({
       success: false,
+
       message:
         "Route not found",
     });
+
   }
 );
 
@@ -183,11 +202,14 @@ app.use(
     res.status(
       error.status || 500
     ).json({
+
       success: false,
+
       message:
         error.message ||
         "Server error. Please try again later.",
     });
+
   }
 );
 
