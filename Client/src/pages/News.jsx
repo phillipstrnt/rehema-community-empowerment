@@ -1,99 +1,857 @@
-import React from "react";
 
-import {
-  useEffect,
-  useState
-} from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import "../styles/News.css";
 
-import {
-  Link
-} from "react-router-dom";
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-import {
-  api
-} from "../api";
 
+const fallbackStories = [
+  {
+    _id: "fallback-1",
+    title:
+      "REHEMA Strengthens Community Health Through Outreach and Education",
+    slug: "rehema-strengthens-community-health",
+    excerpt:
+      "REHEMA continues to work with communities to improve access to health information, services and practical public health support.",
+    category: "Community Health",
+    author: "REHEMA",
+    image: "/images/rehema/community.jpg",
+    published: true,
+    date: "2025-08-13",
+  },
+  {
+    _id: "fallback-2",
+    title:
+      "Free Medical Camp Brings Health Services Closer to the Community",
+    slug: "free-medical-camp",
+    excerpt:
+      "A community medical outreach brought health services, screening, consultation and health education closer to residents.",
+    category: "Medical Outreach",
+    author: "REHEMA",
+    image: "/images/rehema/medical-camp.jpg",
+    published: true,
+    date: "2025-08-13",
+  },
+  {
+    _id: "fallback-3",
+    title:
+      "Investing in Maternal and Child Health for a Healthier Future",
+    slug: "maternal-child-health",
+    excerpt:
+      "REHEMA promotes access to maternal, newborn, child and adolescent health information and services.",
+    category: "Maternal & Child Health",
+    author: "REHEMA",
+    image: "/images/rehema/maternal-health.jpg",
+    published: true,
+    date: "2025-07-20",
+  },
+];
+
+
+/* ============================================================
+   FORMAT DATE
+============================================================ */
+
+function formatDate(date) {
+  if (!date) return "REHEMA Update";
+
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "REHEMA Update";
+  }
+
+  return parsedDate.toLocaleDateString("en-UG", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+
+/* ============================================================
+   GET CATEGORY
+============================================================ */
+
+function getCategory(post) {
+  return (
+    post.category ||
+    post.type ||
+    post.program ||
+    "Community Health"
+  );
+}
+
+
+/* ============================================================
+   IMAGE FALLBACK
+============================================================ */
+
+function handleImageError(event) {
+  event.currentTarget.src =
+    "/images/rehema/community.jpg";
+}
+
+
+/* ============================================================
+   NEWS PAGE
+============================================================ */
 
 export default function News() {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [error, setError] = useState("");
 
-  const [posts, setPosts] =
-    useState([]);
-
+  /*
+    ----------------------------------------------------------
+    LOAD POSTS
+    ----------------------------------------------------------
+  */
 
   useEffect(() => {
+    let mounted = true;
 
-    api("/posts")
-      .then(setPosts)
-      .catch(console.error);
+    async function loadPosts() {
+      try {
+        setLoading(true);
+        setError("");
 
+        const response = await fetch(`${API_URL}/posts`);
+
+        if (!response.ok) {
+          throw new Error("Unable to load news.");
+        }
+
+        const data = await response.json();
+
+        const receivedPosts = Array.isArray(data)
+          ? data
+          : Array.isArray(data.posts)
+          ? data.posts
+          : [];
+
+        if (mounted) {
+          setPosts(receivedPosts);
+        }
+      } catch (err) {
+        console.error("News loading error:", err);
+
+        if (mounted) {
+          setError(
+            "We could not load the latest stories right now."
+          );
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadPosts();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
 
+  /*
+    ----------------------------------------------------------
+    USE DATABASE POSTS WHEN AVAILABLE
+    ----------------------------------------------------------
+  */
+
+  const allStories = useMemo(() => {
+    if (posts.length > 0) {
+      return posts.map((post) => ({
+        ...post,
+        category: getCategory(post),
+        image:
+          post.image ||
+          post.imageUrl ||
+          "/images/rehema/community.jpg",
+      }));
+    }
+
+    return fallbackStories;
+  }, [posts]);
+
+
+  /*
+    ----------------------------------------------------------
+    CATEGORIES
+  ----------------------------------------------------------
+  */
+
+  const categories = useMemo(() => {
+    const unique = [
+      ...new Set(
+        allStories.map((story) => getCategory(story))
+      ),
+    ];
+
+    return ["All", ...unique];
+  }, [allStories]);
+
+
+  /*
+    ----------------------------------------------------------
+    FILTER STORIES
+  ----------------------------------------------------------
+  */
+
+  const filteredStories = useMemo(() => {
+    return allStories.filter((story) => {
+      const category = getCategory(story);
+
+      const matchesCategory =
+        activeCategory === "All" ||
+        category === activeCategory;
+
+      const searchText = search.toLowerCase().trim();
+
+      const matchesSearch =
+        !searchText ||
+        story.title?.toLowerCase().includes(searchText) ||
+        story.excerpt?.toLowerCase().includes(searchText) ||
+        story.content?.toLowerCase().includes(searchText);
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [allStories, activeCategory, search]);
+
+
+  /*
+    ----------------------------------------------------------
+    FEATURED STORY
+  ----------------------------------------------------------
+  */
+
+  const featuredStory =
+    filteredStories.length > 0
+      ? filteredStories[0]
+      : null;
+
+  const remainingStories =
+    filteredStories.length > 1
+      ? filteredStories.slice(1)
+      : [];
+
+
   return (
+    <main className="news-page">
 
-    <section className="container section">
+      {/* =====================================================
+          PAGE HERO
+      ===================================================== */}
 
-      <p className="eyebrow">
-        NEWS & STORIES
-      </p>
+      <section className="news-hero">
 
-      <h1>
-        REHEMA Updates
-      </h1>
+        <img
+          src="/images/rehema/news-hero.jpg"
+          alt="REHEMA community stories"
+          className="news-hero-image"
+          onError={handleImageError}
+        />
+
+        <div className="news-hero-overlay"></div>
+
+        <div className="container news-hero-content">
+
+          <span className="news-eyebrow">
+            NEWS & STORIES
+          </span>
+
+          <h1>
+            Stories of health,
+            <br />
+            hope and community impact.
+          </h1>
+
+          <p>
+            Discover the latest stories, community activities,
+            health initiatives and updates from REHEMA as we
+            work alongside communities toward healthier futures.
+          </p>
+
+        </div>
+
+      </section>
 
 
-      <div className="cards">
+      {/* =====================================================
+          INTRO / NEWSLETTER STYLE STRIP
+      ===================================================== */}
 
-        {posts.map(post => (
+      <section className="news-intro">
 
-          <article
-            className="card"
-            key={post._id}
-          >
+        <div className="container news-intro-grid">
 
-            {/* FEATURED IMAGE */}
+          <div>
 
-            {post.image && (
-              <img
-                src={post.image}
-                alt={post.title}
-                className="news-card-image"
-              />
-            )}
-
-
-            <small>
-
-              {new Date(
-                post.publishedAt
-              ).toLocaleDateString()}
-
-            </small>
-
+            <span className="news-small-label">
+              FROM THE FIELD
+            </span>
 
             <h2>
-              {post.title}
+              Real work. Real communities. Real stories.
             </h2>
 
+          </div>
 
-            <p>
-              {post.excerpt}
-            </p>
+          <p>
+            From medical outreach and health education to maternal
+            and child health, HIV prevention, WASH and community
+            empowerment, this is where we share what REHEMA is
+            doing and the difference our collective efforts are
+            making.
+          </p>
+
+        </div>
+
+      </section>
 
 
-            <Link
-              to={`/news/${post.slug}`}
+      {/* =====================================================
+          SEARCH + CATEGORIES
+      ===================================================== */}
+
+      <section className="container news-controls">
+
+        <div className="news-search">
+
+          <span>⌕</span>
+
+          <input
+            type="search"
+            value={search}
+            onChange={(event) =>
+              setSearch(event.target.value)
+            }
+            placeholder="Search stories..."
+            aria-label="Search stories"
+          />
+
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              aria-label="Clear search"
             >
-              Read Story →
-            </Link>
+              ×
+            </button>
+          )}
+
+        </div>
+
+
+        <div className="news-categories">
+
+          {categories.map((category) => (
+            <button
+              type="button"
+              key={category}
+              className={
+                activeCategory === category
+                  ? "news-category active"
+                  : "news-category"
+              }
+              onClick={() =>
+                setActiveCategory(category)
+              }
+            >
+              {category}
+            </button>
+          ))}
+
+        </div>
+
+      </section>
+
+
+      {/* =====================================================
+          ERROR NOTICE
+      ===================================================== */}
+
+      {error && (
+        <div className="container">
+          <div className="news-notice">
+            {error}
+          </div>
+        </div>
+      )}
+
+
+      {/* =====================================================
+          FEATURED STORY
+      ===================================================== */}
+
+      {!loading && featuredStory && (
+        <section className="container news-featured-section">
+
+          <div className="news-section-heading">
+
+            <div>
+              <span className="news-small-label">
+                FEATURED STORY
+              </span>
+
+              <h2>
+                Latest from REHEMA
+              </h2>
+            </div>
+
+            <span className="news-story-count">
+              {filteredStories.length}{" "}
+              {filteredStories.length === 1
+                ? "story"
+                : "stories"}
+            </span>
+
+          </div>
+
+
+          <article className="news-featured-card">
+
+            <div className="news-featured-image">
+
+              <img
+                src={featuredStory.image}
+                alt={featuredStory.title}
+                onError={handleImageError}
+              />
+
+              <span className="news-featured-tag">
+                {getCategory(featuredStory)}
+              </span>
+
+            </div>
+
+
+            <div className="news-featured-content">
+
+              <div className="news-meta">
+
+                <span>
+                  {formatDate(
+                    featuredStory.createdAt ||
+                    featuredStory.date ||
+                    featuredStory.publishedAt
+                  )}
+                </span>
+
+                <span>•</span>
+
+                <span>
+                  {featuredStory.author || "REHEMA"}
+                </span>
+
+              </div>
+
+
+              <h3>
+                {featuredStory.title}
+              </h3>
+
+
+              <p>
+                {featuredStory.excerpt ||
+                  "Read the latest REHEMA story and discover more about our work with communities."}
+              </p>
+
+
+              <Link
+                to={`/news/${featuredStory.slug || featuredStory._id}`}
+                className="news-read-button"
+              >
+                Read Full Story
+                <span>→</span>
+              </Link>
+
+            </div>
 
           </article>
 
-        ))}
+        </section>
+      )}
 
-      </div>
 
-    </section>
+      {/* =====================================================
+          ALL STORIES
+      ===================================================== */}
 
+      <section className="container news-stories-section">
+
+        <div className="news-section-heading">
+
+          <div>
+
+            <span className="news-small-label">
+              LATEST UPDATES
+            </span>
+
+            <h2>
+              Explore our stories
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        {loading ? (
+
+          <div className="news-loading-grid">
+
+            {[1, 2, 3].map((item) => (
+              <div
+                className="news-skeleton"
+                key={item}
+              >
+                <div className="news-skeleton-image"></div>
+
+                <div className="news-skeleton-body">
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                </div>
+              </div>
+            ))}
+
+          </div>
+
+        ) : remainingStories.length > 0 ? (
+
+          <div className="news-grid">
+
+            {remainingStories.map((story, index) => (
+
+              <article
+                className="news-card"
+                key={story._id || story.id || index}
+              >
+
+                <div className="news-card-image">
+
+                  <img
+                    src={story.image}
+                    alt={story.title}
+                    onError={handleImageError}
+                  />
+
+                  <span className="news-card-category">
+                    {getCategory(story)}
+                  </span>
+
+                </div>
+
+
+                <div className="news-card-body">
+
+                  <div className="news-meta">
+
+                    <span>
+                      {formatDate(
+                        story.createdAt ||
+                        story.date ||
+                        story.publishedAt
+                      )}
+                    </span>
+
+                  </div>
+
+
+                  <h3>
+                    {story.title}
+                  </h3>
+
+
+                  <p>
+                    {story.excerpt ||
+                      "Discover more about REHEMA's work and community impact."}
+                  </p>
+
+
+                  <Link
+                    to={`/news/${story.slug || story._id}`}
+                    className="news-card-link"
+                  >
+                    Read Story
+                    <span>→</span>
+                  </Link>
+
+                </div>
+
+              </article>
+
+            ))}
+
+          </div>
+
+        ) : (
+
+          <div className="news-empty">
+
+            <div className="news-empty-icon">
+              ◌
+            </div>
+
+            <h3>
+              No stories found
+            </h3>
+
+            <p>
+              Try another search term or select a different
+              category.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setActiveCategory("All");
+              }}
+              className="news-reset-button"
+            >
+              View All Stories
+            </button>
+
+          </div>
+
+        )}
+
+      </section>
+
+
+      {/* =====================================================
+          PROGRAM STORY BANNERS
+      ===================================================== */}
+
+      <section className="news-topic-section">
+
+        <div className="container">
+
+          <div className="news-section-heading centered">
+
+            <span className="news-small-label">
+              OUR FOCUS
+            </span>
+
+            <h2>
+              Stories from the areas that matter
+            </h2>
+
+            <p>
+              Explore the health and development themes that
+              shape REHEMA's work with communities.
+            </p>
+
+          </div>
+
+
+          <div className="news-topic-grid">
+
+            <Link
+              to="/programs"
+              className="news-topic-card"
+            >
+
+              <img
+                src="/images/rehema/maternal-health.jpg"
+                alt="Maternal and child health"
+                onError={handleImageError}
+              />
+
+              <div className="news-topic-overlay">
+
+                <span>
+                  01
+                </span>
+
+                <h3>
+                  Maternal & Child Health
+                </h3>
+
+                <p>
+                  Supporting healthier mothers, children
+                  and families.
+                </p>
+
+                <strong>
+                  Explore →
+                </strong>
+
+              </div>
+
+            </Link>
+
+
+            <Link
+              to="/programs"
+              className="news-topic-card"
+            >
+
+              <img
+                src="/images/rehema/community.jpg"
+                alt="Community development"
+                onError={handleImageError}
+              />
+
+              <div className="news-topic-overlay">
+
+                <span>
+                  02
+                </span>
+
+                <h3>
+                  Community Development
+                </h3>
+
+                <p>
+                  Empowering people to participate in
+                  healthier communities.
+                </p>
+
+                <strong>
+                  Explore →
+                </strong>
+
+              </div>
+
+            </Link>
+
+
+            <Link
+              to="/programs"
+              className="news-topic-card"
+            >
+
+              <img
+                src="/images/rehema/medical-camp.jpg"
+                alt="Medical outreach"
+                onError={handleImageError}
+              />
+
+              <div className="news-topic-overlay">
+
+                <span>
+                  03
+                </span>
+
+                <h3>
+                  Medical Outreach
+                </h3>
+
+                <p>
+                  Taking essential health information and
+                  services closer to communities.
+                </p>
+
+                <strong>
+                  Explore →
+                </strong>
+
+              </div>
+
+            </Link>
+
+
+            <Link
+              to="/programs"
+              className="news-topic-card"
+            >
+
+              <img
+                src="/images/rehema/health-education.jpg"
+                alt="Health education"
+                onError={handleImageError}
+              />
+
+              <div className="news-topic-overlay">
+
+                <span>
+                  04
+                </span>
+
+                <h3>
+                  Health Education
+                </h3>
+
+                <p>
+                  Equipping communities with practical
+                  health information.
+                </p>
+
+                <strong>
+                  Explore →
+                </strong>
+
+              </div>
+
+            </Link>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      {/* =====================================================
+          NEWS CTA
+      ===================================================== */}
+
+      <section className="news-cta">
+
+        <div className="container news-cta-inner">
+
+          <div>
+
+            <span className="news-small-label">
+              JOIN THE JOURNEY
+            </span>
+
+            <h2>
+              Help us turn stories into action.
+            </h2>
+
+            <p>
+              Volunteer, partner with REHEMA or support our
+              community initiatives and become part of the work
+              happening on the ground.
+            </p>
+
+          </div>
+
+
+          <div className="news-cta-actions">
+
+            <Link
+              to="/get-involved"
+              className="news-cta-primary"
+            >
+              Get Involved
+              <span>→</span>
+            </Link>
+
+            <Link
+              to="/donate"
+              className="news-cta-secondary"
+            >
+              Support REHEMA
+            </Link>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
   );
 }
