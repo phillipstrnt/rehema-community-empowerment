@@ -1,14 +1,18 @@
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Newsletter from "../components/Newsletter";
 import "../styles/Home.css";
 
 /* =====================================================
    ANIMATED COUNTER
 ===================================================== */
 
-function Counter({ end, prefix = "", suffix = "", duration = 1800 }) {
+function Counter({
+  end,
+  prefix = "",
+  suffix = "",
+  duration = 1800
+}) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
@@ -16,7 +20,9 @@ function Counter({ end, prefix = "", suffix = "", duration = 1800 }) {
     let animationFrame;
 
     function animate(currentTime) {
-      if (!startTime) startTime = currentTime;
+      if (!startTime) {
+        startTime = currentTime;
+      }
 
       const progress = Math.min(
         (currentTime - startTime) / duration,
@@ -28,11 +34,13 @@ function Counter({ end, prefix = "", suffix = "", duration = 1800 }) {
       setCount(value);
 
       if (progress < 1) {
-        animationFrame = requestAnimationFrame(animate);
+        animationFrame =
+          requestAnimationFrame(animate);
       }
     }
 
-    animationFrame = requestAnimationFrame(animate);
+    animationFrame =
+      requestAnimationFrame(animate);
 
     return () => {
       cancelAnimationFrame(animationFrame);
@@ -63,7 +71,7 @@ export default function Home() {
 
       <section className="home-hero">
 
-        {/* BACKGROUND IMAGE */}
+        {/* HERO IMAGE */}
 
         <img
           src="/images/rehema/hero.jpg"
@@ -95,13 +103,14 @@ export default function Home() {
             </h1>
 
             <p>
-              REHEMA works with communities across Uganda to promote
-              better health through medical outreach, health education,
-              disease prevention, community engagement and partnerships.
+              REHEMA works with communities across Uganda
+              to promote better health through medical
+              outreach, health education, disease prevention,
+              community engagement and partnerships.
             </p>
 
 
-            {/* BUTTONS */}
+            {/* HERO BUTTONS */}
 
             <div className="home-actions">
 
@@ -135,6 +144,7 @@ export default function Home() {
             </div>
 
             <div>
+
               <strong>
                 Community First
               </strong>
@@ -142,11 +152,13 @@ export default function Home() {
               <span>
                 Health • Education • Empowerment
               </span>
+
             </div>
 
           </div>
 
         </div>
+
 
         {/* SCROLL INDICATOR */}
 
@@ -182,7 +194,10 @@ export default function Home() {
           <div className="home-counter">
 
             <strong>
-              <Counter end={5} suffix="+" />
+              <Counter
+                end={5}
+                suffix="+"
+              />
             </strong>
 
             <span>
@@ -195,7 +210,10 @@ export default function Home() {
           <div className="home-counter">
 
             <strong>
-              <Counter end={100} suffix="%" />
+              <Counter
+                end={100}
+                suffix="%"
+              />
             </strong>
 
             <span>
@@ -208,7 +226,10 @@ export default function Home() {
           <div className="home-counter">
 
             <strong>
-              <Counter end={1} suffix="+" />
+              <Counter
+                end={1}
+                suffix="+"
+              />
             </strong>
 
             <span>
@@ -229,6 +250,8 @@ export default function Home() {
       <section className="container home-section home-introduction">
 
         <div className="home-two-column">
+
+          {/* IMAGE */}
 
           <div className="home-image-wrapper">
 
@@ -253,6 +276,8 @@ export default function Home() {
           </div>
 
 
+          {/* CONTENT */}
+
           <div className="home-section-content">
 
             <p className="home-eyebrow">
@@ -264,22 +289,25 @@ export default function Home() {
             </h2>
 
             <p>
-              REHEMA is committed to improving health and wellbeing
-              by working directly with communities and supporting
-              practical solutions to local health challenges.
+              REHEMA is committed to improving health and
+              wellbeing by working directly with communities
+              and supporting practical solutions to local
+              health challenges.
             </p>
 
             <p>
-              Our work brings together medical outreach, health
-              education, disease prevention, community engagement
-              and partnerships that help communities access useful
-              information and appropriate services.
+              Our work brings together medical outreach,
+              health education, disease prevention,
+              community engagement and partnerships that
+              help communities access useful information
+              and appropriate services.
             </p>
 
             <p>
-              We believe lasting improvements happen when communities
-              are informed, involved and empowered to participate in
-              decisions affecting their health.
+              We believe lasting improvements happen when
+              communities are informed, involved and
+              empowered to participate in decisions
+              affecting their health.
             </p>
 
             <Link
@@ -315,15 +343,17 @@ export default function Home() {
             </h2>
 
             <p>
-              Through partnerships, community support and dedicated
-              resources, REHEMA continues working toward healthier
-              communities.
+              Through partnerships, community support and
+              dedicated resources, REHEMA continues working
+              toward healthier communities.
             </p>
 
           </div>
 
 
           <div className="home-funding-grid">
+
+            {/* FUNDING CARD */}
 
             <div className="home-funding-card">
 
@@ -343,12 +373,14 @@ export default function Home() {
               </h3>
 
               <p>
-                Resources mobilized toward community health
-                activities and outreach.
+                Resources mobilized toward community
+                health activities and outreach.
               </p>
 
             </div>
 
+
+            {/* PROGRAM CARD */}
 
             <div className="home-funding-card featured">
 
@@ -368,12 +400,14 @@ export default function Home() {
               </h3>
 
               <p>
-                Multiple areas of intervention supporting health,
-                prevention, education and empowerment.
+                Multiple areas of intervention supporting
+                health, prevention, education and empowerment.
               </p>
 
             </div>
 
+
+            {/* COMMUNITY CARD */}
 
             <div className="home-funding-card">
 
@@ -393,8 +427,8 @@ export default function Home() {
               </h3>
 
               <p>
-                Our programs are designed around the needs of the
-                communities we serve.
+                Our programs are designed around the needs
+                of the communities we serve.
               </p>
 
             </div>
@@ -425,8 +459,9 @@ export default function Home() {
             </h2>
 
             <p>
-              Our work focuses on health initiatives that connect
-              communities with knowledge, services and opportunities.
+              Our work focuses on health initiatives that
+              connect communities with knowledge, services
+              and opportunities.
             </p>
 
           </div>
@@ -434,7 +469,9 @@ export default function Home() {
 
           <div className="home-program-grid">
 
-            {/* CARD 1 */}
+            {/* =================================================
+                PROGRAM 01
+            ================================================= */}
 
             <article className="home-program-card">
 
@@ -458,8 +495,9 @@ export default function Home() {
                 </h3>
 
                 <p>
-                  Bringing health services, screening, consultation
-                  and health information closer to communities.
+                  Bringing health services, screening,
+                  consultation and health information
+                  closer to communities.
                 </p>
 
                 <Link to="/programs">
@@ -471,7 +509,9 @@ export default function Home() {
             </article>
 
 
-            {/* CARD 2 */}
+            {/* =================================================
+                PROGRAM 02
+            ================================================= */}
 
             <article className="home-program-card">
 
@@ -508,7 +548,9 @@ export default function Home() {
             </article>
 
 
-            {/* CARD 3 */}
+            {/* =================================================
+                PROGRAM 03
+            ================================================= */}
 
             <article className="home-program-card">
 
@@ -532,8 +574,9 @@ export default function Home() {
                 </h3>
 
                 <p>
-                  Supporting healthier mothers, families and
-                  communities through education and access to services.
+                  Supporting healthier mothers, families
+                  and communities through education and
+                  access to services.
                 </p>
 
                 <Link to="/programs">
@@ -545,7 +588,9 @@ export default function Home() {
             </article>
 
 
-            {/* CARD 4 */}
+            {/* =================================================
+                PROGRAM 04
+            ================================================= */}
 
             <article className="home-program-card">
 
@@ -569,8 +614,8 @@ export default function Home() {
                 </h3>
 
                 <p>
-                  Promoting prevention, testing, treatment linkage
-                  and access to appropriate services.
+                  Promoting prevention, testing, treatment
+                  linkage and access to appropriate services.
                 </p>
 
                 <Link to="/programs">
@@ -582,7 +627,9 @@ export default function Home() {
             </article>
 
 
-            {/* CARD 5 */}
+            {/* =================================================
+                PROGRAM 05
+            ================================================= */}
 
             <article className="home-program-card">
 
@@ -606,8 +653,9 @@ export default function Home() {
                 </h3>
 
                 <p>
-                  Helping communities access practical information
-                  that supports informed health decisions.
+                  Helping communities access practical
+                  information that supports informed
+                  health decisions.
                 </p>
 
                 <Link to="/programs">
@@ -619,7 +667,9 @@ export default function Home() {
             </article>
 
 
-            {/* CARD 6 */}
+            {/* =================================================
+                PROGRAM 06
+            ================================================= */}
 
             <article className="home-program-card">
 
@@ -643,8 +693,9 @@ export default function Home() {
                 </h3>
 
                 <p>
-                  Collaborating with organizations, professionals
-                  and stakeholders to strengthen health solutions.
+                  Collaborating with organizations,
+                  professionals and stakeholders to
+                  strengthen health solutions.
                 </p>
 
                 <Link to="/get-involved">
@@ -682,20 +733,23 @@ export default function Home() {
 
             <p>
               REHEMA held a free medical camp on
-              <strong> 13 August 2025</strong>, bringing health
-              services and information closer to members of the
-              community.
+              <strong> 13 August 2025</strong>, bringing
+              health services and information closer to
+              members of the community.
             </p>
 
             <p>
-              The experience strengthened our commitment to expanding
-              community outreach and building partnerships that can
-              help address health challenges at the local level.
+              The experience strengthened our commitment
+              to expanding community outreach and building
+              partnerships that can help address health
+              challenges at the local level.
             </p>
+
 
             <div className="home-mini-stats">
 
               <div>
+
                 <strong>
                   2025
                 </strong>
@@ -703,9 +757,11 @@ export default function Home() {
                 <span>
                   Medical Camp
                 </span>
+
               </div>
 
               <div>
+
                 <strong>
                   Free
                 </strong>
@@ -713,9 +769,11 @@ export default function Home() {
                 <span>
                   Community Outreach
                 </span>
+
               </div>
 
             </div>
+
 
             <Link
               to="/news"
@@ -792,22 +850,25 @@ export default function Home() {
               </p>
 
               <p>
-                REHEMA was founded with a commitment to supporting
-                communities through practical public health initiatives,
-                health education and stronger community engagement.
+                REHEMA was founded with a commitment to
+                supporting communities through practical
+                public health initiatives, health education
+                and stronger community engagement.
               </p>
 
               <p>
                 Through REHEMA, I am passionate about creating
-                opportunities for communities to better understand
-                health challenges, access appropriate services and
-                participate in solutions that improve wellbeing.
+                opportunities for communities to better
+                understand health challenges, access appropriate
+                services and participate in solutions that
+                improve wellbeing.
               </p>
 
               <p>
-                Our approach is grounded in evidence, compassion,
-                collaboration and the belief that communities should
-                be active participants in shaping healthier futures.
+                Our approach is grounded in evidence,
+                compassion, collaboration and the belief that
+                communities should be active participants in
+                shaping healthier futures.
               </p>
 
               <div className="home-founder-signature">
@@ -840,8 +901,9 @@ export default function Home() {
           </h2>
 
           <p>
-            We focus on practical action, meaningful partnerships
-            and solutions that respond to the people we serve.
+            We focus on practical action, meaningful
+            partnerships and solutions that respond to
+            the people we serve.
           </p>
 
         </div>
@@ -850,39 +912,76 @@ export default function Home() {
         <div className="home-values-grid">
 
           <div className="home-value-card">
-            <div className="home-value-icon">01</div>
-            <h3>Community First</h3>
+
+            <div className="home-value-icon">
+              01
+            </div>
+
+            <h3>
+              Community First
+            </h3>
+
             <p>
-              We listen to communities and place their needs at
-              the center of our work.
+              We listen to communities and place their
+              needs at the center of our work.
             </p>
+
           </div>
 
-          <div className="home-value-card">
-            <div className="home-value-icon">02</div>
-            <h3>Evidence Based</h3>
-            <p>
-              We promote health information and interventions
-              informed by public health knowledge.
-            </p>
-          </div>
 
           <div className="home-value-card">
-            <div className="home-value-icon">03</div>
-            <h3>Partnership</h3>
+
+            <div className="home-value-icon">
+              02
+            </div>
+
+            <h3>
+              Evidence Based
+            </h3>
+
             <p>
-              Collaboration helps create stronger and more
-              sustainable health outcomes.
+              We promote health information and
+              interventions informed by public health
+              knowledge.
             </p>
+
           </div>
 
+
           <div className="home-value-card">
-            <div className="home-value-icon">04</div>
-            <h3>Lasting Impact</h3>
+
+            <div className="home-value-icon">
+              03
+            </div>
+
+            <h3>
+              Partnership
+            </h3>
+
             <p>
-              We aim to create initiatives that continue making
-              a difference beyond individual activities.
+              Collaboration helps create stronger and
+              more sustainable health outcomes.
             </p>
+
+          </div>
+
+
+          <div className="home-value-card">
+
+            <div className="home-value-icon">
+              04
+            </div>
+
+            <h3>
+              Lasting Impact
+            </h3>
+
+            <p>
+              We aim to create initiatives that continue
+              making a difference beyond individual
+              activities.
+            </p>
+
           </div>
 
         </div>
@@ -909,9 +1008,9 @@ export default function Home() {
             </h2>
 
             <p>
-              REHEMA is grateful for organizations and partners
-              who believe in community health and sustainable
-              development.
+              REHEMA is grateful for organizations and
+              partners who believe in community health
+              and sustainable development.
             </p>
 
           </div>
@@ -940,8 +1039,9 @@ export default function Home() {
               </h3>
 
               <p>
-                Our key sponsor supporting REHEMA's commitment
-                to community health and empowerment.
+                Our key sponsor supporting REHEMA's
+                commitment to community health and
+                empowerment.
               </p>
 
             </div>
@@ -954,7 +1054,7 @@ export default function Home() {
 
 
       {/* =================================================
-          CTA
+          CALL TO ACTION
       ================================================= */}
 
       <section className="home-cta-section">
@@ -970,9 +1070,9 @@ export default function Home() {
           </h2>
 
           <p>
-            Whether you want to volunteer, partner with REHEMA,
-            support our programs or stay informed, there is
-            a place for you.
+            Whether you want to volunteer, partner with
+            REHEMA, support our programs or stay informed,
+            there is a place for you.
           </p>
 
 
@@ -1000,10 +1100,13 @@ export default function Home() {
 
 
       {/* =================================================
-          NEWSLETTER
+          NOTE:
+          NEWSLETTER IS NO LONGER HERE.
+          
+          It is now inside Footer.jsx so that the
+          newsletter appears uniformly across all
+          public pages.
       ================================================= */}
-
-      <Newsletter />
 
 
       {/* =================================================

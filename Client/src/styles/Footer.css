@@ -1,0 +1,304 @@
+/* =====================================================
+   REHEMA FOOTER
+===================================================== */
+
+.site-footer {
+  background: #092f2a;
+  color: #ffffff;
+  margin-top: 0;
+}
+
+
+/* =====================================================
+   NEWSLETTER
+===================================================== */
+
+.footer-newsletter {
+  background: #0d3b35;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-newsletter-inner {
+  min-height: 220px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 50px;
+  padding-top: 35px;
+  padding-bottom: 35px;
+}
+
+.footer-newsletter-text {
+  max-width: 570px;
+}
+
+.footer-eyebrow {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #72d7a8;
+}
+
+.footer-newsletter-text h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  line-height: 1.15;
+  color: #ffffff;
+}
+
+.footer-newsletter-text p {
+  margin: 0;
+  max-width: 520px;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.7;
+}
+
+
+/* =====================================================
+   MAIN FOOTER
+===================================================== */
+
+.footer-main {
+  padding: 55px 0 45px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 0.8fr 0.8fr 1.3fr;
+  gap: 45px;
+  align-items: start;
+}
+
+
+/* =====================================================
+   BRAND
+===================================================== */
+
+.footer-brand {
+  max-width: 350px;
+}
+
+.footer-logo {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.footer-logo img {
+  width: 135px;
+  height: auto;
+  max-height: 70px;
+  object-fit: contain;
+  object-position: left center;
+  background: #ffffff;
+  padding: 7px 10px;
+  border-radius: 8px;
+}
+
+.footer-brand p {
+  margin: 0 0 15px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.footer-read-more {
+  color: #72d7a8;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: 0.25s ease;
+}
+
+.footer-read-more:hover {
+  color: #ffffff;
+}
+
+
+/* =====================================================
+   FOOTER COLUMNS
+===================================================== */
+
+.footer-column h3 {
+  margin: 0 0 18px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column li {
+  margin-bottom: 10px;
+}
+
+.footer-column li a {
+  color: rgba(255, 255, 255, 0.66);
+  text-decoration: none;
+  font-size: 0.88rem;
+  transition: all 0.25s ease;
+}
+
+.footer-column li a:hover {
+  color: #72d7a8;
+  padding-left: 3px;
+}
+
+
+/* =====================================================
+   CONTACT
+===================================================== */
+
+.footer-contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.footer-contact-icon {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(114, 215, 168, 0.12);
+  border-radius: 7px;
+  font-size: 0.85rem;
+}
+
+.footer-contact-item small {
+  display: block;
+  margin-bottom: 3px;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.footer-contact-item a {
+  color: rgba(255, 255, 255, 0.78);
+  text-decoration: none;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  transition: 0.25s ease;
+}
+
+.footer-contact-item a:hover {
+  color: #72d7a8;
+}
+
+.footer-contact-item p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+
+/* =====================================================
+   FOOTER BOTTOM
+===================================================== */
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: #072722;
+}
+
+.footer-bottom-inner {
+  min-height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.footer-bottom p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.78rem;
+}
+
+.footer-social a,
+.footer-bottom-links a {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 0.78rem;
+  transition: 0.25s ease;
+}
+
+.footer-social a:hover,
+.footer-bottom-links a:hover {
+  color: #72d7a8;
+}
+
+.footer-bottom-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1000px) {
+
+  .footer-newsletter-inner {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px 30px;
+  }
+
+}
+
+
+@media (max-width: 650px) {
+
+  .footer-newsletter-inner {
+    min-height: auto;
+    padding: 35px 20px;
+  }
+
+  .footer-main {
+    padding: 40px 0 30px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .footer-brand {
+    max-width: 100%;
+  }
+
+  .footer-logo img {
+    width: 120px;
+  }
+
+  .footer-bottom-inner {
+    min-height: auto;
+    padding: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .footer-bottom-links {
+    gap: 15px;
+  }
+
+}

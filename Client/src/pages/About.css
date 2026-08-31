@@ -1,0 +1,854 @@
+
+/* =========================================================
+   REHEMA ABOUT PAGE
+========================================================= */
+
+.about-page {
+  background: #ffffff;
+  color: #18352d;
+  overflow: hidden;
+}
+
+.about-page .container {
+  width: min(1180px, 92%);
+  margin: 0 auto;
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.about-hero {
+  min-height: 620px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.about-hero-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.about-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(3, 38, 27, 0.88),
+      rgba(3, 38, 27, 0.60),
+      rgba(3, 38, 27, 0.25)
+    );
+}
+
+.about-hero-content {
+  position: relative;
+  z-index: 2;
+  color: #ffffff;
+  padding: 100px 0;
+}
+
+.about-eyebrow {
+  color: #16805b;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.about-hero .about-eyebrow {
+  color: #b9efd8;
+}
+
+.about-hero h1 {
+  max-width: 760px;
+  font-size: clamp(2.8rem, 6vw, 5.5rem);
+  line-height: 0.98;
+  margin: 0 0 28px;
+  letter-spacing: -0.04em;
+}
+
+.about-hero-content > p:not(.about-eyebrow) {
+  max-width: 690px;
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: rgba(255,255,255,0.9);
+}
+
+.about-hero-actions,
+.about-cta-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 32px;
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.about-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  padding: 0 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 750;
+  transition: all 0.25s ease;
+}
+
+.about-btn-primary {
+  background: #16805b;
+  color: #ffffff;
+}
+
+.about-btn-primary:hover {
+  background: #0e6246;
+  transform: translateY(-2px);
+}
+
+.about-btn-light {
+  background: #ffffff;
+  color: #073b2a;
+}
+
+.about-btn-light:hover {
+  background: #d8f3e7;
+  transform: translateY(-2px);
+}
+
+
+/* =========================================================
+   GENERAL SECTIONS
+========================================================= */
+
+.about-section {
+  padding: 100px 0;
+}
+
+.about-section-heading {
+  max-width: 760px;
+  margin-bottom: 55px;
+}
+
+.about-section-heading h2,
+.about-content h2,
+.about-feature-content h2,
+.about-partnership-grid h2 {
+  color: #12382d;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  margin: 0 0 20px;
+}
+
+.about-section-heading > p:last-child {
+  color: #60736c;
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+
+/* =========================================================
+   INTRODUCTION
+========================================================= */
+
+.about-intro {
+  padding-bottom: 120px;
+}
+
+.about-intro-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.about-image-column {
+  position: relative;
+}
+
+.about-main-image {
+  width: 100%;
+  height: 570px;
+  object-fit: cover;
+  border-radius: 20px;
+  display: block;
+}
+
+.about-image-label {
+  position: absolute;
+  left: 25px;
+  bottom: 25px;
+  background: rgba(255,255,255,0.95);
+  padding: 17px 22px;
+  border-radius: 12px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+}
+
+.about-image-label strong {
+  color: #073b2a;
+  font-size: 1.1rem;
+}
+
+.about-image-label span {
+  color: #657871;
+  font-size: 0.78rem;
+  margin-top: 4px;
+}
+
+.about-content p {
+  color: #5c7068;
+  line-height: 1.85;
+  margin: 0 0 18px;
+}
+
+.about-content strong {
+  color: #183f33;
+}
+
+
+/* =========================================================
+   HIGHLIGHT
+========================================================= */
+
+.about-highlight {
+  background: #073b2a;
+  color: #ffffff;
+  padding: 95px 0;
+}
+
+.about-highlight-content {
+  max-width: 850px;
+  text-align: center;
+  margin: auto;
+}
+
+.about-highlight .about-eyebrow {
+  color: #b9efd8;
+}
+
+.about-highlight h2 {
+  font-size: clamp(2.1rem, 4vw, 3.5rem);
+  line-height: 1.1;
+  margin: 0 0 24px;
+}
+
+.about-highlight p:not(.about-eyebrow) {
+  color: rgba(255,255,255,0.82);
+  line-height: 1.8;
+  font-size: 1.05rem;
+}
+
+
+/* =========================================================
+   FOCUS CARDS
+========================================================= */
+
+.about-focus-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px;
+}
+
+.about-focus-card {
+  background: #ffffff;
+  border: 1px solid #e6eeea;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 12px 35px rgba(20,60,45,0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-focus-card:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 22px 55px rgba(20,60,45,0.13);
+}
+
+.about-card-image {
+  height: 270px;
+  position: relative;
+  overflow: hidden;
+}
+
+.about-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.about-focus-card:hover .about-card-image img {
+  transform: scale(1.06);
+}
+
+.about-card-image span {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  width: 43px;
+  height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #073b2a;
+  border-radius: 50%;
+  font-weight: 800;
+}
+
+.about-card-body {
+  padding: 30px;
+}
+
+.about-card-body h3 {
+  color: #12382d;
+  font-size: 1.45rem;
+  margin: 0 0 14px;
+}
+
+.about-card-body p {
+  color: #61736c;
+  line-height: 1.75;
+}
+
+.about-card-body ul {
+  padding-left: 18px;
+  color: #456158;
+  line-height: 1.9;
+}
+
+
+/* =========================================================
+   FEATURE
+========================================================= */
+
+.about-feature {
+  background: #f1f7f4;
+  padding: 100px 0;
+}
+
+.about-feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 75px;
+  align-items: center;
+}
+
+.about-feature-number {
+  display: inline-flex;
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #16805b;
+  color: #ffffff;
+  font-weight: 800;
+  margin-bottom: 25px;
+}
+
+.about-feature-content > p:not(.about-eyebrow) {
+  color: #60736c;
+  line-height: 1.85;
+}
+
+.about-feature-image img {
+  width: 100%;
+  height: 580px;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.about-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.about-mini-grid div {
+  background: #ffffff;
+  border: 1px solid #dce9e3;
+  padding: 18px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.about-mini-grid strong {
+  color: #16805b;
+  font-size: 0.8rem;
+}
+
+.about-mini-grid span {
+  color: #334d44;
+  font-weight: 650;
+  margin-top: 5px;
+}
+
+
+/* =========================================================
+   DEVELOPMENT
+========================================================= */
+
+.about-development-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 75px;
+  align-items: center;
+}
+
+.about-development-image {
+  width: 100%;
+  height: 500px;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+
+/* =========================================================
+   VISION / MISSION
+========================================================= */
+
+.about-vision-section {
+  background: #073b2a;
+  padding: 100px 0;
+}
+
+.about-section-heading.light {
+  color: #ffffff;
+}
+
+.about-section-heading.light h2 {
+  color: #ffffff;
+}
+
+.about-section-heading.light .about-eyebrow {
+  color: #b9efd8;
+}
+
+.about-section-heading.light > p:last-child {
+  color: rgba(255,255,255,0.8);
+}
+
+.about-vision-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+.about-statement-card {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 18px;
+  padding: 40px;
+}
+
+.about-statement-icon {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #073b2a;
+  border-radius: 50%;
+  font-weight: 900;
+  margin-bottom: 25px;
+}
+
+.about-statement-card .about-eyebrow {
+  color: #b9efd8;
+}
+
+.about-statement-card h3 {
+  color: #ffffff;
+  line-height: 1.65;
+  font-size: 1.3rem;
+  font-weight: 550;
+}
+
+
+/* =========================================================
+   BELIEFS
+========================================================= */
+
+.about-beliefs-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.about-belief-card {
+  padding: 30px 25px;
+  border: 1px solid #e1ebe6;
+  border-radius: 15px;
+  background: #ffffff;
+  transition: all 0.25s ease;
+}
+
+.about-belief-card:hover {
+  transform: translateY(-5px);
+  border-color: #9dd9c0;
+  box-shadow: 0 15px 35px rgba(20,60,45,0.08);
+}
+
+.about-belief-card > span,
+.about-goal-card > span {
+  color: #16805b;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.about-belief-card h3 {
+  color: #12382d;
+  font-size: 1.15rem;
+  margin: 15px 0 10px;
+}
+
+.about-belief-card p {
+  color: #65766f;
+  line-height: 1.7;
+  font-size: 0.93rem;
+}
+
+
+/* =========================================================
+   GOALS
+========================================================= */
+
+.about-goals-section {
+  background: #f4f8f6;
+  padding: 100px 0;
+}
+
+.about-goals-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+.about-goal-card {
+  background: #ffffff;
+  border-radius: 15px;
+  padding: 30px 22px;
+  border: 1px solid #e1ebe6;
+}
+
+.about-goal-card h3 {
+  color: #12382d;
+  font-size: 1.1rem;
+  margin: 15px 0 10px;
+}
+
+.about-goal-card p {
+  color: #687972;
+  line-height: 1.7;
+  font-size: 0.9rem;
+}
+
+
+/* =========================================================
+   FOUNDER
+========================================================= */
+
+.about-founder-section {
+  padding: 110px 0;
+}
+
+.about-founder-grid {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.about-founder-image {
+  height: 560px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #e8f1ed;
+}
+
+.about-founder-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.about-founder-content h2 {
+  margin-bottom: 12px;
+}
+
+.about-founder-content h3 {
+  color: #16805b;
+  font-size: 1.9rem;
+  margin: 0 0 7px;
+}
+
+.about-founder-role {
+  color: #687a72;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+
+.about-founder-content > p:not(.about-eyebrow):not(.about-founder-role) {
+  color: #5e7069;
+  line-height: 1.85;
+}
+
+.about-founder-signature {
+  font-family: cursive;
+  font-size: 1.8rem;
+  color: #16805b;
+  margin-top: 30px;
+}
+
+
+/* =========================================================
+   PARTNERSHIP
+========================================================= */
+
+.about-partnership-section {
+  background: #f1f7f4;
+  padding: 100px 0;
+}
+
+.about-partnership-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.about-partnership-grid > div:first-child p:not(.about-eyebrow) {
+  color: #61736c;
+  line-height: 1.8;
+  margin-bottom: 25px;
+}
+
+.about-sponsor-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 35px;
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  border: 1px solid #e0ebe5;
+  box-shadow: 0 15px 40px rgba(20,60,45,0.08);
+}
+
+.about-sponsor-card img {
+  width: 130px;
+  height: 100px;
+  object-fit: contain;
+}
+
+.about-sponsor-card span {
+  color: #16805b;
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+}
+
+.about-sponsor-card h3 {
+  color: #12382d;
+  margin: 8px 0;
+}
+
+.about-sponsor-card p {
+  color: #697a73;
+  line-height: 1.6;
+  font-size: 0.92rem;
+}
+
+
+/* =========================================================
+   FINAL CTA
+========================================================= */
+
+.about-cta {
+  background:
+    linear-gradient(
+      135deg,
+      #0a4a35,
+      #073b2a
+    );
+  color: #ffffff;
+  padding: 105px 20px;
+  text-align: center;
+}
+
+.about-cta .about-eyebrow {
+  color: #b9efd8;
+}
+
+.about-cta h2 {
+  max-width: 800px;
+  margin: auto;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  line-height: 1.05;
+}
+
+.about-cta p:not(.about-eyebrow) {
+  max-width: 700px;
+  margin: 25px auto 0;
+  color: rgba(255,255,255,0.82);
+  line-height: 1.8;
+}
+
+.about-cta-actions {
+  justify-content: center;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1000px) {
+
+  .about-beliefs-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .about-goals-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .about-hero {
+    min-height: 620px;
+  }
+
+  .about-hero-content {
+    padding: 80px 0;
+  }
+
+  .about-hero h1 {
+    font-size: 2.8rem;
+  }
+
+  .about-hero-content > p:not(.about-eyebrow) {
+    font-size: 1rem;
+  }
+
+  .about-section,
+  .about-feature,
+  .about-founder-section,
+  .about-partnership-section,
+  .about-vision-section,
+  .about-goals-section {
+    padding: 70px 0;
+  }
+
+  .about-intro-grid,
+  .about-feature-grid,
+  .about-development-grid,
+  .about-vision-grid,
+  .about-founder-grid,
+  .about-partnership-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .about-main-image {
+    height: 420px;
+  }
+
+  .about-feature-image img {
+    height: 420px;
+  }
+
+  .about-development-image {
+    height: 380px;
+  }
+
+  .about-founder-image {
+    height: 430px;
+  }
+
+  .about-focus-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-beliefs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-goals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-mini-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .about-sponsor-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .about-sponsor-card img {
+    width: 120px;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL PHONES
+========================================================= */
+
+@media (max-width: 480px) {
+
+  .about-hero h1 {
+    font-size: 2.35rem;
+  }
+
+  .about-hero-actions,
+  .about-cta-actions {
+    flex-direction: column;
+  }
+
+  .about-btn {
+    width: 100%;
+  }
+
+  .about-card-body {
+    padding: 23px;
+  }
+
+  .about-statement-card {
+    padding: 28px;
+  }
+
+  .about-mini-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
