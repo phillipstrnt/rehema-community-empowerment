@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 
@@ -96,10 +95,6 @@ const postSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-
-    /* =====================================================
-       FACEBOOK PUBLISHING
-    ===================================================== */
 
     facebook: {
       published: {
@@ -503,6 +498,58 @@ const contactSchema = new mongoose.Schema(
 
 
 /* =========================================================
+   NOTIFICATION
+========================================================= */
+
+const notificationSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    message: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    type: {
+      type: String,
+      enum: [
+        "message",
+        "volunteer",
+        "donation",
+        "newsletter",
+        "partner",
+        "event",
+        "program",
+        "post",
+        "gallery",
+        "default",
+      ],
+      default: "default",
+    },
+
+    link: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    read: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+
+/* =========================================================
    MONGOOSE MODELS
 ========================================================= */
 
@@ -575,4 +622,12 @@ export const Contact =
   mongoose.model(
     "Contact",
     contactSchema
+  );
+
+
+export const Notification =
+  mongoose.models.Notification ||
+  mongoose.model(
+    "Notification",
+    notificationSchema
   );

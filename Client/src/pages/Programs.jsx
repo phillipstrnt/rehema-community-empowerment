@@ -1,12 +1,17 @@
 
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Programs.css";
+import api from "../api";
 
+/* =====================================================
+   HARDCODED PROGRAMS
+   These remain permanently available on the website.
+===================================================== */
 
-
-const programs = [
+const hardcodedPrograms = [
   {
+    id: "hardcoded-01",
     number: "01",
     title: "Maternal, Child Health & HIV/AIDS",
     shortTitle: "Maternal & Child Health",
@@ -23,6 +28,7 @@ const programs = [
     ]
   },
   {
+    id: "hardcoded-02",
     number: "02",
     title: "Child Development",
     shortTitle: "Child Development",
@@ -39,6 +45,7 @@ const programs = [
     ]
   },
   {
+    id: "hardcoded-03",
     number: "03",
     title: "HIV Prevention & PrEP",
     shortTitle: "HIV Prevention",
@@ -55,6 +62,7 @@ const programs = [
     ]
   },
   {
+    id: "hardcoded-04",
     number: "04",
     title: "Water, Sanitation, Hygiene & Environment",
     shortTitle: "WASH & Environment",
@@ -71,6 +79,7 @@ const programs = [
     ]
   },
   {
+    id: "hardcoded-05",
     number: "05",
     title: "Community & Economic Development",
     shortTitle: "Economic Development",
@@ -87,6 +96,7 @@ const programs = [
     ]
   },
   {
+    id: "hardcoded-06",
     number: "06",
     title: "Community Health & Outreach",
     shortTitle: "Community Health",
@@ -103,6 +113,11 @@ const programs = [
     ]
   }
 ];
+
+
+/* =====================================================
+   APPROACH
+===================================================== */
 
 const approaches = [
   {
@@ -131,9 +146,203 @@ const approaches = [
   }
 ];
 
+
+/* =====================================================
+   HELPER
+   Convert database program into the same structure
+   used by the existing program cards.
+===================================================== */
+
+function normalizeProgram(program, index) {
+  const points = Array.isArray(program.points)
+    ? program.points
+    : Array.isArray(program.focusAreas)
+      ? program.focusAreas
+      : [];
+
+  return {
+    id: program._id || program.id || `database-${index}`,
+    number: String(index + 1).padStart(2, "0"),
+    title: program.title || "REHEMA Program",
+    shortTitle:
+      program.shortTitle ||
+      program.title ||
+      "REHEMA Program",
+    image: program.image || "/images/rehema/program-placeholder.jpg",
+    description:
+      program.shortDescription ||
+      program.description ||
+      "REHEMA works with communities to improve health, wellbeing and sustainable development.",
+    points
+  };
+}
+
+
+/* =====================================================
+   MAIN COMPONENT
+===================================================== */
+
 export default function Programs() {
+
+  const [databasePrograms, setDatabasePrograms] = useState([]);
+  const [programsLoading, setProgramsLoading] = useState(true);
+  const [programsError, setProgramsError] = useState(false);
+
+
+  /* =====================================================
+     FETCH PROGRAMS FROM API
+  ===================================================== */
+
+  useEffect(() => {
+
+    let mounted = true;
+
+    async function loadPrograms() {
+
+      try {
+
+        setProgramsLoading(true);
+        setProgramsError(false);
+
+        const data = await api("/programs");
+
+        /*
+          The backend normally returns an array.
+
+          This also safely handles APIs that return:
+          { programs: [...] }
+          or
+          { data: [...] }
+        */
+
+        const returnedPrograms =
+          Array.isArray(data)
+            ? data
+            : Array.isArray(data?.programs)
+              ? data.programs
+              : Array.isArray(data?.data)
+                ? data.data
+                : [];
+
+        if (mounted) {
+          setDatabasePrograms(returnedPrograms);
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Failed to load programs:",
+          error
+        );
+
+        if (mounted) {
+          setProgramsError(true);
+          setDatabasePrograms([]);
+        }
+
+      } finally {
+
+        if (mounted) {
+          setProgramsLoading(false);
+        }
+
+      }
+
+    }
+
+    loadPrograms();
+
+    return () => {
+      mounted = false;
+    };
+
+  }, []);
+
+
+  /* =====================================================
+     COMBINE HARDCODED + DATABASE PROGRAMS
+
+     Existing hardcoded programs remain.
+
+     Database programs are added after them.
+
+     Duplicate titles are removed so the same program
+     is not displayed twice if it exists in both places.
+  ===================================================== */
+
+  const programs = useMemo(() => {
+
+    const normalizedDatabasePrograms =
+      databasePrograms
+        .filter((program) => program && program.active !== false)
+        .map((program, index) =>
+          normalizeProgram(
+            program,
+            index + hardcodedPrograms.length
+          )
+        );
+
+
+    const combined = [
+      ...hardcodedPrograms,
+      ...normalizedDatabasePrograms
+    ];
+
+
+    /*
+      Remove duplicate titles.
+
+      This is case-insensitive and prevents an
+      accidentally duplicated database program
+      from appearing twice.
+    */
+
+    const seenTitles = new Set();
+
+    return combined.filter((program) => {
+
+      const titleKey =
+        String(program.title || "")
+          .trim()
+          .toLowerCase();
+
+      if (!titleKey) {
+        return true;
+      }
+
+      if (seenTitles.has(titleKey)) {
+        return false;
+      }
+
+      seenTitles.add(titleKey);
+
+      return true;
+
+    });
+
+  }, [databasePrograms]);
+
+
+  /* =====================================================
+     DISPLAY NUMBERS
+
+     The program number is regenerated here so that
+     database programs continue from the hardcoded ones.
+  ===================================================== */
+
+  const displayPrograms = useMemo(() => {
+
+    return programs.map((program, index) => ({
+      ...program,
+      number: String(index + 1).padStart(2, "0")
+    }));
+
+  }, [programs]);
+
+
   return (
     <main className="programs-page">
+
 
       {/* =====================================================
           HERO
@@ -141,10 +350,6 @@ export default function Programs() {
 
       <section className="programs-hero">
 
-        {/* IMAGE:
-            Replace programs-hero.jpg with your strongest
-            REHEMA community/program image.
-        */}
         <img
           src="/images/rehema/programs-hero.jpg"
           alt="REHEMA community health programs"
@@ -172,7 +377,11 @@ export default function Programs() {
           </p>
 
           <div className="programs-hero-actions">
-            <a href="#programs" className="programs-btn programs-btn-primary">
+
+            <a
+              href="#programs"
+              className="programs-btn programs-btn-primary"
+            >
               Explore Our Programs
               <span>↓</span>
             </a>
@@ -184,6 +393,7 @@ export default function Programs() {
               Get Involved
               <span>→</span>
             </Link>
+
           </div>
 
         </div>
@@ -249,23 +459,56 @@ export default function Programs() {
         <div className="container programs-stats-grid">
 
           <div className="programs-stat">
-            <strong>06</strong>
-            <span>Core program areas</span>
+
+            <strong>
+              {programsLoading
+                ? "—"
+                : String(displayPrograms.length).padStart(2, "0")}
+            </strong>
+
+            <span>
+              Program areas
+            </span>
+
           </div>
 
-          <div className="programs-stat">
-            <strong>MCH</strong>
-            <span>Maternal & child health focus</span>
-          </div>
 
           <div className="programs-stat">
-            <strong>HIV</strong>
-            <span>Prevention & support</span>
+
+            <strong>
+              MCH
+            </strong>
+
+            <span>
+              Maternal & child health focus
+            </span>
+
           </div>
 
+
           <div className="programs-stat">
-            <strong>WASH</strong>
-            <span>Water, sanitation & hygiene</span>
+
+            <strong>
+              HIV
+            </strong>
+
+            <span>
+              Prevention & support
+            </span>
+
+          </div>
+
+
+          <div className="programs-stat">
+
+            <strong>
+              WASH
+            </strong>
+
+            <span>
+              Water, sanitation & hygiene
+            </span>
+
           </div>
 
         </div>
@@ -277,7 +520,10 @@ export default function Programs() {
           PROGRAMS GRID
       ===================================================== */}
 
-      <section id="programs" className="programs-list-section">
+      <section
+        id="programs"
+        className="programs-list-section"
+      >
 
         <div className="container">
 
@@ -299,13 +545,53 @@ export default function Programs() {
           </div>
 
 
+          {/* -------------------------------------------------
+              LOADING STATE
+          ------------------------------------------------- */}
+
+          {programsLoading && (
+
+            <div
+              className="programs-loading"
+              aria-live="polite"
+            >
+              Loading additional programs...
+            </div>
+
+          )}
+
+
+          {/* -------------------------------------------------
+              API ERROR
+
+              The hardcoded programs still display, so the
+              website remains functional.
+          ------------------------------------------------- */}
+
+          {programsError && (
+
+            <div
+              className="programs-api-notice"
+              role="status"
+            >
+              Additional programs could not be loaded right now.
+              Our core program areas are still available below.
+            </div>
+
+          )}
+
+
+          {/* -------------------------------------------------
+              PROGRAM CARDS
+          ------------------------------------------------- */}
+
           <div className="programs-grid">
 
-            {programs.map((program) => (
+            {displayPrograms.map((program) => (
 
               <article
                 className="program-card"
-                key={program.number}
+                key={program.id}
               >
 
                 <div className="program-card-image">
@@ -313,6 +599,10 @@ export default function Programs() {
                   <img
                     src={program.image}
                     alt={program.title}
+                    onError={(event) => {
+                      event.currentTarget.src =
+                        "/images/rehema/program-placeholder.jpg";
+                    }}
                   />
 
                   <span className="program-card-number">
@@ -344,14 +634,51 @@ export default function Programs() {
                     Our focus includes
                   </h4>
 
-                  <ul>
-                    {program.points.map((point) => (
-                      <li key={point}>
+
+                  {program.points.length > 0 ? (
+
+                    <ul>
+
+                      {program.points.map(
+                        (point, pointIndex) => (
+
+                          <li
+                            key={`${program.id}-point-${pointIndex}`}
+                          >
+
+                            <span>✓</span>
+
+                            {point}
+
+                          </li>
+
+                        )
+                      )}
+
+                    </ul>
+
+                  ) : (
+
+                    <ul>
+
+                      <li>
                         <span>✓</span>
-                        {point}
+                        Community-centered services
                       </li>
-                    ))}
-                  </ul>
+
+                      <li>
+                        <span>✓</span>
+                        Health education and awareness
+                      </li>
+
+                      <li>
+                        <span>✓</span>
+                        Community engagement
+                      </li>
+
+                    </ul>
+
+                  )}
 
                 </div>
 
@@ -376,17 +703,21 @@ export default function Programs() {
 
           <div className="programs-feature-image">
 
-            {/* IMAGE:
-                Add your best maternal/child health image here.
-            */}
             <img
               src="/images/rehema/maternal-health.jpg"
               alt="Maternal and child health"
             />
 
             <div className="programs-image-badge">
-              <strong>Maternal & Child Health</strong>
-              <span>Protecting mothers, newborns and children</span>
+
+              <strong>
+                Maternal & Child Health
+              </strong>
+
+              <span>
+                Protecting mothers, newborns and children
+              </span>
+
             </div>
 
           </div>
@@ -512,9 +843,6 @@ export default function Programs() {
 
           <div className="programs-wash-image">
 
-            {/* IMAGE:
-                Use a WASH, sanitation, water or environment photo.
-            */}
             <img
               src="/images/rehema/wash.jpg"
               alt="Water sanitation hygiene and environment"
@@ -535,10 +863,6 @@ export default function Programs() {
 
         <div className="programs-economic-image">
 
-          {/* IMAGE:
-              Use a village savings, community meeting or
-              economic empowerment photo.
-          */}
           <img
             src="/images/rehema/economic-development.jpg"
             alt="Community economic development"
@@ -572,7 +896,9 @@ export default function Programs() {
 
           <div className="programs-economic-card">
 
-            <span>COMMUNITY MODEL</span>
+            <span>
+              COMMUNITY MODEL
+            </span>
 
             <h3>
               Savings → Opportunity → Resilience
@@ -694,9 +1020,6 @@ export default function Programs() {
 
         <div className="programs-outreach-image">
 
-          {/* IMAGE:
-              Use your strongest community outreach photo.
-          */}
           <img
             src="/images/rehema/programs-community.jpg"
             alt="REHEMA community outreach"

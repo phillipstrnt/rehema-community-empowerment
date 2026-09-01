@@ -1,280 +1,571 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
+import "../styles/Gallery.css";
 
-import {
-  useNavigate,
-  useParams
-} from "react-router-dom";
+export default function Gallery() {
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [selectedImage, setSelectedImage] = useState(null);
 
+  /*
+    =========================================================
+    ADD / CHANGE YOUR IMAGES HERE
+    =========================================================
 
-export default function GalleryForm() {
+    All images should be placed in:
 
-  const { id } = useParams();
-  const navigate = useNavigate();
+    Client/public/images/rehema/
 
-  const editing = Boolean(id);
+    Example:
+    Client/public/images/rehema/medical-camp-1.jpg
 
-  const [form, setForm] = useState({
-    title: "",
-    type: "image",
-    url: "",
-    caption: "",
-    date: ""
-  });
+    Then add the filename below.
 
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
+    Categories can be:
+    Medical Camps
+    Community Outreach
+    Maternal Health
+    Health Education
+    Team & Partners
+  */
 
+  const galleryImages = [
+    {
+      id: 1,
+      src: "/images/rehema/medical-camp.jpg",
+      title: "REHEMA Medical Camp",
+      category: "Medical Camps",
+      description:
+        "Community members accessing health services and information through REHEMA outreach.",
+    },
 
-  useEffect(() => {
+    {
+      id: 2,
+      src: "/images/rehema/community.jpg",
+      title: "Community Outreach",
+      category: "Community Outreach",
+      description:
+        "Working together with communities to promote healthier and more resilient households.",
+    },
 
-    if (!editing) return;
+    {
+      id: 3,
+      src: "/images/rehema/maternal-health.jpg",
+      title: "Maternal Health",
+      category: "Maternal Health",
+      description:
+        "Promoting maternal, newborn and family health through community-based initiatives.",
+    },
 
-    async function loadMedia() {
+    {
+      id: 4,
+      src: "/images/rehema/about.jpg",
+      title: "Health Education",
+      category: "Health Education",
+      description:
+        "Sharing practical health information that enables communities to make informed decisions.",
+    },
 
-      try {
+    /*
+      ADD MORE IMAGES BELOW
 
-        const response = await fetch(
-          `http://localhost:5000/api/gallery/${id}`
-        );
+      {
+        id: 5,
+        src: "/images/rehema/your-image.jpg",
+        title: "Your Image Title",
+        category: "Community Outreach",
+        description: "Your image description.",
+      },
+    */
 
-        const data = await response.json();
+    {
+      id: 5,
+      src: "/images/rehema/team.jpg",
+      title: "REHEMA Team",
+      category: "Team & Partners",
+      description:
+        "Our team and partners working together to strengthen community health.",
+    },
 
-        if (!response.ok) {
-          throw new Error(
-            data.message || "Unable to load media."
-          );
-        }
+    {
+      id: 6,
+      src: "/images/rehema/hero.jpg",
+      title: "Serving Communities",
+      category: "Community Outreach",
+      description:
+        "REHEMA's commitment to reaching communities with meaningful health interventions.",
+    },
+  ];
 
-        setForm({
-          title: data.title || "",
-          type: data.type || "image",
-          url: data.url || "",
-          caption: data.caption || "",
-          date: data.date
-            ? data.date.substring(0, 10)
-            : ""
-        });
+  const categories = [
+    "All",
+    "Medical Camps",
+    "Community Outreach",
+    "Maternal Health",
+    "Health Education",
+    "Team & Partners",
+  ];
 
-      } catch (error) {
-
-        console.error(error);
-
-        setError(error.message);
-
-      }
-
+  const filteredImages = useMemo(() => {
+    if (activeCategory === "All") {
+      return galleryImages;
     }
 
-    loadMedia();
-
-  }, [editing, id]);
-
-
-  function handleChange(event) {
-
-    const {
-      name,
-      value
-    } = event.target;
-
-    setForm(previous => ({
-      ...previous,
-      [name]: value
-    }));
-
-  }
-
-
-  async function handleSubmit(event) {
-
-    event.preventDefault();
-
-    setSaving(true);
-    setError("");
-
-    try {
-
-      const response = await fetch(
-        editing
-          ? `http://localhost:5000/api/gallery/${id}`
-          : "http://localhost:5000/api/gallery",
-        {
-          method: editing ? "PUT" : "POST",
-
-          headers: {
-            "Content-Type": "application/json"
-          },
-
-          body: JSON.stringify(form)
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-
-        throw new Error(
-          data.message || "Unable to save media."
-        );
-
-      }
-
-      navigate("/admin/gallery");
-
-    } catch (error) {
-
-      console.error(error);
-
-      setError(error.message);
-
-    } finally {
-
-      setSaving(false);
-
-    }
-
-  }
-
+    return galleryImages.filter(
+      (image) => image.category === activeCategory
+    );
+  }, [activeCategory]);
 
   return (
+    <main className="gallery-page">
 
-    <section className="admin-form-page">
+      {/* =====================================================
+          PAGE HERO
+      ===================================================== */}
 
-      <div className="admin-form-header">
+      <section className="gallery-hero">
 
-        <p className="admin-eyebrow">
-          MEDIA MANAGEMENT
-        </p>
+        <div className="gallery-hero-background"></div>
 
-        <h1>
-          {editing
-            ? "Edit Media"
-            : "Add Media"}
-        </h1>
+        <div className="container gallery-hero-content">
 
-        <p>
-          Add photos and videos to the REHEMA gallery.
-        </p>
+          <span className="gallery-eyebrow">
+            REHEMA • OUR STORIES IN PICTURES
+          </span>
 
-      </div>
+          <h1>
+            Moments of
+            <span> community impact.</span>
+          </h1>
 
+          <p>
+            Explore moments from REHEMA's community health activities,
+            medical outreach, health education, partnerships and
+            initiatives supporting healthier communities.
+          </p>
 
-      {error && (
-        <div className="admin-error">
-          {error}
         </div>
-      )}
+
+      </section>
 
 
-      <form
-        className="admin-form-card admin-form"
-        onSubmit={handleSubmit}
-      >
+      {/* =====================================================
+          INTRO
+      ===================================================== */}
 
-        <label>
-          Media Title
+      <section className="container gallery-intro">
 
-          <input
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            placeholder="REHEMA Medical Outreach"
-          />
+        <div className="gallery-intro-text">
 
-        </label>
+          <span className="gallery-eyebrow">
+            OUR GALLERY
+          </span>
 
+          <h2>
+            See the people and moments behind our work
+          </h2>
 
-        <label>
-          Media Type
+          <p>
+            Every photograph tells a story of people coming together,
+            sharing knowledge, accessing services and creating
+            opportunities for better health.
+          </p>
 
-          <select
-            name="type"
-            value={form.type}
-            onChange={handleChange}
-          >
-
-            <option value="image">
-              Image
-            </option>
-
-            <option value="video">
-              Video
-            </option>
-
-          </select>
-
-        </label>
+        </div>
 
 
-        <label>
-          Media URL
+        <div className="gallery-intro-highlight">
 
-          <input
-            name="url"
-            value={form.url}
-            onChange={handleChange}
-            placeholder="Image or video URL"
-            required
-          />
+          <strong>
+            {galleryImages.length}+
+          </strong>
 
-        </label>
+          <span>
+            Featured moments
+          </span>
 
+        </div>
 
-        <label>
-          Caption
-
-          <textarea
-            name="caption"
-            value={form.caption}
-            onChange={handleChange}
-            rows="5"
-            placeholder="Describe this media..."
-          />
-
-        </label>
+      </section>
 
 
-        <label>
-          Date
+      {/* =====================================================
+          CATEGORY FILTER
+      ===================================================== */}
 
-          <input
-            type="date"
-            name="date"
-            value={form.date}
-            onChange={handleChange}
-          />
+      <section className="gallery-filter-section">
 
-        </label>
+        <div className="container">
+
+          <div className="gallery-filter">
+
+            {categories.map((category) => (
+
+              <button
+                key={category}
+                type="button"
+                className={
+                  activeCategory === category
+                    ? "gallery-filter-btn active"
+                    : "gallery-filter-btn"
+                }
+                onClick={() => setActiveCategory(category)}
+              >
+                {category}
+              </button>
+
+            ))}
+
+          </div>
+
+        </div>
+
+      </section>
 
 
-        <div className="admin-form-actions">
+      {/* =====================================================
+          GALLERY GRID
+      ===================================================== */}
+
+      <section className="container gallery-main">
+
+        {filteredImages.length > 0 ? (
+
+          <div className="gallery-grid">
+
+            {filteredImages.map((image, index) => (
+
+              <article
+                className={`gallery-card ${
+                  index === 0 ? "gallery-card-featured" : ""
+                }`}
+                key={image.id}
+                onClick={() => setSelectedImage(image)}
+              >
+
+                <div className="gallery-image-wrapper">
+
+                  <img
+                    src={image.src}
+                    alt={image.title}
+                    className="gallery-image"
+                    loading="lazy"
+                  />
+
+                  <div className="gallery-image-overlay">
+
+                    <div className="gallery-view-icon">
+                      +
+                    </div>
+
+                    <span>
+                      View image
+                    </span>
+
+                  </div>
+
+                  <span className="gallery-category">
+                    {image.category}
+                  </span>
+
+                </div>
+
+
+                <div className="gallery-card-content">
+
+                  <h3>
+                    {image.title}
+                  </h3>
+
+                  <p>
+                    {image.description}
+                  </p>
+
+                </div>
+
+              </article>
+
+            ))}
+
+          </div>
+
+        ) : (
+
+          <div className="gallery-empty">
+
+            <div>
+              No images found in this category.
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setActiveCategory("All")}
+            >
+              View all images
+            </button>
+
+          </div>
+
+        )}
+
+      </section>
+
+
+      {/* =====================================================
+          COMMUNITY STORY
+      ===================================================== */}
+
+      <section className="gallery-story">
+
+        <div className="container gallery-story-grid">
+
+          <div className="gallery-story-image">
+
+            <img
+              src="/images/rehema/community.jpg"
+              alt="REHEMA community engagement"
+              loading="lazy"
+            />
+
+            <div className="gallery-story-badge">
+              <strong>Community First</strong>
+              <span>Health • Education • Empowerment</span>
+            </div>
+
+          </div>
+
+
+          <div className="gallery-story-content">
+
+            <span className="gallery-eyebrow">
+              BEYOND THE PHOTOGRAPHS
+            </span>
+
+            <h2>
+              Every moment represents a person, a family or a community.
+            </h2>
+
+            <p>
+              Our gallery captures more than events. It reflects the
+              relationships, conversations and partnerships that make
+              community health work possible.
+            </p>
+
+            <p>
+              From medical outreach to health education and community
+              engagement, REHEMA continues to work alongside communities
+              to identify priorities and develop practical responses.
+            </p>
+
+            <div className="gallery-story-points">
+
+              <div>
+                <span>01</span>
+                <strong>Listen</strong>
+                <p>Understanding community priorities.</p>
+              </div>
+
+              <div>
+                <span>02</span>
+                <strong>Engage</strong>
+                <p>Working together toward solutions.</p>
+              </div>
+
+              <div>
+                <span>03</span>
+                <strong>Impact</strong>
+                <p>Turning action into meaningful change.</p>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      {/* =====================================================
+          PARTNERSHIP SECTION
+      ===================================================== */}
+
+      <section className="container gallery-partners">
+
+        <div className="gallery-section-heading">
+
+          <span className="gallery-eyebrow">
+            STRONGER TOGETHER
+          </span>
+
+          <h2>
+            Community health is a shared responsibility
+          </h2>
+
+          <p>
+            Our work is strengthened by communities, health workers,
+            volunteers, organizations and partners who contribute
+            knowledge, resources and time.
+          </p>
+
+        </div>
+
+
+        <div className="gallery-partner-cards">
+
+          <div className="gallery-partner-card">
+
+            <span className="gallery-partner-number">
+              01
+            </span>
+
+            <h3>
+              Communities
+            </h3>
+
+            <p>
+              Communities help identify priorities and shape solutions
+              that respond to their everyday realities.
+            </p>
+
+          </div>
+
+
+          <div className="gallery-partner-card">
+
+            <span className="gallery-partner-number">
+              02
+            </span>
+
+            <h3>
+              Health Professionals
+            </h3>
+
+            <p>
+              Skilled professionals contribute expertise that supports
+              quality health education and outreach.
+            </p>
+
+          </div>
+
+
+          <div className="gallery-partner-card">
+
+            <span className="gallery-partner-number">
+              03
+            </span>
+
+            <h3>
+              Partners
+            </h3>
+
+            <p>
+              Strategic partnerships help expand resources and create
+              opportunities for sustainable community impact.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      {/* =====================================================
+          CALL TO ACTION
+      ===================================================== */}
+
+      <section className="gallery-cta">
+
+        <div className="container">
+
+          <span className="gallery-eyebrow">
+            JOIN THE JOURNEY
+          </span>
+
+          <h2>
+            Help us create more moments worth capturing.
+          </h2>
+
+          <p>
+            Volunteer, partner with REHEMA or support our community
+            health programs and become part of the story.
+          </p>
+
+          <div className="gallery-cta-actions">
+
+            <a
+              href="/get-involved"
+              className="gallery-btn gallery-btn-primary"
+            >
+              Get Involved →
+            </a>
+
+            <a
+              href="/donate"
+              className="gallery-btn gallery-btn-light"
+            >
+              Support REHEMA →
+            </a>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      {/* =====================================================
+          IMAGE LIGHTBOX
+      ===================================================== */}
+
+      {selectedImage && (
+
+        <div
+          className="gallery-lightbox"
+          onClick={() => setSelectedImage(null)}
+        >
 
           <button
             type="button"
-            className="button secondary"
-            onClick={() => navigate("/admin/gallery")}
+            className="gallery-lightbox-close"
+            onClick={() => setSelectedImage(null)}
+            aria-label="Close image"
           >
-            Cancel
+            ×
           </button>
 
-          <button
-            type="submit"
-            className="button"
-            disabled={saving}
+
+          <div
+            className="gallery-lightbox-content"
+            onClick={(event) => event.stopPropagation()}
           >
-            {saving
-              ? "Saving..."
-              : editing
-                ? "Update Media"
-                : "Add Media"}
-          </button>
+
+            <img
+              src={selectedImage.src}
+              alt={selectedImage.title}
+            />
+
+            <div className="gallery-lightbox-info">
+
+              <span>
+                {selectedImage.category}
+              </span>
+
+              <h3>
+                {selectedImage.title}
+              </h3>
+
+              <p>
+                {selectedImage.description}
+              </p>
+
+            </div>
+
+          </div>
 
         </div>
 
-      </form>
+      )}
 
-    </section>
-
+    </main>
   );
-
 }

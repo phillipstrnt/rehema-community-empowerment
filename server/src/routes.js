@@ -1,4 +1,3 @@
-
 import express from "express";
 
 import {
@@ -11,11 +10,37 @@ import {
   Donation,
   Newsletter,
   Contact,
+  Notification,
 } from "./models.js";
 
+const router = express.Router();
 
-const router =
-  express.Router();
+
+/* =========================================================
+   NOTIFICATION HELPER
+========================================================= */
+
+const createNotification = async ({
+  title,
+  message,
+  type,
+  link,
+}) => {
+  try {
+    await Notification.create({
+      title,
+      message,
+      type,
+      link,
+      read: false,
+    });
+  } catch (error) {
+    console.error(
+      "Notification creation error:",
+      error
+    );
+  }
+};
 
 
 /* =========================================================
@@ -25,197 +50,163 @@ const router =
 
 /* GET ALL POSTS */
 
-router.get(
-  "/posts",
-  async (req, res) => {
+router.get("/posts", async (req, res) => {
+  try {
+    const posts = await Post.find().sort({
+      publishedAt: -1,
+      createdAt: -1,
+    });
 
-    try {
+    res.json(posts);
 
-      const posts =
-        await Post.find()
-          .sort({
-            publishedAt: -1,
-            createdAt: -1,
-          });
+  } catch (error) {
 
+    console.error(
+      "Posts GET error:",
+      error
+    );
 
-      res.json(posts);
-
-    } catch (error) {
-
-      console.error(error);
-
-      res.status(500).json({
-        message:
-          "Failed to fetch posts",
-      });
-
-    }
-
+    res.status(500).json({
+      message: "Failed to fetch posts",
+    });
   }
-);
+});
 
 
 /* GET SINGLE POST */
 
-router.get(
-  "/posts/:slug",
-  async (req, res) => {
+router.get("/posts/:slug", async (req, res) => {
+  try {
 
-    try {
+    const post = await Post.findOne({
+      slug: req.params.slug,
+    });
 
-      const post =
-        await Post.findOne({
-          slug: req.params.slug,
-        });
-
-
-      if (!post) {
-
-        return res.status(404).json({
-          message:
-            "Post not found",
-        });
-
-      }
-
-
-      res.json(post);
-
-    } catch (error) {
-
-      console.error(error);
-
-      res.status(500).json({
-        message:
-          "Failed to fetch post",
+    if (!post) {
+      return res.status(404).json({
+        message: "Post not found",
       });
-
     }
 
+    res.json(post);
+
+  } catch (error) {
+
+    console.error(
+      "Single post GET error:",
+      error
+    );
+
+    res.status(500).json({
+      message: "Failed to fetch post",
+    });
   }
-);
+});
 
 
 /* CREATE POST */
 
-router.post(
-  "/posts",
-  async (req, res) => {
+router.post("/posts", async (req, res) => {
+  try {
 
-    try {
+    const post = await Post.create(
+      req.body
+    );
 
-      const post =
-        await Post.create(
-          req.body
-        );
+    await createNotification({
+      title: "New news story",
+      message: `A new news story "${post.title}" was created.`,
+      type: "post",
+      link: "/admin/posts",
+    });
 
+    res.status(201).json(post);
 
-      res.status(201).json(post);
+  } catch (error) {
 
-    } catch (error) {
+    console.error(
+      "Post creation error:",
+      error
+    );
 
-      console.error(error);
-
-      res.status(400).json({
-        message:
-          error.message,
-      });
-
-    }
-
+    res.status(400).json({
+      message: error.message,
+    });
   }
-);
+});
 
 
 /* UPDATE POST */
 
-router.put(
-  "/posts/:id",
-  async (req, res) => {
+router.put("/posts/:id", async (req, res) => {
+  try {
 
-    try {
+    const post =
+      await Post.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
 
-      const post =
-        await Post.findByIdAndUpdate(
-          req.params.id,
-          req.body,
-          {
-            new: true,
-            runValidators: true,
-          }
-        );
-
-
-      if (!post) {
-
-        return res.status(404).json({
-          message:
-            "Post not found",
-        });
-
-      }
-
-
-      res.json(post);
-
-    } catch (error) {
-
-      console.error(error);
-
-      res.status(400).json({
-        message:
-          error.message,
+    if (!post) {
+      return res.status(404).json({
+        message: "Post not found",
       });
-
     }
 
+    res.json(post);
+
+  } catch (error) {
+
+    console.error(
+      "Post update error:",
+      error
+    );
+
+    res.status(400).json({
+      message: error.message,
+    });
   }
-);
+});
 
 
 /* DELETE POST */
 
-router.delete(
-  "/posts/:id",
-  async (req, res) => {
+router.delete("/posts/:id", async (req, res) => {
+  try {
 
-    try {
+    const post =
+      await Post.findByIdAndDelete(
+        req.params.id
+      );
 
-      const post =
-        await Post.findByIdAndDelete(
-          req.params.id
-        );
-
-
-      if (!post) {
-
-        return res.status(404).json({
-          message:
-            "Post not found",
-        });
-
-      }
-
-
-      res.json({
-        message:
-          "Post deleted successfully",
+    if (!post) {
+      return res.status(404).json({
+        message: "Post not found",
       });
-
-    } catch (error) {
-
-      console.error(error);
-
-      res.status(500).json({
-        message:
-          "Failed to delete post",
-      });
-
     }
 
+    res.json({
+      message:
+        "Post deleted successfully",
+    });
+
+  } catch (error) {
+
+    console.error(
+      "Post deletion error:",
+      error
+    );
+
+    res.status(500).json({
+      message:
+        "Failed to delete post",
+    });
   }
-);
+});
 
 
 /* =========================================================
@@ -225,34 +216,29 @@ router.delete(
 
 /* GET PROGRAMS */
 
-router.get(
-  "/programs",
-  async (req, res) => {
+router.get("/programs", async (req, res) => {
+  try {
 
-    try {
-
-      const programs =
-        await Program.find()
-          .sort({
-            createdAt: -1,
-          });
-
-
-      res.json(programs);
-
-    } catch (error) {
-
-      console.error(error);
-
-      res.status(500).json({
-        message:
-          "Failed to fetch programs",
+    const programs =
+      await Program.find().sort({
+        createdAt: -1,
       });
 
-    }
+    res.json(programs);
 
+  } catch (error) {
+
+    console.error(
+      "Programs GET error:",
+      error
+    );
+
+    res.status(500).json({
+      message:
+        "Failed to fetch programs",
+    });
   }
-);
+});
 
 
 /* GET SINGLE PROGRAM */
@@ -268,30 +254,27 @@ router.get(
           req.params.id
         );
 
-
       if (!program) {
-
         return res.status(404).json({
           message:
             "Program not found",
         });
-
       }
-
 
       res.json(program);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Single program GET error:",
+        error
+      );
 
       res.status(500).json({
         message:
           "Failed to fetch program",
       });
-
     }
-
   }
 );
 
@@ -309,20 +292,29 @@ router.post(
           req.body
         );
 
+      await createNotification({
+        title: "New program created",
+        message: `The program "${program.title}" was added.`,
+        type: "program",
+        link: "/admin/programs",
+      });
 
-      res.status(201).json(program);
+      res.status(201).json(
+        program
+      );
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Program creation error:",
+        error
+      );
 
       res.status(400).json({
         message:
           error.message,
       });
-
     }
-
   }
 );
 
@@ -345,30 +337,27 @@ router.put(
           }
         );
 
-
       if (!program) {
-
         return res.status(404).json({
           message:
             "Program not found",
         });
-
       }
-
 
       res.json(program);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Program update error:",
+        error
+      );
 
       res.status(400).json({
         message:
           error.message,
       });
-
     }
-
   }
 );
 
@@ -386,16 +375,12 @@ router.delete(
           req.params.id
         );
 
-
       if (!program) {
-
         return res.status(404).json({
           message:
             "Program not found",
         });
-
       }
-
 
       res.json({
         message:
@@ -404,15 +389,16 @@ router.delete(
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Program deletion error:",
+        error
+      );
 
       res.status(500).json({
         message:
           "Failed to delete program",
       });
-
     }
-
   }
 );
 
@@ -431,25 +417,24 @@ router.get(
     try {
 
       const events =
-        await Event.find()
-          .sort({
-            date: 1,
-          });
-
+        await Event.find().sort({
+          date: 1,
+        });
 
       res.json(events);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Events GET error:",
+        error
+      );
 
       res.status(500).json({
         message:
           "Failed to fetch events",
       });
-
     }
-
   }
 );
 
@@ -467,30 +452,27 @@ router.get(
           req.params.id
         );
 
-
       if (!event) {
-
         return res.status(404).json({
           message:
             "Event not found",
         });
-
       }
-
 
       res.json(event);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Single event GET error:",
+        error
+      );
 
       res.status(500).json({
         message:
           "Failed to fetch event",
       });
-
     }
-
   }
 );
 
@@ -508,20 +490,27 @@ router.post(
           req.body
         );
 
+      await createNotification({
+        title: "New event created",
+        message: `The event "${event.title}" was added.`,
+        type: "event",
+        link: "/admin/events",
+      });
 
       res.status(201).json(event);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Event creation error:",
+        error
+      );
 
       res.status(400).json({
         message:
           error.message,
       });
-
     }
-
   }
 );
 
@@ -544,30 +533,27 @@ router.put(
           }
         );
 
-
       if (!event) {
-
         return res.status(404).json({
           message:
             "Event not found",
         });
-
       }
-
 
       res.json(event);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Event update error:",
+        error
+      );
 
       res.status(400).json({
         message:
           error.message,
       });
-
     }
-
   }
 );
 
@@ -585,16 +571,12 @@ router.delete(
           req.params.id
         );
 
-
       if (!event) {
-
         return res.status(404).json({
           message:
             "Event not found",
         });
-
       }
-
 
       res.json({
         message:
@@ -603,15 +585,16 @@ router.delete(
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Event deletion error:",
+        error
+      );
 
       res.status(500).json({
         message:
           "Failed to delete event",
       });
-
     }
-
   }
 );
 
@@ -630,26 +613,25 @@ router.get(
     try {
 
       const gallery =
-        await Gallery.find()
-          .sort({
-            date: -1,
-            createdAt: -1,
-          });
-
+        await Gallery.find().sort({
+          date: -1,
+          createdAt: -1,
+        });
 
       res.json(gallery);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Gallery GET error:",
+        error
+      );
 
       res.status(500).json({
         message:
           "Failed to fetch gallery",
       });
-
     }
-
   }
 );
 
@@ -667,30 +649,27 @@ router.get(
           req.params.id
         );
 
-
       if (!item) {
-
         return res.status(404).json({
           message:
             "Gallery item not found",
         });
-
       }
-
 
       res.json(item);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Single gallery GET error:",
+        error
+      );
 
       res.status(500).json({
         message:
           "Failed to fetch gallery item",
       });
-
     }
-
   }
 );
 
@@ -708,20 +687,27 @@ router.post(
           req.body
         );
 
+      await createNotification({
+        title: "New gallery item",
+        message: `A new gallery ${item.type || "item"} was added.`,
+        type: "gallery",
+        link: "/admin/gallery",
+      });
 
       res.status(201).json(item);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Gallery creation error:",
+        error
+      );
 
       res.status(400).json({
         message:
           error.message,
       });
-
     }
-
   }
 );
 
@@ -744,30 +730,27 @@ router.put(
           }
         );
 
-
       if (!item) {
-
         return res.status(404).json({
           message:
             "Gallery item not found",
         });
-
       }
-
 
       res.json(item);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Gallery update error:",
+        error
+      );
 
       res.status(400).json({
         message:
           error.message,
       });
-
     }
-
   }
 );
 
@@ -785,16 +768,12 @@ router.delete(
           req.params.id
         );
 
-
       if (!item) {
-
         return res.status(404).json({
           message:
             "Gallery item not found",
         });
-
       }
-
 
       res.json({
         message:
@@ -803,15 +782,16 @@ router.delete(
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Gallery deletion error:",
+        error
+      );
 
       res.status(500).json({
         message:
           "Failed to delete gallery item",
       });
-
     }
-
   }
 );
 
@@ -830,25 +810,107 @@ router.get(
     try {
 
       const volunteers =
-        await Volunteer.find()
-          .sort({
-            createdAt: -1,
-          });
-
+        await Volunteer.find().sort({
+          createdAt: -1,
+        });
 
       res.json(volunteers);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Volunteers GET error:",
+        error
+      );
 
       res.status(500).json({
         message:
           "Failed to fetch volunteers",
       });
-
     }
+  }
+);
 
+
+/* CREATE VOLUNTEER */
+
+router.post(
+  "/volunteers",
+  async (req, res) => {
+
+    try {
+
+      const volunteer =
+        await Volunteer.create(
+          req.body
+        );
+
+      await createNotification({
+        title: "New volunteer application",
+        message: `${volunteer.name} submitted a volunteer application.`,
+        type: "volunteer",
+        link: "/admin/volunteers",
+      });
+
+      res.status(201).json(
+        volunteer
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Volunteer creation error:",
+        error
+      );
+
+      res.status(400).json({
+        message:
+          error.message,
+      });
+    }
+  }
+);
+
+
+/* UPDATE VOLUNTEER */
+
+router.put(
+  "/volunteers/:id",
+  async (req, res) => {
+
+    try {
+
+      const volunteer =
+        await Volunteer.findByIdAndUpdate(
+          req.params.id,
+          req.body,
+          {
+            new: true,
+            runValidators: true,
+          }
+        );
+
+      if (!volunteer) {
+        return res.status(404).json({
+          message:
+            "Volunteer not found",
+        });
+      }
+
+      res.json(volunteer);
+
+    } catch (error) {
+
+      console.error(
+        "Volunteer update error:",
+        error
+      );
+
+      res.status(400).json({
+        message:
+          error.message,
+      });
+    }
   }
 );
 
@@ -866,16 +928,12 @@ router.delete(
           req.params.id
         );
 
-
       if (!volunteer) {
-
         return res.status(404).json({
           message:
             "Volunteer not found",
         });
-
       }
-
 
       res.json({
         message:
@@ -884,15 +942,16 @@ router.delete(
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Volunteer deletion error:",
+        error
+      );
 
       res.status(500).json({
         message:
           "Failed to delete volunteer",
       });
-
     }
-
   }
 );
 
@@ -911,11 +970,9 @@ router.get(
     try {
 
       const partners =
-        await Partner.find()
-          .sort({
-            createdAt: -1,
-          });
-
+        await Partner.find().sort({
+          createdAt: -1,
+        });
 
       res.json(partners);
 
@@ -930,9 +987,7 @@ router.get(
         message:
           "Failed to fetch partners",
       });
-
     }
-
   }
 );
 
@@ -950,30 +1005,27 @@ router.get(
           req.params.id
         );
 
-
       if (!partner) {
-
         return res.status(404).json({
           message:
             "Partner not found",
         });
-
       }
-
 
       res.json(partner);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Single partner GET error:",
+        error
+      );
 
       res.status(500).json({
         message:
           "Failed to fetch partner",
       });
-
     }
-
   }
 );
 
@@ -991,8 +1043,16 @@ router.post(
           req.body
         );
 
+      await createNotification({
+        title: "New partner",
+        message: `${partner.organization} was added as a partner.`,
+        type: "partner",
+        link: "/admin/partners",
+      });
 
-      res.status(201).json(partner);
+      res.status(201).json(
+        partner
+      );
 
     } catch (error) {
 
@@ -1005,9 +1065,7 @@ router.post(
         message:
           error.message,
       });
-
     }
-
   }
 );
 
@@ -1030,16 +1088,12 @@ router.put(
           }
         );
 
-
       if (!partner) {
-
         return res.status(404).json({
           message:
             "Partner not found",
         });
-
       }
-
 
       res.json(partner);
 
@@ -1054,9 +1108,7 @@ router.put(
         message:
           error.message,
       });
-
     }
-
   }
 );
 
@@ -1074,16 +1126,12 @@ router.delete(
           req.params.id
         );
 
-
       if (!partner) {
-
         return res.status(404).json({
           message:
             "Partner not found",
         });
-
       }
-
 
       res.json({
         message:
@@ -1101,15 +1149,13 @@ router.delete(
         message:
           "Failed to delete partner",
       });
-
     }
-
   }
 );
 
 
 /* =========================================================
-   MESSAGES / CONTACT ENQUIRIES
+   MESSAGES / CONTACT
 ========================================================= */
 
 
@@ -1122,17 +1168,9 @@ router.get(
     try {
 
       const messages =
-        await Contact.find()
-          .sort({
-            createdAt: -1,
-          });
-
-
-      /*
-        Normalize the contact documents so
-        the frontend can consistently use
-        read/status.
-      */
+        await Contact.find().sort({
+          createdAt: -1,
+        });
 
       const normalized =
         messages.map(
@@ -1141,25 +1179,19 @@ router.get(
             const item =
               message.toObject();
 
-
             const isRead =
               item.read === true ||
               item.status === "read";
 
-
             return {
               ...item,
               read: isRead,
-              status:
-                isRead
-                  ? "read"
-                  : item.status ||
-                    "new",
+              status: isRead
+                ? "read"
+                : item.status || "new",
             };
-
           }
         );
-
 
       res.json(normalized);
 
@@ -1174,9 +1206,7 @@ router.get(
         message:
           "Failed to fetch messages",
       });
-
     }
-
   }
 );
 
@@ -1194,30 +1224,27 @@ router.get(
           req.params.id
         );
 
-
       if (!message) {
-
         return res.status(404).json({
           message:
             "Message not found",
         });
-
       }
-
 
       res.json(message);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Single message GET error:",
+        error
+      );
 
       res.status(500).json({
         message:
           "Failed to fetch message",
       });
-
     }
-
   }
 );
 
@@ -1242,16 +1269,12 @@ router.patch(
           }
         );
 
-
       if (!message) {
-
         return res.status(404).json({
           message:
             "Message not found",
         });
-
       }
-
 
       res.json(message);
 
@@ -1266,9 +1289,7 @@ router.patch(
         message:
           "Failed to mark message as read",
       });
-
     }
-
   }
 );
 
@@ -1286,16 +1307,12 @@ router.delete(
           req.params.id
         );
 
-
       if (!message) {
-
         return res.status(404).json({
           message:
             "Message not found",
         });
-
       }
-
 
       res.json({
         message:
@@ -1313,9 +1330,7 @@ router.delete(
         message:
           "Failed to delete message",
       });
-
     }
-
   }
 );
 
@@ -1324,8 +1339,56 @@ router.delete(
    PUBLIC CONTACT FORM
 ========================================================= */
 
+router.post(
+  "/contact",
+  async (req, res) => {
 
-/* CREATE CONTACT MESSAGE */
+    try {
+
+      const contact =
+        await Contact.create({
+          name: req.body.name,
+          email: req.body.email,
+          phone: req.body.phone,
+          subject: req.body.subject,
+          message: req.body.message,
+          status: "new",
+          read: false,
+        });
+
+      await createNotification({
+        title: "New contact message",
+        message: `${contact.name} sent a new message.`,
+        type: "message",
+        link: "/admin/messages",
+      });
+
+      res.status(201).json({
+        success: true,
+        message:
+          "Your message has been sent successfully.",
+        contact,
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Contact creation error:",
+        error
+      );
+
+      res.status(400).json({
+        message:
+          error.message,
+      });
+    }
+  }
+);
+
+
+/* =========================================================
+   LEGACY PUBLIC MESSAGES ENDPOINT
+========================================================= */
 
 router.post(
   "/messages",
@@ -1335,20 +1398,21 @@ router.post(
 
       const message =
         await Contact.create({
-          name:
-            req.body.name,
-          email:
-            req.body.email,
-          phone:
-            req.body.phone,
-          subject:
-            req.body.subject,
-          message:
-            req.body.message,
-          status:
-            "new",
+          name: req.body.name,
+          email: req.body.email,
+          phone: req.body.phone,
+          subject: req.body.subject,
+          message: req.body.message,
+          status: "new",
+          read: false,
         });
 
+      await createNotification({
+        title: "New contact message",
+        message: `${message.name} sent a new message.`,
+        type: "message",
+        link: "/admin/messages",
+      });
 
       res.status(201).json(
         message
@@ -1356,15 +1420,16 @@ router.post(
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Contact message creation error:",
+        error
+      );
 
       res.status(400).json({
         message:
           error.message,
       });
-
     }
-
   }
 );
 
@@ -1387,38 +1452,36 @@ router.post(
           ?.trim()
           .toLowerCase();
 
-
       if (!email) {
-
         return res.status(400).json({
           message:
             "Email address is required.",
         });
-
       }
-
 
       const existing =
         await Newsletter.findOne({
           email,
         });
 
-
       if (existing) {
-
         return res.status(409).json({
           message:
             "This email is already subscribed.",
         });
-
       }
-
 
       const subscriber =
         await Newsletter.create({
           email,
         });
 
+      await createNotification({
+        title: "New newsletter subscriber",
+        message: `${email} subscribed to the newsletter.`,
+        type: "newsletter",
+        link: "/admin/newsletter",
+      });
 
       res.status(201).json({
         success: true,
@@ -1434,30 +1497,18 @@ router.post(
         error
       );
 
-
-      /*
-        MongoDB duplicate-key protection
-      */
-
-      if (
-        error.code === 11000
-      ) {
-
+      if (error.code === 11000) {
         return res.status(409).json({
           message:
             "This email is already subscribed.",
         });
-
       }
-
 
       res.status(400).json({
         message:
           error.message,
       });
-
     }
-
   }
 );
 
@@ -1471,15 +1522,11 @@ router.get(
     try {
 
       const subscribers =
-        await Newsletter.find()
-          .sort({
-            createdAt: -1,
-          });
+        await Newsletter.find().sort({
+          createdAt: -1,
+        });
 
-
-      res.json(
-        subscribers
-      );
+      res.json(subscribers);
 
     } catch (error) {
 
@@ -1492,9 +1539,7 @@ router.get(
         message:
           "Failed to fetch newsletter subscribers",
       });
-
     }
-
   }
 );
 
@@ -1512,32 +1557,27 @@ router.get(
           req.params.id
         );
 
-
       if (!subscriber) {
-
         return res.status(404).json({
           message:
             "Subscriber not found",
         });
-
       }
 
-
-      res.json(
-        subscriber
-      );
+      res.json(subscriber);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Single subscriber GET error:",
+        error
+      );
 
       res.status(500).json({
         message:
           "Failed to fetch subscriber",
       });
-
     }
-
   }
 );
 
@@ -1555,16 +1595,12 @@ router.delete(
           req.params.id
         );
 
-
       if (!subscriber) {
-
         return res.status(404).json({
           message:
             "Subscriber not found",
         });
-
       }
-
 
       res.json({
         message:
@@ -1582,9 +1618,7 @@ router.delete(
         message:
           "Failed to delete subscriber",
       });
-
     }
-
   }
 );
 
@@ -1603,25 +1637,24 @@ router.get(
     try {
 
       const donations =
-        await Donation.find()
-          .sort({
-            createdAt: -1,
-          });
-
+        await Donation.find().sort({
+          createdAt: -1,
+        });
 
       res.json(donations);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Donations GET error:",
+        error
+      );
 
       res.status(500).json({
         message:
           "Failed to fetch donations",
       });
-
     }
-
   }
 );
 
@@ -1638,22 +1671,34 @@ router.post(
         await Donation.create({
           donorName:
             req.body.donorName,
+
           email:
             req.body.email,
+
           phone:
             req.body.phone,
+
           amount:
             req.body.amount,
+
           method:
             req.body.method,
+
           reference:
             req.body.reference,
+
           message:
             req.body.message,
-          status:
-            "pending",
+
+          status: "pending",
         });
 
+      await createNotification({
+        title: "New donation received",
+        message: `A donation of ${donation.amount} was submitted.`,
+        type: "donation",
+        link: "/admin/donations",
+      });
 
       res.status(201).json(
         donation
@@ -1661,15 +1706,16 @@ router.post(
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Donation creation error:",
+        error
+      );
 
       res.status(400).json({
         message:
           error.message,
       });
-
     }
-
   }
 );
 
@@ -1695,32 +1741,27 @@ router.patch(
           }
         );
 
-
       if (!donation) {
-
         return res.status(404).json({
           message:
             "Donation not found",
         });
-
       }
 
-
-      res.json(
-        donation
-      );
+      res.json(donation);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Donation status update error:",
+        error
+      );
 
       res.status(400).json({
         message:
           error.message,
       });
-
     }
-
   }
 );
 
@@ -1738,16 +1779,12 @@ router.delete(
           req.params.id
         );
 
-
       if (!donation) {
-
         return res.status(404).json({
           message:
             "Donation not found",
         });
-
       }
-
 
       res.json({
         message:
@@ -1756,15 +1793,173 @@ router.delete(
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Donation deletion error:",
+        error
+      );
 
       res.status(500).json({
         message:
           "Failed to delete donation",
       });
-
     }
+  }
+);
 
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+
+/* GET NOTIFICATIONS */
+
+router.get(
+  "/notifications",
+  async (req, res) => {
+
+    try {
+
+      const notifications =
+        await Notification.find()
+          .sort({
+            createdAt: -1,
+          })
+          .limit(50);
+
+      res.json(notifications);
+
+    } catch (error) {
+
+      console.error(
+        "Notifications GET error:",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Failed to fetch notifications",
+      });
+    }
+  }
+);
+
+
+/* MARK ONE NOTIFICATION AS READ */
+
+router.patch(
+  "/notifications/:id/read",
+  async (req, res) => {
+
+    try {
+
+      const notification =
+        await Notification.findByIdAndUpdate(
+          req.params.id,
+          {
+            read: true,
+          },
+          {
+            new: true,
+          }
+        );
+
+      if (!notification) {
+        return res.status(404).json({
+          message:
+            "Notification not found",
+        });
+      }
+
+      res.json(notification);
+
+    } catch (error) {
+
+      console.error(
+        "Notification read error:",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Failed to mark notification as read",
+      });
+    }
+  }
+);
+
+
+/* MARK ALL NOTIFICATIONS AS READ */
+
+router.patch(
+  "/notifications/read-all",
+  async (req, res) => {
+
+    try {
+
+      await Notification.updateMany(
+        {
+          read: false,
+        },
+        {
+          $set: {
+            read: true,
+          },
+        }
+      );
+
+      res.json({
+        success: true,
+        message:
+          "All notifications marked as read.",
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Mark all notifications error:",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Failed to mark all notifications as read",
+      });
+    }
+  }
+);
+
+
+/* DELETE ALL READ NOTIFICATIONS */
+
+router.delete(
+  "/notifications/read",
+  async (req, res) => {
+
+    try {
+
+      await Notification.deleteMany({
+        read: true,
+      });
+
+      res.json({
+        success: true,
+        message:
+          "Read notifications deleted.",
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Delete notifications error:",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Failed to delete read notifications",
+      });
+    }
   }
 );
 
@@ -1788,7 +1983,7 @@ router.get(
 
 
 /* =========================================================
-   EXPORT
+   EXPORT ROUTER
 ========================================================= */
 
 export default router;
