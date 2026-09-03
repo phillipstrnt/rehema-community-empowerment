@@ -1,5 +1,9 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 /* =====================================================
    PUBLIC COMPONENTS
@@ -76,338 +80,435 @@ import AdminNewsletter from "./pages/admin/AdminNewsletter";
 import AdminSettings from "./pages/admin/AdminSettings";
 
 
+/* =====================================================
+   PUBLIC WEBSITE WRAPPER
+===================================================== */
+
+function PublicLayout({ children }) {
+  return (
+    <>
+      <Navbar />
+
+      <main>
+        {children}
+      </main>
+
+      <Footer />
+
+      <WhatsAppButton />
+    </>
+  );
+}
+
+
+/* =====================================================
+   APPLICATION
+===================================================== */
+
 export default function App() {
   return (
-    <Routes>
-
+    <>
       {/* =================================================
-          PUBLIC WEBSITE
+          SCROLL TO TOP
       ================================================= */}
 
-      <Route
-        path="/"
-        element={
-          <>
-            <Navbar />
-            <main>
-              <Home />
-            </main>
-            <Footer />
-            <WhatsAppButton />
-          </>
-        }
-      />
+      <ScrollToTop />
 
-      <Route
-        path="/about"
-        element={
-          <>
-            <Navbar />
-            <main>
-              <About />
-            </main>
-            <Footer />
-            <WhatsAppButton />
-          </>
-        }
-      />
+      <Routes>
 
-      <Route
-        path="/programs"
-        element={
-          <>
-            <Navbar />
-            <main>
-              <Programs />
-            </main>
-            <Footer />
-            <WhatsAppButton />
-          </>
-        }
-      />
-
-      <Route
-        path="/news"
-        element={
-          <>
-            <Navbar />
-            <main>
-              <News />
-            </main>
-            <Footer />
-            <WhatsAppButton />
-          </>
-        }
-      />
-
-      <Route
-        path="/news/:slug"
-        element={
-          <>
-            <Navbar />
-            <main>
-              <Post />
-            </main>
-            <Footer />
-            <WhatsAppButton />
-          </>
-        }
-      />
-
-      <Route
-        path="/gallery"
-        element={
-          <>
-            <Navbar />
-            <main>
-              <Gallery />
-            </main>
-            <Footer />
-            <WhatsAppButton />
-          </>
-        }
-      />
-
-      <Route
-        path="/get-involved"
-        element={
-          <>
-            <Navbar />
-            <main>
-              <GetInvolved />
-            </main>
-            <Footer />
-            <WhatsAppButton />
-          </>
-        }
-      />
-
-      <Route
-        path="/donate"
-        element={
-          <>
-            <Navbar />
-            <main>
-              <Donate />
-            </main>
-            <Footer />
-            <WhatsAppButton />
-          </>
-        }
-      />
-
-      <Route
-        path="/contact"
-        element={
-          <>
-            <Navbar />
-            <main>
-              <Contact />
-            </main>
-            <Footer />
-            <WhatsAppButton />
-          </>
-        }
-      />
-
-      {/* =================================================
-          ADMIN LOGIN
-      ================================================= */}
-
-      <Route
-        path="/admin/login"
-        element={<AdminLogin />}
-      />
-
-      {/* =================================================
-          PROTECTED ADMIN AREA
-      ================================================= */}
-
-      <Route element={<ProtectedRoute />}>
+        {/* =================================================
+            PUBLIC WEBSITE
+        ================================================= */}
 
         <Route
-          path="/admin"
-          element={<AdminLayout />}
-        >
+          path="/"
+          element={
+            <PublicLayout>
+              <Home />
+            </PublicLayout>
+          }
+        />
 
-          {/* =================================================
-              DASHBOARD
-          ================================================= */}
 
-          <Route
-            index
-            element={<AdminDashboard />}
-          />
+        {/* =================================================
+            ABOUT
+        ================================================= */}
 
-          {/* =================================================
-              NEWS & STORIES
-          ================================================= */}
+        <Route
+          path="/about"
+          element={
+            <PublicLayout>
+              <About />
+            </PublicLayout>
+          }
+        />
 
-          <Route
-            path="posts"
-            element={<AdminPosts />}
-          />
 
-          <Route
-            path="posts/new"
-            element={<PostForm />}
-          />
+        {/* =================================================
+            PROGRAMS
+        ================================================= */}
 
-          <Route
-            path="posts/:id/edit"
-            element={<PostForm />}
-          />
+        <Route
+          path="/programs"
+          element={
+            <PublicLayout>
+              <Programs />
+            </PublicLayout>
+          }
+        />
 
-          {/* =================================================
-              PROGRAMS
-          ================================================= */}
 
-          <Route
-            path="programs"
-            element={<AdminPrograms />}
-          />
+        {/* =================================================
+            NEWS
+        ================================================= */}
 
-          <Route
-            path="programs/new"
-            element={<ProgramForm />}
-          />
+        <Route
+          path="/news"
+          element={
+            <PublicLayout>
+              <News />
+            </PublicLayout>
+          }
+        />
 
-          <Route
-            path="programs/:id/edit"
-            element={<ProgramForm />}
-          />
 
-          {/* =================================================
-              EVENTS
-          ================================================= */}
+        {/* =================================================
+            SINGLE NEWS STORY
+        ================================================= */}
 
-          <Route
-            path="events"
-            element={<AdminEvents />}
-          />
+        <Route
+          path="/news/:slug"
+          element={
+            <PublicLayout>
+              <Post />
+            </PublicLayout>
+          }
+        />
 
-          <Route
-            path="events/new"
-            element={<EventForm />}
-          />
 
-          <Route
-            path="events/:id/edit"
-            element={<EventForm />}
-          />
+        {/* =================================================
+            GALLERY
+        ================================================= */}
 
-          {/* =================================================
-              GALLERY
-          ================================================= */}
+        <Route
+          path="/gallery"
+          element={
+            <PublicLayout>
+              <Gallery />
+            </PublicLayout>
+          }
+        />
 
-          <Route
-            path="gallery"
-            element={<AdminGallery />}
-          />
 
-          <Route
-            path="gallery/new"
-            element={<GalleryForm />}
-          />
+        {/* =================================================
+            GET INVOLVED
+        ================================================= */}
 
-          <Route
-            path="gallery/:id/edit"
-            element={<GalleryForm />}
-          />
+        <Route
+          path="/get-involved"
+          element={
+            <PublicLayout>
+              <GetInvolved />
+            </PublicLayout>
+          }
+        />
 
-          {/* =================================================
-              VOLUNTEERS
-          ================================================= */}
 
-          <Route
-            path="volunteers"
-            element={<AdminVolunteers />}
-          />
+        {/* =================================================
+            DONATE
+        ================================================= */}
 
-          {/* =================================================
-              PARTNERS
-          ================================================= */}
+        <Route
+          path="/donate"
+          element={
+            <PublicLayout>
+              <Donate />
+            </PublicLayout>
+          }
+        />
 
-          <Route
-            path="partners"
-            element={<AdminPartners />}
-          />
 
-          {/* =================================================
-              DONATIONS
-          ================================================= */}
+        {/* =================================================
+            CONTACT
+        ================================================= */}
 
-          <Route
-            path="donations"
-            element={<AdminDonations />}
-          />
+        <Route
+          path="/contact"
+          element={
+            <PublicLayout>
+              <Contact />
+            </PublicLayout>
+          }
+        />
 
-          <Route
-            path="donations/:id"
-            element={<AdminDonationDetails />}
-          />
 
-          {/* =================================================
-              MESSAGES
-          ================================================= */}
+        {/* =================================================
+            ADMIN LOGIN
+        ================================================= */}
 
-          <Route
-            path="messages"
-            element={<AdminMessages />}
-          />
+        <Route
+          path="/admin/login"
+          element={<AdminLogin />}
+        />
 
-          {/* =================================================
-              NEWSLETTER
-          ================================================= */}
 
-          <Route
-            path="newsletter"
-            element={<AdminNewsletter />}
-          />
+        {/* =================================================
+            PROTECTED ADMIN AREA
+        ================================================= */}
 
-          {/* =================================================
-              SETTINGS
-          ================================================= */}
+        <Route element={<ProtectedRoute />}>
 
           <Route
-            path="settings"
-            element={<AdminSettings />}
-          />
+            path="/admin"
+            element={<AdminLayout />}
+          >
 
-          {/* =================================================
-              ADMIN USERS
-          ================================================= */}
+            {/* =============================================
+                ADMIN DASHBOARD
+            ============================================= */}
 
-          <Route
-            path="users"
-            element={<AdminUsers />}
-          />
+            <Route
+              index
+              element={<AdminDashboard />}
+            />
+
+
+            {/* =============================================
+                NEWS & STORIES
+            ============================================= */}
+
+            <Route
+              path="posts"
+              element={<AdminPosts />}
+            />
+
+            <Route
+              path="posts/new"
+              element={<PostForm />}
+            />
+
+            <Route
+              path="posts/:id/edit"
+              element={<PostForm />}
+            />
+
+
+            {/* =============================================
+                NEWS / STORIES ALIASES
+
+                These prevent "Route not found" if an
+                existing button uses /admin/stories or
+                /admin/news.
+            ============================================= */}
+
+            <Route
+              path="stories"
+              element={<AdminPosts />}
+            />
+
+            <Route
+              path="stories/new"
+              element={<PostForm />}
+            />
+
+            <Route
+              path="stories/:id/edit"
+              element={<PostForm />}
+            />
+
+            <Route
+              path="news"
+              element={<AdminPosts />}
+            />
+
+            <Route
+              path="news/new"
+              element={<PostForm />}
+            />
+
+            <Route
+              path="news/:id/edit"
+              element={<PostForm />}
+            />
+
+
+            {/* =============================================
+                PROGRAMS
+            ============================================= */}
+
+            <Route
+              path="programs"
+              element={<AdminPrograms />}
+            />
+
+            <Route
+              path="programs/new"
+              element={<ProgramForm />}
+            />
+
+            <Route
+              path="programs/:id/edit"
+              element={<ProgramForm />}
+            />
+
+
+            {/* =============================================
+                EVENTS
+            ============================================= */}
+
+            <Route
+              path="events"
+              element={<AdminEvents />}
+            />
+
+            <Route
+              path="events/new"
+              element={<EventForm />}
+            />
+
+            <Route
+              path="events/:id/edit"
+              element={<EventForm />}
+            />
+
+
+            {/* =============================================
+                GALLERY
+            ============================================= */}
+
+            <Route
+              path="gallery"
+              element={<AdminGallery />}
+            />
+
+            <Route
+              path="gallery/new"
+              element={<GalleryForm />}
+            />
+
+            <Route
+              path="gallery/:id/edit"
+              element={<GalleryForm />}
+            />
+
+
+            {/* =============================================
+                VOLUNTEERS
+            ============================================= */}
+
+            <Route
+              path="volunteers"
+              element={<AdminVolunteers />}
+            />
+
+
+            {/* =============================================
+                PARTNERS
+            ============================================= */}
+
+            <Route
+              path="partners"
+              element={<AdminPartners />}
+            />
+
+
+            {/* =============================================
+                DONATIONS
+            ============================================= */}
+
+            <Route
+              path="donations"
+              element={<AdminDonations />}
+            />
+
+            <Route
+              path="donations/:id"
+              element={<AdminDonationDetails />}
+            />
+
+
+            {/* =============================================
+                MESSAGES
+            ============================================= */}
+
+            <Route
+              path="messages"
+              element={<AdminMessages />}
+            />
+
+
+            {/* =============================================
+                NEWSLETTER
+            ============================================= */}
+
+            <Route
+              path="newsletter"
+              element={<AdminNewsletter />}
+            />
+
+
+            {/* =============================================
+                SETTINGS
+            ============================================= */}
+
+            <Route
+              path="settings"
+              element={<AdminSettings />}
+            />
+
+
+            {/* =============================================
+                ADMIN USERS
+            ============================================= */}
+
+            <Route
+              path="users"
+              element={<AdminUsers />}
+            />
+
+
+            {/* =============================================
+                ADMIN FALLBACK
+
+                If an old button points to something like:
+
+                /admin/story
+                /admin/donation
+                /admin/something
+
+                it stays inside the admin area instead
+                of displaying the public 404 page.
+            ============================================= */}
+
+            <Route
+              path="*"
+              element={
+                <Navigate
+                  to="/admin"
+                  replace
+                />
+              }
+            />
+
+          </Route>
 
         </Route>
 
-      </Route>
 
-      {/* =================================================
-          404 PAGE
-      ================================================= */}
+        {/* =================================================
+            PUBLIC 404
+        ================================================= */}
 
-      <Route
-        path="*"
-        element={
-          <>
-            <Navbar />
-
-            <main>
+        <Route
+          path="*"
+          element={
+            <PublicLayout>
               <NotFound />
-            </main>
+            </PublicLayout>
+          }
+        />
 
-            <Footer />
-
-            <WhatsAppButton />
-          </>
-        }
-      />
-
-    </Routes>
+      </Routes>
+    </>
   );
 }

@@ -1,201 +1,176 @@
-import React from "react";
 
-import {
-  useState
-} from "react";
-
-import {
-  api
-} from "../api";
-
+import React, { useState } from "react";
+import { api } from "../api";
 
 export default function Contact() {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+  });
 
-  const [form, setForm] =
-    useState({});
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
 
+  function handleChange(e) {
+    const { name, value } = e.target;
 
-  const [message, setMessage] =
-    useState("");
-
-
-  async function submit(e) {
-
-    e.preventDefault();
-
-
-    try {
-
-      const data =
-        await api(
-          "/contact",
-          {
-            method: "POST",
-
-            body: JSON.stringify(form)
-          }
-        );
-
-
-      setMessage(
-        data.message
-      );
-
-      setForm({});
-
-    }
-
-    catch (error) {
-
-      setMessage(
-        error.message
-      );
-
-    }
-
+    setForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
   }
 
+  async function submit(e) {
+    e.preventDefault();
+
+    setSending(true);
+    setMessage("");
+
+    try {
+      const data = await api("/contact", {
+        method: "POST",
+        body: JSON.stringify(form),
+      });
+
+      setMessage(
+        data.message || "Your message has been sent successfully."
+      );
+
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+      });
+    } catch (error) {
+      setMessage(
+        error.message || "Failed to send your message."
+      );
+    } finally {
+      setSending(false);
+    }
+  }
 
   return (
-
     <section className="container section">
+      <p className="eyebrow">CONTACT REHEMA</p>
 
-      <p className="eyebrow">
-        CONTACT REHEMA
-      </p>
-
-
-      <h1>
-        We Would Love To Hear From You
-      </h1>
-
+      <h1>We Would Love To Hear From You</h1>
 
       <div className="two-col">
-
+        {/* ================================================
+            CONTACT INFORMATION
+        ================================================= */}
 
         <div>
+          <h2>REHEMA</h2>
 
-          <h2>
-            REHEMA
-          </h2>
+          <p>Mbale, Uganda</p>
 
-          <p>
-            Mbale, Uganda
-          </p>
+          <p>0702952694</p>
 
-          <p>
-            0702952694
-          </p>
+          <p>info@rehemauganda.org</p>
 
-          <p>
-            info@rehemauganda.org
-          </p>
-
+          {/* ==============================================
+              GOOGLE MAP
+          ============================================== */}
 
           <div className="map">
-
             <iframe
-
-              title="Mbale map"
-
-              src="https://www.google.com/maps?q=Mbale%2C%20Uganda&output=embed"
-
+              title="REHEMA location in Mbale, Uganda"
+              src="https://www.google.com/maps?q=REHEMA+MEDICAL+CENTER+%26+MATERNITY+HOME,+Plot+1580+Florida+Road,+Nauyo+Bugema+Town,+Mbale,+Uganda&output=embed"
+              width="100%"
+              height="400"
+              style={{
+                border: 0,
+                borderRadius: "12px",
+              }}
+              allowFullScreen
               loading="lazy"
-
+              referrerPolicy="no-referrer-when-downgrade"
             />
-
           </div>
 
+          {/* DIRECT MAP LINK */}
+
+          <p style={{ marginTop: "12px" }}>
+            <a
+              href="https://maps.app.goo.gl/5AAfQMeBj6dBqXdv9?g_st=iwb"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              📍 Get Directions to REHEMA
+            </a>
+          </p>
         </div>
 
+        {/* ================================================
+            CONTACT FORM
+        ================================================= */}
 
         <form
           className="form"
           onSubmit={submit}
         >
-
           <input
+            name="name"
+            value={form.name}
             placeholder="Name"
             required
-            onChange={
-              e =>
-                setForm({
-                  ...form,
-                  name: e.target.value
-                })
-            }
+            onChange={handleChange}
           />
 
-
           <input
+            name="email"
             type="email"
+            value={form.email}
             placeholder="Email"
             required
-            onChange={
-              e =>
-                setForm({
-                  ...form,
-                  email: e.target.value
-                })
-            }
+            onChange={handleChange}
           />
 
-
           <input
+            name="phone"
+            value={form.phone}
             placeholder="Phone"
-            onChange={
-              e =>
-                setForm({
-                  ...form,
-                  phone: e.target.value
-                })
-            }
+            onChange={handleChange}
           />
-
 
           <input
+            name="subject"
+            value={form.subject}
             placeholder="Subject"
-            onChange={
-              e =>
-                setForm({
-                  ...form,
-                  subject: e.target.value
-                })
-            }
+            onChange={handleChange}
           />
-
 
           <textarea
+            name="message"
+            value={form.message}
             placeholder="Message"
             required
-            onChange={
-              e =>
-                setForm({
-                  ...form,
-                  message: e.target.value
-                })
-            }
+            rows="6"
+            onChange={handleChange}
           />
 
-
-          <button className="btn">
-            Send Message
+          <button
+            className="btn"
+            type="submit"
+            disabled={sending}
+          >
+            {sending ? "Sending..." : "Send Message"}
           </button>
 
-
           {message && (
-
             <p className="form-message">
               {message}
             </p>
-
           )}
-
         </form>
-
       </div>
-
     </section>
-
   );
 }

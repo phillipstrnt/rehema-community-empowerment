@@ -794,7 +794,7 @@ export default function About() {
 
             {/* IMAGE: Sydney Nsubuga founder photograph */}
             <img
-              src="/images/rehema/founder.jpg"
+              src="https://res.cloudinary.com/ttymyelh/image/upload/v1788243559/founder.jpg"
               alt="Sydney Nsubuga, Founder of REHEMA"
             />
 

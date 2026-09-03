@@ -634,7 +634,7 @@ export default function GetInvolved() {
 
               {/* ADD YOUR PARTNERSHIP IMAGE HERE */}
               <img
-                src="/images/rehema/partnership.jpg"
+                src="https://res.cloudinary.com/ttymyelh/image/upload/v1788360703/partnership-img.jpg"
                 alt="REHEMA partnership and collaboration"
               />
 

@@ -662,7 +662,7 @@ export default function News() {
             >
 
               <img
-                src="/images/rehema/maternal-health.jpg"
+                src="https://res.cloudinary.com/ttymyelh/image/upload/v1788243562/maternal-health1.jpg"
                 alt="Maternal and child health"
                 onError={handleImageError}
               />
@@ -697,7 +697,7 @@ export default function News() {
             >
 
               <img
-                src="/images/rehema/community.jpg"
+                src="https://res.cloudinary.com/ttymyelh/image/upload/v1788243561/Maternal_mortality__It_s_just_poor_African_and_Asian_women_dying___Liz_Ford.jpg2"
                 alt="Community development"
                 onError={handleImageError}
               />
@@ -732,7 +732,7 @@ export default function News() {
             >
 
               <img
-                src="/images/rehema/medical-camp.jpg"
+                src="https://res.cloudinary.com/ttymyelh/image/upload/v1788243556/camp11.jpg"
                 alt="Medical outreach"
                 onError={handleImageError}
               />
@@ -767,7 +767,7 @@ export default function News() {
             >
 
               <img
-                src="/images/rehema/health-education.jpg"
+                src="https://res.cloudinary.com/ttymyelh/image/upload/v1788243556/camp14.jpg"
                 alt="Health education"
                 onError={handleImageError}
               />

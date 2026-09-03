@@ -100,7 +100,7 @@ const hardcodedPrograms = [
     number: "06",
     title: "Community Health & Outreach",
     shortTitle: "Community Health",
-    image: "/images/rehema/community-health.jpg",
+    image: "https://res.cloudinary.com/ttymyelh/image/upload/v1788243559/group1.webp",
     description:
       "We bring health information, services and community engagement closer to people, particularly communities that may face barriers to accessing conventional health services.",
     points: [
@@ -844,7 +844,7 @@ export default function Programs() {
           <div className="programs-wash-image">
 
             <img
-              src="/images/rehema/wash.jpg"
+              src="https://res.cloudinary.com/ttymyelh/image/upload/v1788362003/Gasi_Spring_Ethiopia.jpg"
               alt="Water sanitation hygiene and environment"
             />
 
@@ -864,7 +864,7 @@ export default function Programs() {
         <div className="programs-economic-image">
 
           <img
-            src="/images/rehema/economic-development.jpg"
+            src="https://res.cloudinary.com/ttymyelh/image/upload/v1788363465/savings.jpg"
             alt="Community economic development"
           />
 

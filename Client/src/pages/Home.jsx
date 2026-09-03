@@ -478,7 +478,7 @@ export default function Home() {
               <div className="home-card-image">
 
                 <img
-                  src="/images/rehema/medical-camp.jpg"
+                  src="https://res.cloudinary.com/ttymyelh/image/upload/v1788243563/tent_speech.jpg"
                   alt="REHEMA medical camp"
                 />
 
@@ -676,7 +676,7 @@ export default function Home() {
               <div className="home-card-image">
 
                 <img
-                  src="/images/rehema/team.jpg"
+                  src="https://res.cloudinary.com/ttymyelh/image/upload/v1788360703/partnership-img.jpg"
                   alt="REHEMA partnerships"
                 />
 
@@ -788,7 +788,7 @@ export default function Home() {
           <div className="home-feature-image">
 
             <img
-              src="/images/rehema/medical-camp.jpg"
+              src="https://res.cloudinary.com/ttymyelh/image/upload/v1788243563/tent_speech.jpg"
               alt="REHEMA medical outreach"
             />
 
