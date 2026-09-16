@@ -15,7 +15,6 @@ import {
 
 const router = express.Router();
 
-
 /* =========================================================
    NOTIFICATION HELPER
 ========================================================= */
@@ -42,11 +41,9 @@ const createNotification = async ({
   }
 };
 
-
 /* =========================================================
    POSTS / NEWS
 ========================================================= */
-
 
 /* GET ALL POSTS */
 
@@ -58,9 +55,7 @@ router.get("/posts", async (req, res) => {
     });
 
     res.json(posts);
-
   } catch (error) {
-
     console.error(
       "Posts GET error:",
       error
@@ -72,12 +67,10 @@ router.get("/posts", async (req, res) => {
   }
 });
 
-
 /* GET SINGLE POST */
 
 router.get("/posts/:slug", async (req, res) => {
   try {
-
     const post = await Post.findOne({
       slug: req.params.slug,
     });
@@ -89,9 +82,7 @@ router.get("/posts/:slug", async (req, res) => {
     }
 
     res.json(post);
-
   } catch (error) {
-
     console.error(
       "Single post GET error:",
       error
@@ -103,12 +94,10 @@ router.get("/posts/:slug", async (req, res) => {
   }
 });
 
-
 /* CREATE POST */
 
 router.post("/posts", async (req, res) => {
   try {
-
     const post = await Post.create(
       req.body
     );
@@ -121,9 +110,7 @@ router.post("/posts", async (req, res) => {
     });
 
     res.status(201).json(post);
-
   } catch (error) {
-
     console.error(
       "Post creation error:",
       error
@@ -135,12 +122,10 @@ router.post("/posts", async (req, res) => {
   }
 });
 
-
 /* UPDATE POST */
 
 router.put("/posts/:id", async (req, res) => {
   try {
-
     const post =
       await Post.findByIdAndUpdate(
         req.params.id,
@@ -158,9 +143,7 @@ router.put("/posts/:id", async (req, res) => {
     }
 
     res.json(post);
-
   } catch (error) {
-
     console.error(
       "Post update error:",
       error
@@ -172,12 +155,10 @@ router.put("/posts/:id", async (req, res) => {
   }
 });
 
-
 /* DELETE POST */
 
 router.delete("/posts/:id", async (req, res) => {
   try {
-
     const post =
       await Post.findByIdAndDelete(
         req.params.id
@@ -193,9 +174,7 @@ router.delete("/posts/:id", async (req, res) => {
       message:
         "Post deleted successfully",
     });
-
   } catch (error) {
-
     console.error(
       "Post deletion error:",
       error
@@ -208,26 +187,21 @@ router.delete("/posts/:id", async (req, res) => {
   }
 });
 
-
 /* =========================================================
    PROGRAMS
 ========================================================= */
-
 
 /* GET PROGRAMS */
 
 router.get("/programs", async (req, res) => {
   try {
-
     const programs =
       await Program.find().sort({
         createdAt: -1,
       });
 
     res.json(programs);
-
   } catch (error) {
-
     console.error(
       "Programs GET error:",
       error
@@ -240,15 +214,12 @@ router.get("/programs", async (req, res) => {
   }
 });
 
-
 /* GET SINGLE PROGRAM */
 
 router.get(
   "/programs/:id",
   async (req, res) => {
-
     try {
-
       const program =
         await Program.findById(
           req.params.id
@@ -262,9 +233,7 @@ router.get(
       }
 
       res.json(program);
-
     } catch (error) {
-
       console.error(
         "Single program GET error:",
         error
@@ -278,15 +247,12 @@ router.get(
   }
 );
 
-
 /* CREATE PROGRAM */
 
 router.post(
   "/programs",
   async (req, res) => {
-
     try {
-
       const program =
         await Program.create(
           req.body
@@ -302,9 +268,7 @@ router.post(
       res.status(201).json(
         program
       );
-
     } catch (error) {
-
       console.error(
         "Program creation error:",
         error
@@ -318,15 +282,12 @@ router.post(
   }
 );
 
-
 /* UPDATE PROGRAM */
 
 router.put(
   "/programs/:id",
   async (req, res) => {
-
     try {
-
       const program =
         await Program.findByIdAndUpdate(
           req.params.id,
@@ -345,9 +306,7 @@ router.put(
       }
 
       res.json(program);
-
     } catch (error) {
-
       console.error(
         "Program update error:",
         error
@@ -361,15 +320,12 @@ router.put(
   }
 );
 
-
 /* DELETE PROGRAM */
 
 router.delete(
   "/programs/:id",
   async (req, res) => {
-
     try {
-
       const program =
         await Program.findByIdAndDelete(
           req.params.id
@@ -386,9 +342,7 @@ router.delete(
         message:
           "Program deleted successfully",
       });
-
     } catch (error) {
-
       console.error(
         "Program deletion error:",
         error
@@ -402,29 +356,23 @@ router.delete(
   }
 );
 
-
 /* =========================================================
    EVENTS
 ========================================================= */
-
 
 /* GET EVENTS */
 
 router.get(
   "/events",
   async (req, res) => {
-
     try {
-
       const events =
         await Event.find().sort({
           date: 1,
         });
 
       res.json(events);
-
     } catch (error) {
-
       console.error(
         "Events GET error:",
         error
@@ -438,15 +386,12 @@ router.get(
   }
 );
 
-
 /* GET SINGLE EVENT */
 
 router.get(
   "/events/:id",
   async (req, res) => {
-
     try {
-
       const event =
         await Event.findById(
           req.params.id
@@ -460,9 +405,7 @@ router.get(
       }
 
       res.json(event);
-
     } catch (error) {
-
       console.error(
         "Single event GET error:",
         error
@@ -476,15 +419,12 @@ router.get(
   }
 );
 
-
 /* CREATE EVENT */
 
 router.post(
   "/events",
   async (req, res) => {
-
     try {
-
       const event =
         await Event.create(
           req.body
@@ -498,9 +438,7 @@ router.post(
       });
 
       res.status(201).json(event);
-
     } catch (error) {
-
       console.error(
         "Event creation error:",
         error
@@ -514,15 +452,12 @@ router.post(
   }
 );
 
-
 /* UPDATE EVENT */
 
 router.put(
   "/events/:id",
   async (req, res) => {
-
     try {
-
       const event =
         await Event.findByIdAndUpdate(
           req.params.id,
@@ -541,9 +476,7 @@ router.put(
       }
 
       res.json(event);
-
     } catch (error) {
-
       console.error(
         "Event update error:",
         error
@@ -557,15 +490,12 @@ router.put(
   }
 );
 
-
 /* DELETE EVENT */
 
 router.delete(
   "/events/:id",
   async (req, res) => {
-
     try {
-
       const event =
         await Event.findByIdAndDelete(
           req.params.id
@@ -582,9 +512,7 @@ router.delete(
         message:
           "Event deleted successfully",
       });
-
     } catch (error) {
-
       console.error(
         "Event deletion error:",
         error
@@ -598,20 +526,16 @@ router.delete(
   }
 );
 
-
 /* =========================================================
    GALLERY
 ========================================================= */
-
 
 /* GET GALLERY */
 
 router.get(
   "/gallery",
   async (req, res) => {
-
     try {
-
       const gallery =
         await Gallery.find().sort({
           date: -1,
@@ -619,9 +543,7 @@ router.get(
         });
 
       res.json(gallery);
-
     } catch (error) {
-
       console.error(
         "Gallery GET error:",
         error
@@ -635,15 +557,12 @@ router.get(
   }
 );
 
-
 /* GET SINGLE GALLERY ITEM */
 
 router.get(
   "/gallery/:id",
   async (req, res) => {
-
     try {
-
       const item =
         await Gallery.findById(
           req.params.id
@@ -657,9 +576,7 @@ router.get(
       }
 
       res.json(item);
-
     } catch (error) {
-
       console.error(
         "Single gallery GET error:",
         error
@@ -673,15 +590,12 @@ router.get(
   }
 );
 
-
 /* CREATE GALLERY ITEM */
 
 router.post(
   "/gallery",
   async (req, res) => {
-
     try {
-
       const item =
         await Gallery.create(
           req.body
@@ -695,9 +609,7 @@ router.post(
       });
 
       res.status(201).json(item);
-
     } catch (error) {
-
       console.error(
         "Gallery creation error:",
         error
@@ -711,15 +623,12 @@ router.post(
   }
 );
 
-
 /* UPDATE GALLERY ITEM */
 
 router.put(
   "/gallery/:id",
   async (req, res) => {
-
     try {
-
       const item =
         await Gallery.findByIdAndUpdate(
           req.params.id,
@@ -738,9 +647,7 @@ router.put(
       }
 
       res.json(item);
-
     } catch (error) {
-
       console.error(
         "Gallery update error:",
         error
@@ -754,15 +661,12 @@ router.put(
   }
 );
 
-
 /* DELETE GALLERY ITEM */
 
 router.delete(
   "/gallery/:id",
   async (req, res) => {
-
     try {
-
       const item =
         await Gallery.findByIdAndDelete(
           req.params.id
@@ -779,9 +683,7 @@ router.delete(
         message:
           "Gallery item deleted successfully",
       });
-
     } catch (error) {
-
       console.error(
         "Gallery deletion error:",
         error
@@ -795,29 +697,23 @@ router.delete(
   }
 );
 
-
 /* =========================================================
    VOLUNTEERS
 ========================================================= */
-
 
 /* GET VOLUNTEERS */
 
 router.get(
   "/volunteers",
   async (req, res) => {
-
     try {
-
       const volunteers =
         await Volunteer.find().sort({
           createdAt: -1,
         });
 
       res.json(volunteers);
-
     } catch (error) {
-
       console.error(
         "Volunteers GET error:",
         error
@@ -831,15 +727,12 @@ router.get(
   }
 );
 
-
 /* CREATE VOLUNTEER */
 
 router.post(
   "/volunteers",
   async (req, res) => {
-
     try {
-
       const volunteer =
         await Volunteer.create(
           req.body
@@ -855,9 +748,7 @@ router.post(
       res.status(201).json(
         volunteer
       );
-
     } catch (error) {
-
       console.error(
         "Volunteer creation error:",
         error
@@ -871,15 +762,12 @@ router.post(
   }
 );
 
-
 /* UPDATE VOLUNTEER */
 
 router.put(
   "/volunteers/:id",
   async (req, res) => {
-
     try {
-
       const volunteer =
         await Volunteer.findByIdAndUpdate(
           req.params.id,
@@ -898,9 +786,7 @@ router.put(
       }
 
       res.json(volunteer);
-
     } catch (error) {
-
       console.error(
         "Volunteer update error:",
         error
@@ -914,15 +800,93 @@ router.put(
   }
 );
 
+/* =========================================================
+   UPDATE VOLUNTEER STATUS
+========================================================= */
+
+router.patch(
+  "/volunteers/:id/status",
+  async (req, res) => {
+    try {
+      const { status } = req.body;
+
+      /* Make sure a status was provided */
+
+      if (!status) {
+        return res.status(400).json({
+          message:
+            "Volunteer status is required.",
+        });
+      }
+
+      /* Allowed volunteer statuses */
+
+      const allowedStatuses = [
+        "new",
+        "contacted",
+        "approved",
+        "rejected",
+      ];
+
+      /* Check that the status is valid */
+
+      if (
+        !allowedStatuses.includes(status)
+      ) {
+        return res.status(400).json({
+          message:
+            "Invalid volunteer status.",
+          allowedStatuses,
+        });
+      }
+
+      /* Find and update the volunteer */
+
+      const volunteer =
+        await Volunteer.findByIdAndUpdate(
+          req.params.id,
+          {
+            status,
+          },
+          {
+            new: true,
+            runValidators: true,
+          }
+        );
+
+      /* Volunteer does not exist */
+
+      if (!volunteer) {
+        return res.status(404).json({
+          message:
+            "Volunteer not found",
+        });
+      }
+
+      /* Return updated volunteer */
+
+      res.json(volunteer);
+
+    } catch (error) {
+      console.error(
+        "Volunteer status update error:",
+        error
+      );
+
+      res.status(400).json({
+        message:
+          error.message,
+      });
+    }
+  }
+);
 
 /* DELETE VOLUNTEER */
 
 router.delete(
   "/volunteers/:id",
   async (req, res) => {
-
     try {
-
       const volunteer =
         await Volunteer.findByIdAndDelete(
           req.params.id
@@ -939,9 +903,7 @@ router.delete(
         message:
           "Volunteer deleted successfully",
       });
-
     } catch (error) {
-
       console.error(
         "Volunteer deletion error:",
         error
@@ -955,29 +917,23 @@ router.delete(
   }
 );
 
-
 /* =========================================================
    PARTNERS
 ========================================================= */
-
 
 /* GET PARTNERS */
 
 router.get(
   "/partners",
   async (req, res) => {
-
     try {
-
       const partners =
         await Partner.find().sort({
           createdAt: -1,
         });
 
       res.json(partners);
-
     } catch (error) {
-
       console.error(
         "Partners GET error:",
         error
@@ -991,15 +947,12 @@ router.get(
   }
 );
 
-
 /* GET SINGLE PARTNER */
 
 router.get(
   "/partners/:id",
   async (req, res) => {
-
     try {
-
       const partner =
         await Partner.findById(
           req.params.id
@@ -1013,9 +966,7 @@ router.get(
       }
 
       res.json(partner);
-
     } catch (error) {
-
       console.error(
         "Single partner GET error:",
         error
@@ -1029,15 +980,12 @@ router.get(
   }
 );
 
-
 /* CREATE PARTNER */
 
 router.post(
   "/partners",
   async (req, res) => {
-
     try {
-
       const partner =
         await Partner.create(
           req.body
@@ -1053,9 +1001,7 @@ router.post(
       res.status(201).json(
         partner
       );
-
     } catch (error) {
-
       console.error(
         "Partner creation error:",
         error
@@ -1069,15 +1015,12 @@ router.post(
   }
 );
 
-
 /* UPDATE PARTNER */
 
 router.put(
   "/partners/:id",
   async (req, res) => {
-
     try {
-
       const partner =
         await Partner.findByIdAndUpdate(
           req.params.id,
@@ -1096,9 +1039,7 @@ router.put(
       }
 
       res.json(partner);
-
     } catch (error) {
-
       console.error(
         "Partner update error:",
         error
@@ -1112,15 +1053,12 @@ router.put(
   }
 );
 
-
 /* DELETE PARTNER */
 
 router.delete(
   "/partners/:id",
   async (req, res) => {
-
     try {
-
       const partner =
         await Partner.findByIdAndDelete(
           req.params.id
@@ -1137,9 +1075,7 @@ router.delete(
         message:
           "Partner deleted successfully",
       });
-
     } catch (error) {
-
       console.error(
         "Partner deletion error:",
         error
@@ -1153,20 +1089,16 @@ router.delete(
   }
 );
 
-
 /* =========================================================
    MESSAGES / CONTACT
 ========================================================= */
-
 
 /* GET ALL MESSAGES */
 
 router.get(
   "/messages",
   async (req, res) => {
-
     try {
-
       const messages =
         await Contact.find().sort({
           createdAt: -1,
@@ -1175,7 +1107,6 @@ router.get(
       const normalized =
         messages.map(
           (message) => {
-
             const item =
               message.toObject();
 
@@ -1194,9 +1125,7 @@ router.get(
         );
 
       res.json(normalized);
-
     } catch (error) {
-
       console.error(
         "Messages GET error:",
         error
@@ -1210,15 +1139,12 @@ router.get(
   }
 );
 
-
 /* GET SINGLE MESSAGE */
 
 router.get(
   "/messages/:id",
   async (req, res) => {
-
     try {
-
       const message =
         await Contact.findById(
           req.params.id
@@ -1232,9 +1158,7 @@ router.get(
       }
 
       res.json(message);
-
     } catch (error) {
-
       console.error(
         "Single message GET error:",
         error
@@ -1248,15 +1172,12 @@ router.get(
   }
 );
 
-
 /* MARK MESSAGE AS READ */
 
 router.patch(
   "/messages/:id/read",
   async (req, res) => {
-
     try {
-
       const message =
         await Contact.findByIdAndUpdate(
           req.params.id,
@@ -1277,9 +1198,7 @@ router.patch(
       }
 
       res.json(message);
-
     } catch (error) {
-
       console.error(
         "Mark message read error:",
         error
@@ -1293,15 +1212,12 @@ router.patch(
   }
 );
 
-
 /* DELETE MESSAGE */
 
 router.delete(
   "/messages/:id",
   async (req, res) => {
-
     try {
-
       const message =
         await Contact.findByIdAndDelete(
           req.params.id
@@ -1318,9 +1234,7 @@ router.delete(
         message:
           "Message deleted successfully",
       });
-
     } catch (error) {
-
       console.error(
         "Delete message error:",
         error
@@ -1334,7 +1248,6 @@ router.delete(
   }
 );
 
-
 /* =========================================================
    PUBLIC CONTACT FORM
 ========================================================= */
@@ -1342,9 +1255,7 @@ router.delete(
 router.post(
   "/contact",
   async (req, res) => {
-
     try {
-
       const contact =
         await Contact.create({
           name: req.body.name,
@@ -1369,9 +1280,7 @@ router.post(
           "Your message has been sent successfully.",
         contact,
       });
-
     } catch (error) {
-
       console.error(
         "Contact creation error:",
         error
@@ -1385,7 +1294,6 @@ router.post(
   }
 );
 
-
 /* =========================================================
    LEGACY PUBLIC MESSAGES ENDPOINT
 ========================================================= */
@@ -1393,9 +1301,7 @@ router.post(
 router.post(
   "/messages",
   async (req, res) => {
-
     try {
-
       const message =
         await Contact.create({
           name: req.body.name,
@@ -1417,9 +1323,7 @@ router.post(
       res.status(201).json(
         message
       );
-
     } catch (error) {
-
       console.error(
         "Contact message creation error:",
         error
@@ -1433,20 +1337,16 @@ router.post(
   }
 );
 
-
 /* =========================================================
    NEWSLETTER
 ========================================================= */
-
 
 /* PUBLIC NEWSLETTER SUBSCRIPTION */
 
 router.post(
   "/newsletter/subscribe",
   async (req, res) => {
-
     try {
-
       const email =
         req.body.email
           ?.trim()
@@ -1489,9 +1389,7 @@ router.post(
           "Successfully subscribed to the newsletter.",
         subscriber,
       });
-
     } catch (error) {
-
       console.error(
         "Newsletter subscription error:",
         error
@@ -1512,24 +1410,19 @@ router.post(
   }
 );
 
-
 /* GET NEWSLETTER SUBSCRIBERS */
 
 router.get(
   "/newsletter/subscribers",
   async (req, res) => {
-
     try {
-
       const subscribers =
         await Newsletter.find().sort({
           createdAt: -1,
         });
 
       res.json(subscribers);
-
     } catch (error) {
-
       console.error(
         "Newsletter subscribers GET error:",
         error
@@ -1543,15 +1436,12 @@ router.get(
   }
 );
 
-
 /* GET SINGLE SUBSCRIBER */
 
 router.get(
   "/newsletter/subscribers/:id",
   async (req, res) => {
-
     try {
-
       const subscriber =
         await Newsletter.findById(
           req.params.id
@@ -1565,9 +1455,7 @@ router.get(
       }
 
       res.json(subscriber);
-
     } catch (error) {
-
       console.error(
         "Single subscriber GET error:",
         error
@@ -1581,15 +1469,12 @@ router.get(
   }
 );
 
-
 /* DELETE SUBSCRIBER */
 
 router.delete(
   "/newsletter/subscribers/:id",
   async (req, res) => {
-
     try {
-
       const subscriber =
         await Newsletter.findByIdAndDelete(
           req.params.id
@@ -1606,9 +1491,7 @@ router.delete(
         message:
           "Subscriber removed successfully",
       });
-
     } catch (error) {
-
       console.error(
         "Delete subscriber error:",
         error
@@ -1622,29 +1505,23 @@ router.delete(
   }
 );
 
-
 /* =========================================================
    DONATIONS
 ========================================================= */
-
 
 /* GET DONATIONS */
 
 router.get(
   "/donations",
   async (req, res) => {
-
     try {
-
       const donations =
         await Donation.find().sort({
           createdAt: -1,
         });
 
       res.json(donations);
-
     } catch (error) {
-
       console.error(
         "Donations GET error:",
         error
@@ -1658,15 +1535,12 @@ router.get(
   }
 );
 
-
 /* CREATE DONATION */
 
 router.post(
   "/donations",
   async (req, res) => {
-
     try {
-
       const donation =
         await Donation.create({
           donorName:
@@ -1703,9 +1577,7 @@ router.post(
       res.status(201).json(
         donation
       );
-
     } catch (error) {
-
       console.error(
         "Donation creation error:",
         error
@@ -1719,15 +1591,12 @@ router.post(
   }
 );
 
-
 /* UPDATE DONATION STATUS */
 
 router.patch(
   "/donations/:id/status",
   async (req, res) => {
-
     try {
-
       const donation =
         await Donation.findByIdAndUpdate(
           req.params.id,
@@ -1749,9 +1618,7 @@ router.patch(
       }
 
       res.json(donation);
-
     } catch (error) {
-
       console.error(
         "Donation status update error:",
         error
@@ -1765,15 +1632,12 @@ router.patch(
   }
 );
 
-
 /* DELETE DONATION */
 
 router.delete(
   "/donations/:id",
   async (req, res) => {
-
     try {
-
       const donation =
         await Donation.findByIdAndDelete(
           req.params.id
@@ -1790,9 +1654,7 @@ router.delete(
         message:
           "Donation deleted successfully",
       });
-
     } catch (error) {
-
       console.error(
         "Donation deletion error:",
         error
@@ -1806,20 +1668,16 @@ router.delete(
   }
 );
 
-
 /* =========================================================
    NOTIFICATIONS
 ========================================================= */
-
 
 /* GET NOTIFICATIONS */
 
 router.get(
   "/notifications",
   async (req, res) => {
-
     try {
-
       const notifications =
         await Notification.find()
           .sort({
@@ -1828,9 +1686,7 @@ router.get(
           .limit(50);
 
       res.json(notifications);
-
     } catch (error) {
-
       console.error(
         "Notifications GET error:",
         error
@@ -1844,15 +1700,12 @@ router.get(
   }
 );
 
-
 /* MARK ONE NOTIFICATION AS READ */
 
 router.patch(
   "/notifications/:id/read",
   async (req, res) => {
-
     try {
-
       const notification =
         await Notification.findByIdAndUpdate(
           req.params.id,
@@ -1872,9 +1725,7 @@ router.patch(
       }
 
       res.json(notification);
-
     } catch (error) {
-
       console.error(
         "Notification read error:",
         error
@@ -1888,15 +1739,12 @@ router.patch(
   }
 );
 
-
 /* MARK ALL NOTIFICATIONS AS READ */
 
 router.patch(
   "/notifications/read-all",
   async (req, res) => {
-
     try {
-
       await Notification.updateMany(
         {
           read: false,
@@ -1913,9 +1761,7 @@ router.patch(
         message:
           "All notifications marked as read.",
       });
-
     } catch (error) {
-
       console.error(
         "Mark all notifications error:",
         error
@@ -1929,15 +1775,12 @@ router.patch(
   }
 );
 
-
 /* DELETE ALL READ NOTIFICATIONS */
 
 router.delete(
   "/notifications/read",
   async (req, res) => {
-
     try {
-
       await Notification.deleteMany({
         read: true,
       });
@@ -1947,9 +1790,7 @@ router.delete(
         message:
           "Read notifications deleted.",
       });
-
     } catch (error) {
-
       console.error(
         "Delete notifications error:",
         error
@@ -1963,7 +1804,6 @@ router.delete(
   }
 );
 
-
 /* =========================================================
    HEALTH CHECK
 ========================================================= */
@@ -1971,16 +1811,13 @@ router.delete(
 router.get(
   "/health",
   (req, res) => {
-
     res.json({
       success: true,
       message:
         "REHEMA API is working",
     });
-
   }
 );
-
 
 /* =========================================================
    EXPORT ROUTER

@@ -259,12 +259,18 @@ const volunteerSchema = new mongoose.Schema(
 
     status: {
       type: String,
+
+      /*
+       * These values MUST match the statuses
+       * used by the Admin Volunteers page.
+       */
       enum: [
         "new",
-        "reviewed",
-        "accepted",
+        "contacted",
+        "approved",
         "rejected",
       ],
+
       default: "new",
     },
   },
