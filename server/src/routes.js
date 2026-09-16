@@ -1,3 +1,4 @@
+
 import express from "express";
 
 import {
@@ -67,7 +68,40 @@ router.get("/posts", async (req, res) => {
   }
 });
 
-/* GET SINGLE POST */
+/* =========================================================
+   GET SINGLE POST BY MONGODB ID
+   USED BY ADMIN EDIT FORM
+========================================================= */
+
+router.get("/posts/id/:id", async (req, res) => {
+  try {
+    const post = await Post.findById(
+      req.params.id
+    );
+
+    if (!post) {
+      return res.status(404).json({
+        message: "Post not found",
+      });
+    }
+
+    res.json(post);
+  } catch (error) {
+    console.error(
+      "Single post by ID GET error:",
+      error
+    );
+
+    res.status(400).json({
+      message: "Invalid post ID",
+    });
+  }
+});
+
+/* =========================================================
+   GET SINGLE POST BY SLUG
+   USED BY PUBLIC WEBSITE
+========================================================= */
 
 router.get("/posts/:slug", async (req, res) => {
   try {
@@ -437,7 +471,9 @@ router.post(
         link: "/admin/events",
       });
 
-      res.status(201).json(event);
+      res.status(201).json(
+        event
+      );
     } catch (error) {
       console.error(
         "Event creation error:",
@@ -810,8 +846,6 @@ router.patch(
     try {
       const { status } = req.body;
 
-      /* Make sure a status was provided */
-
       if (!status) {
         return res.status(400).json({
           message:
@@ -819,16 +853,12 @@ router.patch(
         });
       }
 
-      /* Allowed volunteer statuses */
-
       const allowedStatuses = [
         "new",
         "contacted",
         "approved",
         "rejected",
       ];
-
-      /* Check that the status is valid */
 
       if (
         !allowedStatuses.includes(status)
@@ -839,8 +869,6 @@ router.patch(
           allowedStatuses,
         });
       }
-
-      /* Find and update the volunteer */
 
       const volunteer =
         await Volunteer.findByIdAndUpdate(
@@ -854,16 +882,12 @@ router.patch(
           }
         );
 
-      /* Volunteer does not exist */
-
       if (!volunteer) {
         return res.status(404).json({
           message:
             "Volunteer not found",
         });
       }
-
-      /* Return updated volunteer */
 
       res.json(volunteer);
 

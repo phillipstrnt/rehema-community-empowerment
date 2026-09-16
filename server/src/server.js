@@ -1,6 +1,11 @@
 
 import "dotenv/config";
 
+console.log(
+  "JWT_SECRET loaded:",
+  process.env.JWT_SECRET ? "YES" : "NO"
+);
+
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -17,10 +22,18 @@ import { connectDB } from "./db.js";
 import routes from "./routes.js";
 
 
+/* =========================================================
+   CREATE EXPRESS APPLICATION
+========================================================= */
+
 const app = express();
 
-const PORT =
-  process.env.PORT || 5000;
+
+/* =========================================================
+   PORT
+========================================================= */
+
+const PORT = process.env.PORT || 5000;
 
 
 /* =========================================================
@@ -71,77 +84,26 @@ app.use(
    RATE LIMITING
 ========================================================= */
 
-const apiLimiter =
-  rateLimit({
-    windowMs:
-      15 * 60 * 1000,
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
 
-    limit: 200,
+  limit: 200,
 
-    standardHeaders: true,
+  standardHeaders: true,
 
-    legacyHeaders: false,
+  legacyHeaders: false,
 
-    message: {
-      message:
-        "Too many requests. Please try again later.",
-    },
-  });
+  message: {
+    success: false,
+    message:
+      "Too many requests. Please try again later.",
+  },
+});
 
 
 app.use(
   "/api",
   apiLimiter
-);
-
-
-/* =========================================================
-   UPLOAD ROUTES
-========================================================= */
-
-app.use(
-  "/api/upload",
-  uploadRoutes
-);
-
-
-/* =========================================================
-   ADMIN USER MANAGEMENT
-========================================================= */
-
-app.use(
-  "/api/admin/users",
-  adminUserRoutes
-);
-
-
-/* =========================================================
-   ADMIN AUTHENTICATION
-========================================================= */
-
-app.use(
-  "/api/admin",
-  adminAuthRoutes
-);
-
-
-/* =========================================================
-   FACEBOOK PUBLISHING
-========================================================= */
-
-app.use(
-  "/api/admin/facebook",
-  facebookRoutes
-);
-
-
-/* =========================================================
-   GENERAL API ROUTES
-========================================================= */
-
-app.use(
-  "/api",
-  routes
 );
 
 
@@ -152,15 +114,82 @@ app.use(
 app.get(
   "/",
   (_req, res) => {
-
-    res.json({
+    res.status(200).json({
       success: true,
-
-      message:
-        "REHEMA API is running",
+      message: "REHEMA API is running",
     });
-
   }
+);
+
+
+/* =========================================================
+   UPLOAD ROUTES
+
+   POST /api/upload/...
+========================================================= */
+
+app.use(
+  "/api/upload",
+  uploadRoutes
+);
+
+
+/* =========================================================
+   ADMIN AUTHENTICATION
+
+   POST /api/admin/login
+   GET  /api/admin/me
+   POST /api/admin/logout
+
+   IMPORTANT:
+   adminAuth.js now contains ONLY authentication routes.
+========================================================= */
+
+app.use(
+  "/api/admin",
+  adminAuthRoutes
+);
+
+
+/* =========================================================
+   ADMIN USER MANAGEMENT
+
+   GET    /api/admin/users
+   POST   /api/admin/users
+   PUT    /api/admin/users/:id
+   DELETE /api/admin/users/:id
+
+   IMPORTANT:
+   adminUserRoutes.js contains administrator CRUD.
+========================================================= */
+
+app.use(
+  "/api/admin/users",
+  adminUserRoutes
+);
+
+
+/* =========================================================
+   FACEBOOK PUBLISHING
+
+   /api/admin/facebook/...
+========================================================= */
+
+app.use(
+  "/api/admin/facebook",
+  facebookRoutes
+);
+
+
+/* =========================================================
+   GENERAL API ROUTES
+
+   /api/...
+========================================================= */
+
+app.use(
+  "/api",
+  routes
 );
 
 
@@ -170,14 +199,10 @@ app.get(
 
 app.use(
   (_req, res) => {
-
     res.status(404).json({
       success: false,
-
-      message:
-        "Route not found",
+      message: "Route not found",
     });
-
   }
 );
 
@@ -193,39 +218,41 @@ app.use(
     res,
     _next
   ) => {
-
     console.error(
       "SERVER ERROR:",
       error
     );
 
-    res.status(
-      error.status || 500
-    ).json({
+    const statusCode =
+      error.status ||
+      error.statusCode ||
+      500;
 
+    res.status(statusCode).json({
       success: false,
-
       message:
         error.message ||
         "Server error. Please try again later.",
     });
-
   }
 );
 
 
 /* =========================================================
-   DATABASE + SERVER
+   DATABASE + SERVER START
 ========================================================= */
 
-connectDB()
+const startServer = async () => {
+  try {
+    await connectDB();
 
-  .then(() => {
+    console.log(
+      "MongoDB connected successfully."
+    );
 
     app.listen(
       PORT,
       () => {
-
         console.log(
           `REHEMA API running on port ${PORT}`
         );
@@ -234,20 +261,24 @@ connectDB()
           `API: http://localhost:${PORT}/api`
         );
 
+        console.log(
+          `Health: http://localhost:${PORT}/`
+        );
       }
     );
+  } catch (error) {
+    console.error(
+      "Database connection failed:",
+      error.message
+    );
 
-  })
+    process.exit(1);
+  }
+};
 
-  .catch(
-    (error) => {
 
-      console.error(
-        "Database connection failed:",
-        error.message
-      );
+/* =========================================================
+   START APPLICATION
+========================================================= */
 
-      process.exit(1);
-
-    }
-  );
+startServer();

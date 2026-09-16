@@ -2,591 +2,270 @@
 import React, {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 
-import "./AdminLayout.css";
-
 import {
   NavLink,
   Outlet,
+  useLocation,
   useNavigate,
 } from "react-router-dom";
 
-/* =========================================================
-   API
-========================================================= */
+import "./AdminLayout.css";
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
   "http://localhost:5000/api";
 
-/* =========================================================
-   SIDEBAR MENUS
-========================================================= */
+const REHEMA_LOGO =
+  "https://res.cloudinary.com/ttymyelh/image/upload/v1788243561/logo.jpg";
 
 const mainMenu = [
   {
     label: "Dashboard",
-    icon: "▦",
+    icon: "📊",
     path: "/admin",
+    end: true,
   },
   {
-    label: "News & Stories",
+    label: "Posts",
     icon: "📰",
     path: "/admin/posts",
   },
   {
     label: "Programs",
-    icon: "♥",
+    icon: "📋",
     path: "/admin/programs",
   },
   {
     label: "Events",
-    icon: "▣",
+    icon: "📅",
     path: "/admin/events",
   },
   {
     label: "Gallery",
-    icon: "▧",
+    icon: "🖼️",
     path: "/admin/gallery",
   },
+];
+
+const managementMenu = [
   {
     label: "Volunteers",
-    icon: "♟",
+    icon: "🙋",
     path: "/admin/volunteers",
   },
   {
     label: "Partners",
-    icon: "♣",
+    icon: "🤝",
     path: "/admin/partners",
   },
-];
-
-const communicationMenu = [
   {
     label: "Donations",
-    icon: "◆",
+    icon: "💰",
     path: "/admin/donations",
   },
   {
     label: "Messages",
-    icon: "✉",
+    icon: "✉️",
     path: "/admin/messages",
   },
   {
     label: "Newsletter",
-    icon: "◎",
+    icon: "📧",
     path: "/admin/newsletter",
   },
 ];
 
 const systemMenu = [
   {
-    label: "Settings",
-    icon: "⚙",
-    path: "/admin/settings",
-  },
-  {
-    label: "Admin Users",
-    icon: "♙",
+    label: "Users",
+    icon: "👥",
     path: "/admin/users",
   },
 ];
 
-/* =========================================================
-   NOTIFICATION PATH
-========================================================= */
-
-const getNotificationPath = (notification) => {
-  if (notification?.link) {
-    return notification.link;
-  }
-
-  switch (notification?.type) {
-    case "message":
-      return "/admin/messages";
-
-    case "volunteer":
-      return "/admin/volunteers";
-
-    case "donation":
-      return "/admin/donations";
-
-    case "newsletter":
-      return "/admin/newsletter";
-
-    case "partner":
-      return "/admin/partners";
-
-    case "event":
-      return "/admin/events";
-
-    case "program":
-      return "/admin/programs";
-
-    case "post":
-      return "/admin/posts";
-
-    case "gallery":
-      return "/admin/gallery";
-
-    default:
-      return "/admin";
-  }
-};
-
-/* =========================================================
-   NOTIFICATION ICON
-========================================================= */
-
-const getNotificationIcon = (type) => {
-  switch (type) {
-    case "message":
-      return "✉";
-
-    case "volunteer":
-      return "♟";
-
-    case "donation":
-      return "◆";
-
-    case "newsletter":
-      return "◎";
-
-    case "partner":
-      return "♣";
-
-    case "event":
-      return "▣";
-
-    case "program":
-      return "♥";
-
-    case "post":
-      return "📰";
-
-    case "gallery":
-      return "▧";
-
-    default:
-      return "●";
-  }
-};
-
-/* =========================================================
-   RELATIVE TIME
-========================================================= */
-
-const formatRelativeTime = (dateValue) => {
-  if (!dateValue) {
-    return "Just now";
-  }
-
-  const date = new Date(dateValue);
-
-  if (Number.isNaN(date.getTime())) {
-    return "Just now";
-  }
-
-  const now = new Date();
-
-  const difference = Math.floor(
-    (now.getTime() - date.getTime()) / 1000
+const getAdminToken = () => {
+  return (
+    localStorage.getItem("rehema_admin_token") ||
+    sessionStorage.getItem("rehema_admin_token")
   );
-
-  if (difference < 0 || difference < 10) {
-    return "Just now";
-  }
-
-  if (difference < 60) {
-    return `${difference} seconds ago`;
-  }
-
-  const minutes = Math.floor(difference / 60);
-
-  if (minutes === 1) {
-    return "1 minute ago";
-  }
-
-  if (minutes < 60) {
-    return `${minutes} minutes ago`;
-  }
-
-  const hours = Math.floor(minutes / 60);
-
-  if (hours === 1) {
-    return "1 hour ago";
-  }
-
-  if (hours < 24) {
-    return `${hours} hours ago`;
-  }
-
-  const days = Math.floor(hours / 24);
-
-  if (days === 1) {
-    return "Yesterday";
-  }
-
-  if (days < 7) {
-    return `${days} days ago`;
-  }
-
-  const weeks = Math.floor(days / 7);
-
-  if (weeks === 1) {
-    return "1 week ago";
-  }
-
-  if (weeks < 5) {
-    return `${weeks} weeks ago`;
-  }
-
-  return date.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
 };
 
-/* =========================================================
-   ADMIN LAYOUT
-========================================================= */
+const getAdminUser = () => {
+  try {
+    const stored =
+      localStorage.getItem("rehema_admin_user") ||
+      sessionStorage.getItem("rehema_admin_user");
+
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+};
+
+const authenticatedFetch = async (
+  endpoint,
+  options = {}
+) => {
+  const token = getAdminToken();
+
+  const headers = {
+    ...(options.headers || {}),
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  if (
+    options.body &&
+    !(options.body instanceof FormData)
+  ) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  if (
+    response.status === 401 ||
+    response.status === 403
+  ) {
+    throw new Error(
+      "Your admin session has expired. Please log in again."
+    );
+  }
+
+  return response;
+};
 
 export default function AdminLayout() {
-  /* =======================================================
-     NAVIGATION
-
-     IMPORTANT:
-     There is ONLY ONE useNavigate declaration.
-  ======================================================= */
-
   const navigate = useNavigate();
+  const location = useLocation();
 
-  /* =======================================================
-     AUTHENTICATION
-  ======================================================= */
-
-  const [isAuthenticated, setIsAuthenticated] =
-    useState(false);
-
-  const [checkingAuth, setCheckingAuth] =
-    useState(true);
-
-  const [adminUser, setAdminUser] =
-    useState(null);
-
-  /* =======================================================
-     SIDEBAR
-  ======================================================= */
+  const notificationRef = useRef(null);
+  const themeRef = useRef(null);
 
   const [sidebarOpen, setSidebarOpen] =
     useState(false);
 
-  /* =======================================================
-     NOTIFICATIONS
-  ======================================================= */
+  const [notificationsOpen, setNotificationsOpen] =
+    useState(false);
+
+  const [themeOpen, setThemeOpen] =
+    useState(false);
 
   const [notifications, setNotifications] =
     useState([]);
 
-  const [notificationsOpen, setNotificationsOpen] =
+  const [loadingNotifications, setLoadingNotifications] =
     useState(false);
 
-  const [notificationsLoading, setNotificationsLoading] =
-    useState(false);
+  const [adminUser, setAdminUser] =
+    useState(null);
 
-  const [notificationError, setNotificationError] =
-    useState("");
-
-  const [timeTick, setTimeTick] =
-    useState(Date.now());
-
-  const notificationRef =
-    useRef(null);
-
-  /* =======================================================
-     GET CURRENT ADMIN TOKEN
-     
-     Remember me:
-     localStorage
-
-     Session login:
-     sessionStorage
-  ======================================================= */
-
-  const getAdminToken = () => {
+  const [theme, setTheme] = useState(() => {
     return (
-      localStorage.getItem(
-        "rehema_admin_token"
-      ) ||
-      sessionStorage.getItem(
-        "rehema_admin_token"
-      )
+      localStorage.getItem("rehema_admin_theme") ||
+      "system"
     );
-  };
-
-  /* =======================================================
-     CHECK AUTHENTICATION
-  ======================================================= */
+  });
 
   useEffect(() => {
     const token = getAdminToken();
 
-    const storedUser =
-      localStorage.getItem(
-        "rehema_admin_user"
-      ) ||
-      sessionStorage.getItem(
-        "rehema_admin_user"
-      );
-
     if (!token) {
-      setIsAuthenticated(false);
-      setCheckingAuth(false);
-
       navigate("/admin/login", {
         replace: true,
       });
-
       return;
     }
 
-    /* -----------------------------------------------
-       Restore administrator information
-    ------------------------------------------------ */
-
-    if (storedUser) {
-      try {
-        setAdminUser(
-          JSON.parse(storedUser)
-        );
-      } catch (error) {
-        console.error(
-          "Unable to read stored admin user:",
-          error
-        );
-      }
-    }
-
-    setIsAuthenticated(true);
-    setCheckingAuth(false);
+    setAdminUser(getAdminUser());
   }, [navigate]);
 
-  /* =======================================================
-     AUTHENTICATED REQUEST HELPER
-  ======================================================= */
-
-  const authenticatedFetch =
-    useCallback(
-      async (url, options = {}) => {
-        const token = getAdminToken();
-
-        if (!token) {
-          setIsAuthenticated(false);
-
-          navigate("/admin/login", {
-            replace: true,
-          });
-
-          throw new Error(
-            "Administrator authentication required."
-          );
-        }
-
-        const response = await fetch(
-          url,
-          {
-            ...options,
-
-            headers: {
-              ...(options.headers || {}),
-              Authorization: `Bearer ${token}`,
-              "Content-Type":
-                "application/json",
-            },
-          }
-        );
-
-        /* ---------------------------------------------
-           Invalid or expired token
-        --------------------------------------------- */
-
-        if (
-          response.status === 401 ||
-          response.status === 403
-        ) {
-          localStorage.removeItem(
-            "rehema_admin_token"
-          );
-
-          localStorage.removeItem(
-            "rehema_admin_user"
-          );
-
-          sessionStorage.removeItem(
-            "rehema_admin_token"
-          );
-
-          sessionStorage.removeItem(
-            "rehema_admin_user"
-          );
-
-          setIsAuthenticated(false);
-          setAdminUser(null);
-
-          navigate("/admin/login", {
-            replace: true,
-          });
-        }
-
-        return response;
-      },
-      [navigate]
+  useEffect(() => {
+    localStorage.setItem(
+      "rehema_admin_theme",
+      theme
     );
 
-  /* =======================================================
-     FETCH NOTIFICATIONS
-  ======================================================= */
+    const root = document.documentElement;
 
-  const fetchNotifications =
-    useCallback(async () => {
-      if (!isAuthenticated) {
-        return;
-      }
-
-      try {
-        setNotificationsLoading(true);
-        setNotificationError("");
-
-        const response =
-          await authenticatedFetch(
-            `${API_URL}/notifications`
-          );
-
-        if (!response.ok) {
-          throw new Error(
-            `Notification request failed: ${response.status}`
-          );
-        }
-
-        const data =
-          await response.json();
-
-        setNotifications(
-          Array.isArray(data)
-            ? data
-            : []
-        );
-
-      } catch (error) {
-
-        console.error(
-          "Notification error:",
-          error
-        );
-
-        if (
-          error.message !==
-          "Administrator authentication required."
-        ) {
-          setNotificationError(
-            "Unable to load notifications."
-          );
-        }
-
-      } finally {
-
-        setNotificationsLoading(false);
-
-      }
-    }, [
-      authenticatedFetch,
-      isAuthenticated,
-    ]);
-
-  /* =======================================================
-     INITIAL NOTIFICATION FETCH
-  ======================================================= */
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchNotifications();
+    if (theme === "system") {
+      root.removeAttribute("data-admin-theme");
+    } else {
+      root.setAttribute(
+        "data-admin-theme",
+        theme
+      );
     }
-  }, [
-    isAuthenticated,
-    fetchNotifications,
-  ]);
-
-  /* =======================================================
-     AUTO REFRESH NOTIFICATIONS
-  ======================================================= */
+  }, [theme]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      return;
-    }
-
-    const interval = setInterval(() => {
-      fetchNotifications();
-    }, 30000);
-
     return () => {
-      clearInterval(interval);
-    };
-  }, [
-    isAuthenticated,
-    fetchNotifications,
-  ]);
-
-  /* =======================================================
-     UPDATE RELATIVE TIME
-  ======================================================= */
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeTick(Date.now());
-    }, 30000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
-
-  /* =======================================================
-     CLOSE NOTIFICATIONS ON OUTSIDE CLICK
-  ======================================================= */
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        notificationRef.current &&
-        !notificationRef.current.contains(
-          event.target
-        )
-      ) {
-        setNotificationsOpen(false);
-      }
-    };
-
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside
-    );
-
-    return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
+      document.documentElement.removeAttribute(
+        "data-admin-theme"
       );
     };
   }, []);
 
-  /* =======================================================
-     LOCK BODY SCROLL ON MOBILE SIDEBAR
-  ======================================================= */
+  const fetchNotifications = useCallback(async () => {
+    if (!getAdminToken()) return;
+
+    try {
+      setLoadingNotifications(true);
+
+      const response =
+        await authenticatedFetch(
+          "/notifications"
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          "Failed to fetch notifications"
+        );
+      }
+
+      const data = await response.json();
+
+      setNotifications(
+        Array.isArray(data) ? data : []
+      );
+    } catch (error) {
+      console.error(
+        "Notification fetch error:",
+        error
+      );
+    } finally {
+      setLoadingNotifications(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchNotifications();
+
+    const interval = setInterval(
+      fetchNotifications,
+      30000
+    );
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [fetchNotifications]);
+
+  useEffect(() => {
+    setSidebarOpen(false);
+    setNotificationsOpen(false);
+    setThemeOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (sidebarOpen) {
@@ -606,31 +285,160 @@ export default function AdminLayout() {
     };
   }, [sidebarOpen]);
 
-  /* =======================================================
-     SIDEBAR
-  ======================================================= */
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(
+          event.target
+        )
+      ) {
+        setNotificationsOpen(false);
+      }
 
-  const closeSidebar = () => {
-    setSidebarOpen(false);
-  };
+      if (
+        themeRef.current &&
+        !themeRef.current.contains(event.target)
+      ) {
+        setThemeOpen(false);
+      }
+    };
 
-  /* =======================================================
-     LOGOUT
-  ======================================================= */
-
-  const handleLogout = () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to logout?"
+    document.addEventListener(
+      "mousedown",
+      handleOutsideClick
     );
 
-    if (!confirmed) {
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handleOutsideClick
+      );
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key !== "Escape") return;
+
+      setSidebarOpen(false);
+      setNotificationsOpen(false);
+      setThemeOpen(false);
+    };
+
+    document.addEventListener(
+      "keydown",
+      handleEscape
+    );
+
+    return () => {
+      document.removeEventListener(
+        "keydown",
+        handleEscape
+      );
+    };
+  }, []);
+
+  const toggleSidebar = () => {
+    setNotificationsOpen(false);
+    setThemeOpen(false);
+
+    setSidebarOpen((current) => !current);
+  };
+
+  const toggleNotifications = () => {
+    setSidebarOpen(false);
+    setThemeOpen(false);
+
+    setNotificationsOpen((current) => {
+      const nextState = !current;
+
+      if (nextState) {
+        fetchNotifications();
+      }
+
+      return nextState;
+    });
+  };
+
+  const toggleThemeMenu = () => {
+    setSidebarOpen(false);
+    setNotificationsOpen(false);
+
+    setThemeOpen((current) => !current);
+  };
+
+  const selectTheme = (selectedTheme) => {
+    setTheme(selectedTheme);
+    setThemeOpen(false);
+  };
+
+  const markNotificationRead = async (
+    notification
+  ) => {
+    if (
+      !notification?._id ||
+      notification.read
+    ) {
       return;
     }
 
-    /* -----------------------------------------------
-       Remove persistent authentication
-    ------------------------------------------------ */
+    try {
+      await authenticatedFetch(
+        `/notifications/${notification._id}/read`,
+        {
+          method: "PATCH",
+        }
+      );
 
+      setNotifications((current) =>
+        current.map((item) =>
+          item._id === notification._id
+            ? {
+                ...item,
+                read: true,
+              }
+            : item
+        )
+      );
+    } catch (error) {
+      console.error(
+        "Mark notification read error:",
+        error
+      );
+    }
+  };
+
+  const markAllNotificationsRead = async () => {
+    try {
+      await authenticatedFetch(
+        "/notifications/read-all",
+        {
+          method: "PATCH",
+        }
+      );
+
+      setNotifications((current) =>
+        current.map((item) => ({
+          ...item,
+          read: true,
+        }))
+      );
+    } catch (error) {
+      console.error(
+        "Mark all notifications error:",
+        error
+      );
+    }
+  };
+
+  const unreadCount = useMemo(() => {
+    return notifications.filter(
+      (notification) => !notification.read
+    ).length;
+  }, [notifications]);
+
+  const handleLogout = () => {
     localStorage.removeItem(
       "rehema_admin_token"
     );
@@ -638,10 +446,6 @@ export default function AdminLayout() {
     localStorage.removeItem(
       "rehema_admin_user"
     );
-
-    /* -----------------------------------------------
-       Remove session authentication
-    ------------------------------------------------ */
 
     sessionStorage.removeItem(
       "rehema_admin_token"
@@ -651,595 +455,355 @@ export default function AdminLayout() {
       "rehema_admin_user"
     );
 
-    setIsAuthenticated(false);
-    setAdminUser(null);
+    setSidebarOpen(false);
+    setNotificationsOpen(false);
+    setThemeOpen(false);
 
     navigate("/admin/login", {
       replace: true,
     });
   };
 
-  /* =======================================================
-     UNREAD COUNT
-  ======================================================= */
+  const pageTitle = useMemo(() => {
+    const allItems = [
+      ...mainMenu,
+      ...managementMenu,
+      ...systemMenu,
+    ];
 
-  const unreadCount =
-    notifications.filter(
-      (notification) =>
-        notification.read !== true
-    ).length;
-
-  /* =======================================================
-     TOGGLE NOTIFICATIONS
-  ======================================================= */
-
-  const toggleNotifications = () => {
-    setNotificationsOpen(
-      (current) => {
-        const nextState = !current;
-
-        if (nextState) {
-          fetchNotifications();
-        }
-
-        return nextState;
-      }
-    );
-  };
-
-  /* =======================================================
-     MARK ONE AS READ
-  ======================================================= */
-
-  const handleNotificationClick =
-    async (notification) => {
-
-      try {
-
-        if (
-          !notification.read &&
-          notification._id
-        ) {
-
-          const response =
-            await authenticatedFetch(
-              `${API_URL}/notifications/${notification._id}/read`,
-              {
-                method: "PATCH",
-              }
-            );
-
-          if (!response.ok) {
-            throw new Error(
-              "Failed to mark notification as read"
-            );
-          }
-        }
-
-      } catch (error) {
-
-        console.error(
-          "Failed to mark notification as read:",
-          error
+    const matched = allItems.find((item) => {
+      if (item.end) {
+        return (
+          location.pathname === item.path
         );
-
       }
 
-      setNotifications(
-        (current) =>
-          current.map((item) =>
-            item._id === notification._id
-              ? {
-                  ...item,
-                  read: true,
-                }
-              : item
-          )
-      );
-
-      setNotificationsOpen(false);
-
-      navigate(
-        getNotificationPath(
-          notification
+      return (
+        location.pathname === item.path ||
+        location.pathname.startsWith(
+          `${item.path}/`
         )
       );
-    };
+    });
 
-  /* =======================================================
-     MARK ALL AS READ
-  ======================================================= */
+    return (
+      matched?.label ||
+      "Admin Dashboard"
+    );
+  }, [location.pathname]);
 
-  const markAllAsRead = async () => {
-
-    try {
-
-      const response =
-        await authenticatedFetch(
-          `${API_URL}/notifications/read-all`,
-          {
-            method: "PATCH",
-          }
-        );
-
-      if (!response.ok) {
-        throw new Error(
-          "Failed to mark notifications as read"
-        );
-      }
-
-      setNotifications(
-        (current) =>
-          current.map(
-            (notification) => ({
-              ...notification,
-              read: true,
-            })
-          )
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
-      alert(
-        "Failed to mark all notifications as read."
-      );
-
+  const notificationIcon = (type) => {
+    switch (type) {
+      case "post":
+        return "📰";
+      case "program":
+        return "📋";
+      case "event":
+        return "📅";
+      case "gallery":
+        return "🖼️";
+      case "volunteer":
+        return "🙋";
+      case "partner":
+        return "🤝";
+      case "donation":
+        return "💰";
+      case "message":
+        return "✉️";
+      case "newsletter":
+        return "📧";
+      default:
+        return "🔔";
     }
   };
 
-  /* =======================================================
-     MENU RENDERER
-  ======================================================= */
+  const formatNotificationDate = (date) => {
+    if (!date) return "";
 
-  const renderMenu = (items) => {
-
-    return items.map((item) => (
-
-      <NavLink
-        key={item.path}
-        to={item.path}
-        end={item.path === "/admin"}
-        onClick={closeSidebar}
-        className={({ isActive }) =>
-          `admin-nav-link ${
-            isActive ? "active" : ""
-          }`
-        }
-      >
-
-        <span className="admin-nav-icon">
-          {item.icon}
-        </span>
-
-        <span className="admin-nav-label">
-          {item.label}
-        </span>
-
-      </NavLink>
-
-    ));
+    try {
+      return new Date(date).toLocaleString([], {
+        dateStyle: "medium",
+        timeStyle: "short",
+      });
+    } catch {
+      return "";
+    }
   };
 
-  /* =======================================================
-     AUTH CHECK SCREEN
-  ======================================================= */
-
-  if (checkingAuth) {
-
+  const renderMenu = (
+    items,
+    sectionTitle
+  ) => {
     return (
-      <div className="admin-auth-loading">
+      <div className="admin-sidebar-section">
+        <div className="admin-sidebar-section-title">
+          {sectionTitle}
+        </div>
 
-        <div className="login-spinner"></div>
+        {items.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            end={item.end}
+            className="admin-nav-link"
+            onClick={() => {
+              setSidebarOpen(false);
+              setNotificationsOpen(false);
+              setThemeOpen(false);
+            }}
+          >
+            <span className="admin-nav-icon">
+              {item.icon}
+            </span>
 
-        <p>
-          Checking administrator access...
-        </p>
-
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
       </div>
     );
-  }
+  };
 
-  /* =======================================================
-     DO NOT RENDER DASHBOARD WITHOUT AUTH
-  ======================================================= */
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  /* =======================================================
-     DISPLAY NAME
-  ======================================================= */
-
-  const displayName =
+  const userName =
     adminUser?.name ||
+    adminUser?.username ||
     "Administrator";
 
-  const displayRole =
-    adminUser?.role === "super_admin"
-      ? "Super Admin"
-      : "Admin";
+  const userRole =
+    adminUser?.role ||
+    "Administrator";
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
+  const userInitial =
+    userName?.charAt(0)?.toUpperCase() ||
+    "A";
+
+  const currentThemeLabel =
+    theme === "light"
+      ? "Light"
+      : theme === "dark"
+      ? "Dark"
+      : "System";
+
+  const currentThemeIcon =
+    theme === "light"
+      ? "☀️"
+      : theme === "dark"
+      ? "🌙"
+      : "🌓";
 
   return (
-
     <div className="admin-layout">
-
-      {/* =================================================
-          MOBILE OVERLAY
-      ================================================= */}
-
-      {sidebarOpen && (
-        <div
-          className="admin-sidebar-overlay"
-          onClick={closeSidebar}
-        />
-      )}
-
-      {/* =================================================
-          SIDEBAR
-      ================================================= */}
-
       <aside
         className={`admin-sidebar ${
           sidebarOpen ? "open" : ""
         }`}
       >
-
-        {/* BRAND */}
-
-        <div className="admin-sidebar-brand">
-
-          <div className="admin-brand-mark">
-            R
+        <div className="admin-sidebar-header">
+          <div className="admin-sidebar-logo">
+            <img
+              src={REHEMA_LOGO}
+              alt="REHEMA Foundation logo"
+            />
           </div>
 
-          <div className="admin-brand-text">
-            <strong>REHEMA</strong>
-            <span>FOUNDATION</span>
+          <div className="admin-sidebar-brand">
+            <strong>
+              REHEMA Foundation
+            </strong>
+
+            <span>
+              Administration
+            </span>
           </div>
-
-          <button
-            type="button"
-            className="admin-sidebar-close"
-            onClick={closeSidebar}
-            aria-label="Close navigation"
-          >
-            ×
-          </button>
-
         </div>
 
-        {/* NAVIGATION */}
+        <nav className="admin-sidebar-nav">
+          {renderMenu(
+            mainMenu,
+            "Main"
+          )}
 
-        <div className="admin-sidebar-scroll">
+          {renderMenu(
+            managementMenu,
+            "Management"
+          )}
 
-          <nav className="admin-sidebar-nav">
-
-            <div className="admin-nav-section">
-
-              <div className="admin-nav-heading">
-                <span>MAIN MENU</span>
-              </div>
-
-              {renderMenu(mainMenu)}
-
-            </div>
-
-            <div className="admin-nav-section">
-
-              <div className="admin-nav-heading">
-                <span>COMMUNICATION</span>
-              </div>
-
-              {renderMenu(
-                communicationMenu
-              )}
-
-            </div>
-
-            <div className="admin-nav-section">
-
-              <div className="admin-nav-heading">
-                <span>SYSTEM</span>
-              </div>
-
-              {renderMenu(systemMenu)}
-
-            </div>
-
-          </nav>
-
-        </div>
-
-        {/* SIDEBAR FOOTER */}
+          {renderMenu(
+            systemMenu,
+            "System"
+          )}
+        </nav>
 
         <div className="admin-sidebar-footer">
-
-          <div className="admin-sidebar-user">
-
-            <div className="admin-user-avatar">
-              {displayName
-                .charAt(0)
-                .toUpperCase()}
+          <div className="admin-sidebar-footer-user">
+            <div className="admin-sidebar-footer-avatar">
+              {userInitial}
             </div>
 
-            <div className="admin-user-info">
-
+            <div className="admin-sidebar-footer-info">
               <strong>
-                {displayName}
+                {userName}
               </strong>
 
               <span>
-                {displayRole}
+                {userRole}
               </span>
-
             </div>
-
           </div>
-
-          <button
-            type="button"
-            className="admin-logout-button"
-            onClick={handleLogout}
-          >
-
-            <span className="admin-logout-icon">
-              ↪
-            </span>
-
-            <span>
-              Logout
-            </span>
-
-          </button>
-
         </div>
-
       </aside>
 
-      {/* =================================================
-          MAIN AREA
-      ================================================= */}
+      <div
+        className={`admin-sidebar-overlay ${
+          sidebarOpen ? "active" : ""
+        }`}
+        onClick={() =>
+          setSidebarOpen(false)
+        }
+      />
 
-      <div className="admin-main">
-
-        {/* TOP BAR */}
-
+      <main className="admin-main">
         <header className="admin-topbar">
-
           <div className="admin-topbar-left">
-
             <button
               type="button"
               className="admin-menu-button"
-              onClick={() =>
-                setSidebarOpen(true)
+              onClick={toggleSidebar}
+              aria-label={
+                sidebarOpen
+                  ? "Close sidebar"
+                  : "Open sidebar"
               }
-              aria-label="Open navigation"
+              aria-expanded={
+                sidebarOpen
+              }
             >
-              ☰
+              {sidebarOpen
+                ? "✕"
+                : "☰"}
             </button>
 
-            <div className="admin-breadcrumb">
+            <div className="admin-page-heading">
+              <h1>{pageTitle}</h1>
 
-              <span className="admin-breadcrumb-main">
-                REHEMA
-              </span>
-
-              <span className="admin-breadcrumb-separator">
-                /
-              </span>
-
-              <span className="admin-breadcrumb-current">
-                Administration
-              </span>
-
+              <p>
+                REHEMA Foundation
+                administration
+              </p>
             </div>
-
           </div>
 
-          {/* =================================================
-              TOPBAR RIGHT
-          ================================================= */}
-
           <div className="admin-topbar-right">
-
-            {/* NOTIFICATIONS */}
-
             <div
               className="admin-notification-wrapper"
               ref={notificationRef}
             >
-
               <button
                 type="button"
-                className="admin-topbar-icon"
-                aria-label="Notifications"
-                title="Notifications"
+                className={`admin-notification-button ${
+                  notificationsOpen
+                    ? "active"
+                    : ""
+                }`}
                 onClick={
                   toggleNotifications
                 }
+                aria-label="Notifications"
+                aria-expanded={
+                  notificationsOpen
+                }
               >
-
                 🔔
 
                 {unreadCount > 0 && (
                   <span className="admin-notification-badge">
-                    {unreadCount > 9
-                      ? "9+"
+                    {unreadCount > 99
+                      ? "99+"
                       : unreadCount}
                   </span>
                 )}
-
               </button>
 
-              {/* NOTIFICATION PANEL */}
-
               {notificationsOpen && (
-
                 <div className="admin-notification-panel">
-
                   <div className="admin-notification-header">
-
-                    <div>
-
-                      <strong>
-                        Notifications
-                      </strong>
-
-                      <span>
-                        {unreadCount > 0
-                          ? `${unreadCount} unread`
-                          : "All caught up"}
-                      </span>
-
-                    </div>
+                    <h3>
+                      Notifications
+                    </h3>
 
                     {unreadCount > 0 && (
-
                       <button
                         type="button"
                         onClick={
-                          markAllAsRead
+                          markAllNotificationsRead
                         }
-                        className="admin-mark-read"
                       >
-                        Mark all read
+                        Mark all as read
                       </button>
-
                     )}
-
                   </div>
 
                   <div className="admin-notification-list">
-
-                    {notificationsLoading ? (
-
-                      <div className="admin-no-notifications">
-
-                        <div>◷</div>
-
-                        <strong>
-                          Loading notifications...
-                        </strong>
-
+                    {loadingNotifications ? (
+                      <div className="admin-notification-empty">
+                        Loading
+                        notifications...
                       </div>
-
-                    ) : notificationError ? (
-
-                      <div className="admin-no-notifications">
-
-                        <div>!</div>
-
-                        <strong>
-                          {notificationError}
-                        </strong>
-
-                        <button
-                          type="button"
-                          onClick={
-                            fetchNotifications
-                          }
-                          className="admin-notification-retry"
-                        >
-                          Try again
-                        </button>
-
+                    ) : notifications.length ===
+                      0 ? (
+                      <div className="admin-notification-empty">
+                        No notifications
+                        yet.
                       </div>
-
-                    ) : notifications.length === 0 ? (
-
-                      <div className="admin-no-notifications">
-
-                        <div>✓</div>
-
-                        <strong>
-                          No notifications
-                        </strong>
-
-                        <span>
-                          You're all caught up.
-                        </span>
-
-                      </div>
-
                     ) : (
-
                       notifications.map(
                         (notification) => (
-
-                          <button
-                            type="button"
+                          <div
                             key={
-                              notification._id ||
-                              notification.id
+                              notification._id
                             }
                             className={`admin-notification-item ${
-                              !notification.read
-                                ? "unread"
-                                : ""
+                              notification.read
+                                ? ""
+                                : "unread"
                             }`}
                             onClick={() =>
-                              handleNotificationClick(
+                              markNotificationRead(
                                 notification
                               )
                             }
                           >
-
-                            <span
-                              className={`admin-notification-icon ${
-                                notification.type ||
-                                "default"
-                              }`}
-                            >
-                              {getNotificationIcon(
+                            <div className="admin-notification-icon">
+                              {notificationIcon(
                                 notification.type
                               )}
-                            </span>
+                            </div>
 
-                            <span className="admin-notification-content">
+                            <div className="admin-notification-content">
+                              <h4>
+                                {
+                                  notification.title
+                                }
+                              </h4>
 
-                              <strong>
-                                {notification.title ||
-                                  "Notification"}
-                              </strong>
+                              <p>
+                                {
+                                  notification.message
+                                }
+                              </p>
 
-                              <span>
-                                {notification.message ||
-                                  notification.text ||
-                                  ""}
-                              </span>
-
-                              <small>
-                                {timeTick &&
-                                  formatRelativeTime(
-                                    notification.createdAt
-                                  )}
-                              </small>
-
-                            </span>
-
-                            {!notification.read && (
-                              <span className="admin-notification-unread-dot" />
-                            )}
-
-                          </button>
-
+                              <div className="admin-notification-time">
+                                {formatNotificationDate(
+                                  notification.createdAt
+                                )}
+                              </div>
+                            </div>
+                          </div>
                         )
                       )
-
                     )}
-
                   </div>
 
                   <div className="admin-notification-footer">
-
                     <button
                       type="button"
                       onClick={() => {
@@ -1248,66 +812,212 @@ export default function AdminLayout() {
                         );
 
                         navigate(
-                          "/admin/messages"
+                          "/admin"
                         );
                       }}
                     >
-                      View communication center →
+                      Close
+                      notifications
                     </button>
-
                   </div>
-
                 </div>
               )}
-
             </div>
 
-            <div className="admin-topbar-divider" />
-
-            {/* PROFILE */}
-
-            <button
-              type="button"
-              className="admin-profile-button"
-              title="Administrator profile"
+            <div
+              className="admin-theme-wrapper"
+              ref={themeRef}
             >
+              <button
+                type="button"
+                className={`admin-theme-button ${
+                  themeOpen
+                    ? "active"
+                    : ""
+                }`}
+                onClick={
+                  toggleThemeMenu
+                }
+                aria-label="Choose theme"
+                aria-expanded={
+                  themeOpen
+                }
+              >
+                <span className="admin-theme-icon">
+                  {currentThemeIcon}
+                </span>
 
-              <div className="admin-profile-avatar">
-                {displayName
-                  .charAt(0)
-                  .toUpperCase()}
+                <span className="admin-theme-label">
+                  {currentThemeLabel}
+                </span>
+
+                <span className="admin-theme-arrow">
+                  {themeOpen
+                    ? "⌃"
+                    : "⌄"}
+                </span>
+              </button>
+
+              {themeOpen && (
+                <div className="admin-theme-menu">
+                  <div className="admin-theme-menu-title">
+                    <strong>
+                      Appearance
+                    </strong>
+
+                    <span>
+                      Choose your dashboard
+                      theme
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    className={`admin-theme-option ${
+                      theme === "light"
+                        ? "selected"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      selectTheme(
+                        "light"
+                      )
+                    }
+                  >
+                    <span className="admin-theme-option-icon">
+                      ☀️
+                    </span>
+
+                    <span className="admin-theme-option-content">
+                      <strong>
+                        Light
+                      </strong>
+
+                      <small>
+                        Bright dashboard
+                      </small>
+                    </span>
+
+                    {theme ===
+                      "light" && (
+                      <span className="admin-theme-check">
+                        ✓
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`admin-theme-option ${
+                      theme === "dark"
+                        ? "selected"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      selectTheme(
+                        "dark"
+                      )
+                    }
+                  >
+                    <span className="admin-theme-option-icon">
+                      🌙
+                    </span>
+
+                    <span className="admin-theme-option-content">
+                      <strong>
+                        Dark
+                      </strong>
+
+                      <small>
+                        Dark dashboard
+                      </small>
+                    </span>
+
+                    {theme ===
+                      "dark" && (
+                      <span className="admin-theme-check">
+                        ✓
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`admin-theme-option ${
+                      theme ===
+                      "system"
+                        ? "selected"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      selectTheme(
+                        "system"
+                      )
+                    }
+                  >
+                    <span className="admin-theme-option-icon">
+                      🌓
+                    </span>
+
+                    <span className="admin-theme-option-content">
+                      <strong>
+                        System
+                      </strong>
+
+                      <small>
+                        Follow device
+                        settings
+                      </small>
+                    </span>
+
+                    {theme ===
+                      "system" && (
+                      <span className="admin-theme-check">
+                        ✓
+                      </span>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="admin-user-summary">
+              <div className="admin-user-avatar">
+                {userInitial}
               </div>
 
-              <div className="admin-profile-info">
-
+              <div className="admin-user-details">
                 <strong>
-                  {displayName}
+                  {userName}
                 </strong>
 
                 <span>
-                  {displayRole}
+                  {userRole}
                 </span>
-
               </div>
+            </div>
 
-              <span className="admin-profile-arrow">
-                ▾
+            <button
+              type="button"
+              className="admin-logout-button"
+              onClick={handleLogout}
+              aria-label="Logout"
+            >
+              <span className="admin-logout-icon">
+                ↪
               </span>
 
+              <span className="admin-logout-text">
+                Logout
+              </span>
             </button>
-
           </div>
-
         </header>
 
-        {/* PAGE CONTENT */}
-
-        <main className="admin-content">
+        <section className="admin-content">
           <Outlet />
-        </main>
-
-      </div>
-
+        </section>
+      </main>
     </div>
   );
 }

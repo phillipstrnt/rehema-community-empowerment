@@ -1,4 +1,3 @@
-
 import express from "express";
 import bcrypt from "bcryptjs";
 
@@ -11,19 +10,26 @@ import {
 
 const router = express.Router();
 
-
 /* =========================================================
    ADMIN USER MANAGEMENT
 
-   Base URL:
-   /api/admin/users
+   Mounted in server.js as:
 
-   Only super_admin accounts can manage administrators.
+   app.use("/api/admin/users", adminUserRoutes);
+
+   Therefore:
+
+   GET    /api/admin/users
+   POST   /api/admin/users
+   PUT    /api/admin/users/:id
+   DELETE /api/admin/users/:id
+
+   ONLY super_admin CAN MANAGE ADMINISTRATORS.
 ========================================================= */
 
 
 /* =========================================================
-   GET ALL ADMIN USERS
+   GET ALL ADMINISTRATORS
 
    GET /api/admin/users
 ========================================================= */
@@ -33,41 +39,35 @@ router.get(
   requireAdmin,
   requireRole("super_admin"),
   async (req, res) => {
-
     try {
-
-      const users = await AdminUser
-        .find()
+      const users = await AdminUser.find()
         .select("-password")
         .sort({
           createdAt: -1,
         });
 
-      res.json({
+      return res.status(200).json({
         success: true,
         users,
       });
-
     } catch (error) {
-
       console.error(
         "Failed to fetch admin users:",
         error
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message:
           "Failed to fetch administrator accounts.",
       });
-
     }
   }
 );
 
 
 /* =========================================================
-   CREATE ADMIN USER
+   CREATE ADMINISTRATOR
 
    POST /api/admin/users
 ========================================================= */
@@ -77,9 +77,7 @@ router.post(
   requireAdmin,
   requireRole("super_admin"),
   async (req, res) => {
-
     try {
-
       const {
         name,
         email,
@@ -87,7 +85,6 @@ router.post(
         role,
         active,
       } = req.body;
-
 
       /* ---------------------------------------------------
          VALIDATION
@@ -98,35 +95,50 @@ router.post(
         !email ||
         !password
       ) {
-
         return res.status(400).json({
           success: false,
           message:
             "Name, email and password are required.",
         });
-
       }
 
+      if (
+        typeof name !== "string" ||
+        !name.trim()
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Name cannot be empty.",
+        });
+      }
+
+      if (
+        typeof email !== "string" ||
+        !email.trim()
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Email cannot be empty.",
+        });
+      }
 
       if (
         typeof password !== "string" ||
         password.length < 8
       ) {
-
         return res.status(400).json({
           success: false,
           message:
             "Password must contain at least 8 characters.",
         });
-
       }
 
+      /* ---------------------------------------------------
+         NORMALIZE EMAIL
+      --------------------------------------------------- */
 
       const normalizedEmail =
-        email
-          .toLowerCase()
-          .trim();
-
+        email.toLowerCase().trim();
 
       /* ---------------------------------------------------
          CHECK EXISTING EMAIL
@@ -137,27 +149,35 @@ router.post(
           email: normalizedEmail,
         });
 
-
       if (existingUser) {
-
         return res.status(409).json({
           success: false,
           message:
             "An administrator with this email already exists.",
         });
-
       }
-
 
       /* ---------------------------------------------------
          VALIDATE ROLE
       --------------------------------------------------- */
 
-      const selectedRole =
-        role === "super_admin"
-          ? "super_admin"
-          : "admin";
+      let selectedRole = "admin";
 
+      if (role === "super_admin") {
+        selectedRole = "super_admin";
+      }
+
+      if (
+        role !== undefined &&
+        role !== "admin" &&
+        role !== "super_admin"
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Invalid administrator role.",
+        });
+      }
 
       /* ---------------------------------------------------
          HASH PASSWORD
@@ -169,122 +189,82 @@ router.post(
           12
         );
 
+      /* ---------------------------------------------------
+         ACTIVE STATUS
+      --------------------------------------------------- */
+
+      const selectedActive =
+        typeof active === "boolean"
+          ? active
+          : true;
 
       /* ---------------------------------------------------
-         CREATE ADMIN
+         CREATE ADMINISTRATOR
       --------------------------------------------------- */
 
       const admin =
         await AdminUser.create({
-
-          name:
-            name.trim(),
-
-          email:
-            normalizedEmail,
-
-          password:
-            hashedPassword,
-
-          role:
-            selectedRole,
-
-          active:
-            typeof active === "boolean"
-              ? active
-              : true,
-
+          name: name.trim(),
+          email: normalizedEmail,
+          password: hashedPassword,
+          role: selectedRole,
+          active: selectedActive,
         });
-
 
       /* ---------------------------------------------------
          SAFE RESPONSE
+
+         Password is NEVER returned.
       --------------------------------------------------- */
 
       const safeAdmin = {
-
-        id:
-          admin._id.toString(),
-
-        _id:
-          admin._id,
-
-        name:
-          admin.name,
-
-        email:
-          admin.email,
-
-        role:
-          admin.role,
-
-        active:
-          admin.active,
-
-        createdAt:
-          admin.createdAt,
-
-        updatedAt:
-          admin.updatedAt,
-
+        id: admin._id.toString(),
+        _id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role,
+        active: admin.active,
+        createdAt: admin.createdAt,
+        updatedAt: admin.updatedAt,
+        lastLogin: admin.lastLogin,
       };
 
-
-      res.status(201).json({
-
+      return res.status(201).json({
         success: true,
-
         message:
           "Administrator created successfully.",
-
-        user:
-          safeAdmin,
-
+        user: safeAdmin,
       });
-
     } catch (error) {
-
       console.error(
         "Create admin error:",
         error
       );
 
+      /* ---------------------------------------------------
+         MONGODB DUPLICATE KEY
+      --------------------------------------------------- */
 
-      /* MongoDB duplicate key */
-
-      if (
-        error.code === 11000
-      ) {
-
+      if (error.code === 11000) {
         return res.status(409).json({
-
           success: false,
-
           message:
             "An administrator with this email already exists.",
-
         });
-
       }
 
-
-      res.status(400).json({
-
+      return res.status(500).json({
         success: false,
-
         message:
-          error.message ||
           "Failed to create administrator.",
-
       });
-
     }
   }
 );
 
 
 /* =========================================================
-   UPDATE ADMIN USER
+   UPDATE ADMINISTRATOR
 
    PUT /api/admin/users/:id
 ========================================================= */
@@ -294,9 +274,7 @@ router.put(
   requireAdmin,
   requireRole("super_admin"),
   async (req, res) => {
-
     try {
-
       const {
         name,
         email,
@@ -305,9 +283,8 @@ router.put(
         active,
       } = req.body;
 
-
       /* ---------------------------------------------------
-         FIND USER
+         FIND ADMINISTRATOR
       --------------------------------------------------- */
 
       const admin =
@@ -315,223 +292,144 @@ router.put(
           req.params.id
         );
 
-
       if (!admin) {
-
         return res.status(404).json({
-
           success: false,
-
           message:
             "Administrator account not found.",
-
         });
-
       }
 
-
       /* ---------------------------------------------------
-         VALIDATE NAME
+         UPDATE NAME
       --------------------------------------------------- */
 
-      if (
-        name !== undefined
-      ) {
-
+      if (name !== undefined) {
         if (
           typeof name !== "string" ||
           !name.trim()
         ) {
-
           return res.status(400).json({
-
             success: false,
-
             message:
               "Name cannot be empty.",
-
           });
-
         }
 
-
-        admin.name =
-          name.trim();
-
+        admin.name = name.trim();
       }
 
-
       /* ---------------------------------------------------
-         VALIDATE EMAIL
+         UPDATE EMAIL
       --------------------------------------------------- */
 
-      if (
-        email !== undefined
-      ) {
-
+      if (email !== undefined) {
         if (
           typeof email !== "string" ||
           !email.trim()
         ) {
-
           return res.status(400).json({
-
             success: false,
-
             message:
               "Email cannot be empty.",
-
           });
-
         }
 
-
         const normalizedEmail =
-          email
-            .toLowerCase()
-            .trim();
-
+          email.toLowerCase().trim();
 
         const emailOwner =
           await AdminUser.findOne({
-
-            email:
-              normalizedEmail,
+            email: normalizedEmail,
 
             _id: {
-              $ne:
-                admin._id,
+              $ne: admin._id,
             },
-
           });
-
 
         if (emailOwner) {
-
           return res.status(409).json({
-
             success: false,
-
             message:
               "Another administrator already uses this email.",
-
           });
-
         }
 
-
-        admin.email =
-          normalizedEmail;
-
+        admin.email = normalizedEmail;
       }
-
 
       /* ---------------------------------------------------
          UPDATE PASSWORD
 
-         Password changes only when supplied.
+         Only change password if one was supplied.
       --------------------------------------------------- */
 
       if (
         password !== undefined &&
         password !== ""
       ) {
-
         if (
           typeof password !== "string" ||
           password.length < 8
         ) {
-
           return res.status(400).json({
-
             success: false,
-
             message:
               "Password must contain at least 8 characters.",
-
           });
-
         }
-
 
         admin.password =
           await bcrypt.hash(
             password,
             12
           );
-
       }
-
 
       /* ---------------------------------------------------
          UPDATE ROLE
       --------------------------------------------------- */
 
-      if (
-        role !== undefined
-      ) {
-
+      if (role !== undefined) {
         if (
           role !== "admin" &&
           role !== "super_admin"
         ) {
-
           return res.status(400).json({
-
             success: false,
-
             message:
               "Invalid administrator role.",
-
           });
-
         }
 
-
         /* -----------------------------------------------
-           Prevent removing the last active super admin
+           PREVENT REMOVING LAST ACTIVE SUPER ADMIN
         ----------------------------------------------- */
 
         if (
           admin.role === "super_admin" &&
-          role !== "super_admin"
+          role !== "super_admin" &&
+          admin.active === true
         ) {
-
-          const superAdminCount =
+          const activeSuperAdmins =
             await AdminUser.countDocuments({
-
-              role:
-                "super_admin",
-
-              active:
-                true,
-
+              role: "super_admin",
+              active: true,
             });
-
 
           if (
-            superAdminCount <= 1
+            activeSuperAdmins <= 1
           ) {
-
             return res.status(400).json({
-
               success: false,
-
               message:
                 "The system must have at least one active super administrator.",
-
             });
-
           }
-
         }
 
-
-        admin.role =
-          role;
-
+        admin.role = role;
       }
-
 
       /* ---------------------------------------------------
          UPDATE ACTIVE STATUS
@@ -540,130 +438,109 @@ router.put(
       if (
         typeof active === "boolean"
       ) {
+        /* -----------------------------------------------
+           PREVENT SELF DEACTIVATION
+        ----------------------------------------------- */
+
+        if (
+          admin._id.toString() ===
+            req.admin._id.toString() &&
+          active === false
+        ) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "You cannot deactivate your own account.",
+          });
+        }
 
         /* -----------------------------------------------
-           Prevent deactivating the last super admin
+           PREVENT DEACTIVATING LAST SUPER ADMIN
         ----------------------------------------------- */
 
         if (
           admin.role === "super_admin" &&
-          active === false &&
-          admin.active === true
+          admin.active === true &&
+          active === false
         ) {
-
           const activeSuperAdmins =
             await AdminUser.countDocuments({
-
-              role:
-                "super_admin",
-
-              active:
-                true,
-
+              role: "super_admin",
+              active: true,
             });
-
 
           if (
             activeSuperAdmins <= 1
           ) {
-
             return res.status(400).json({
-
               success: false,
-
               message:
                 "The last active super administrator cannot be deactivated.",
-
             });
-
           }
-
         }
 
-
-        admin.active =
-          active;
-
+        admin.active = active;
       }
 
-
       /* ---------------------------------------------------
-         SAVE
+         SAVE CHANGES
       --------------------------------------------------- */
 
       await admin.save();
-
 
       /* ---------------------------------------------------
          SAFE RESPONSE
       --------------------------------------------------- */
 
       const safeAdmin = {
-
-        id:
-          admin._id.toString(),
-
-        _id:
-          admin._id,
-
-        name:
-          admin.name,
-
-        email:
-          admin.email,
-
-        role:
-          admin.role,
-
-        active:
-          admin.active,
-
-        createdAt:
-          admin.createdAt,
-
-        updatedAt:
-          admin.updatedAt,
-
+        id: admin._id.toString(),
+        _id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role,
+        active: admin.active,
+        createdAt: admin.createdAt,
+        updatedAt: admin.updatedAt,
+        lastLogin: admin.lastLogin,
       };
 
-
-      res.json({
-
+      return res.status(200).json({
         success: true,
-
         message:
           "Administrator updated successfully.",
-
-        user:
-          safeAdmin,
-
+        user: safeAdmin,
       });
-
     } catch (error) {
-
       console.error(
         "Update admin error:",
         error
       );
 
+      /* ---------------------------------------------------
+         DUPLICATE EMAIL
+      --------------------------------------------------- */
 
-      res.status(400).json({
+      if (error.code === 11000) {
+        return res.status(409).json({
+          success: false,
+          message:
+            "Another administrator already uses this email.",
+        });
+      }
 
+      return res.status(500).json({
         success: false,
-
         message:
-          error.message ||
           "Failed to update administrator.",
-
       });
-
     }
   }
 );
 
 
 /* =========================================================
-   DELETE ADMIN USER
+   DELETE ADMINISTRATOR
 
    DELETE /api/admin/users/:id
 ========================================================= */
@@ -673,11 +550,9 @@ router.delete(
   requireAdmin,
   requireRole("super_admin"),
   async (req, res) => {
-
     try {
-
       /* ---------------------------------------------------
-         FIND USER
+         FIND ADMINISTRATOR
       --------------------------------------------------- */
 
       const admin =
@@ -685,20 +560,13 @@ router.delete(
           req.params.id
         );
 
-
       if (!admin) {
-
         return res.status(404).json({
-
           success: false,
-
           message:
             "Administrator account not found.",
-
         });
-
       }
-
 
       /* ---------------------------------------------------
          PREVENT SELF DELETE
@@ -709,93 +577,62 @@ router.delete(
         req.admin._id.toString() ===
           admin._id.toString()
       ) {
-
         return res.status(400).json({
-
           success: false,
-
           message:
             "You cannot delete your own administrator account.",
-
         });
-
       }
 
-
       /* ---------------------------------------------------
-         PREVENT DELETING LAST SUPER ADMIN
+         PREVENT DELETING LAST ACTIVE SUPER ADMIN
       --------------------------------------------------- */
 
       if (
-        admin.role === "super_admin"
+        admin.role === "super_admin" &&
+        admin.active === true
       ) {
-
-        const superAdminCount =
+        const activeSuperAdmins =
           await AdminUser.countDocuments({
-
-            role:
-              "super_admin",
-
-            active:
-              true,
-
+            role: "super_admin",
+            active: true,
           });
-
 
         if (
-          admin.active &&
-          superAdminCount <= 1
+          activeSuperAdmins <= 1
         ) {
-
           return res.status(400).json({
-
             success: false,
-
             message:
               "The last active super administrator cannot be deleted.",
-
           });
-
         }
-
       }
 
-
       /* ---------------------------------------------------
-         DELETE
+         DELETE ADMINISTRATOR
       --------------------------------------------------- */
 
       await AdminUser.findByIdAndDelete(
         req.params.id
       );
 
-
-      res.json({
-
+      return res.status(200).json({
         success: true,
-
         message:
           "Administrator deleted successfully.",
-
       });
-
     } catch (error) {
-
       console.error(
         "Delete admin error:",
         error
       );
 
-
-      res.status(500).json({
-
+      return res.status(500).json({
         success: false,
-
         message:
           "Failed to delete administrator.",
-
       });
-
     }
   }
 );

@@ -1,10 +1,10 @@
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import "./AdminDonations.css";
 
 const API_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-
 
 /* =========================================================
    GET ADMIN AUTH TOKEN
@@ -17,7 +17,6 @@ const getAdminToken = () => {
   );
 };
 
-
 /* =========================================================
    AUTHENTICATED FETCH
 ========================================================= */
@@ -25,14 +24,28 @@ const getAdminToken = () => {
 const adminFetch = async (url, options = {}) => {
   const token = getAdminToken();
 
+  const headers = {
+    ...(options.headers || {}),
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  /*
+    Only add JSON content type when a body exists
+    and it is not FormData.
+  */
+  if (
+    options.body &&
+    !(options.body instanceof FormData)
+  ) {
+    headers["Content-Type"] = "application/json";
+  }
+
   return fetch(url, {
     ...options,
-
-    headers: {
-      ...(options.headers || {}),
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers,
   });
 };
 
@@ -61,18 +74,25 @@ export default function AdminDonations() {
         `${API_URL}/donations`
       );
 
+      const data = await response
+        .json()
+        .catch(() => ({}));
+
       if (!response.ok) {
-        throw new Error("Failed to fetch donations");
+        throw new Error(
+          data.message || "Failed to fetch donations"
+        );
       }
 
-      const data = await response.json();
-
-      setDonations(Array.isArray(data) ? data : []);
-
+      setDonations(
+        Array.isArray(data) ? data : []
+      );
     } catch (err) {
-      console.error(err);
+      console.error("Fetch donations error:", err);
+
       setError(
-        "Unable to load donations. Please make sure the server is running."
+        err.message ||
+          "Unable to load donations. Please make sure the server is running."
       );
     } finally {
       setLoading(false);
@@ -84,7 +104,7 @@ export default function AdminDonations() {
   }, []);
 
   /* =========================================================
-     UPDATE STATUS
+     UPDATE DONATION STATUS
   ========================================================= */
 
   const updateStatus = async (id, status) => {
@@ -95,15 +115,24 @@ export default function AdminDonations() {
         `${API_URL}/donations/${id}/status`,
         {
           method: "PATCH",
-          body: JSON.stringify({ status }),
+          body: JSON.stringify({
+            status,
+          }),
         }
       );
 
+      const data = await response
+        .json()
+        .catch(() => ({}));
+
       if (!response.ok) {
-        throw new Error("Failed to update donation status");
+        throw new Error(
+          data.message ||
+            "Failed to update donation status"
+        );
       }
 
-      const updatedDonation = await response.json();
+      const updatedDonation = data;
 
       setDonations((current) =>
         current.map((donation) =>
@@ -112,10 +141,16 @@ export default function AdminDonations() {
             : donation
         )
       );
-
     } catch (err) {
-      console.error(err);
-      alert("Failed to update donation status.");
+      console.error(
+        "Donation status update error:",
+        err
+      );
+
+      alert(
+        err.message ||
+          "Failed to update donation status."
+      );
     } finally {
       setUpdatingId(null);
     }
@@ -130,7 +165,9 @@ export default function AdminDonations() {
       "Are you sure you want to delete this donation?"
     );
 
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
 
     try {
       setDeletingId(id);
@@ -142,19 +179,33 @@ export default function AdminDonations() {
         }
       );
 
+      const data = await response
+        .json()
+        .catch(() => ({}));
+
       if (!response.ok) {
-        throw new Error("Failed to delete donation");
+        throw new Error(
+          data.message ||
+            "Failed to delete donation"
+        );
       }
 
       setDonations((current) =>
         current.filter(
-          (donation) => donation._id !== id
+          (donation) =>
+            donation._id !== id
         )
       );
-
     } catch (err) {
-      console.error(err);
-      alert("Failed to delete donation.");
+      console.error(
+        "Delete donation error:",
+        err
+      );
+
+      alert(
+        err.message ||
+          "Failed to delete donation."
+      );
     } finally {
       setDeletingId(null);
     }
@@ -166,7 +217,8 @@ export default function AdminDonations() {
 
   const filteredDonations = useMemo(() => {
     return donations.filter((donation) => {
-      const searchValue = search.toLowerCase().trim();
+      const searchValue =
+        search.toLowerCase().trim();
 
       const matchesSearch =
         !searchValue ||
@@ -209,9 +261,9 @@ export default function AdminDonations() {
   ========================================================= */
 
   const statistics = useMemo(() => {
-    const successful = donations.filter(
+    const confirmed = donations.filter(
       (donation) =>
-        donation.status === "successful"
+        donation.status === "confirmed"
     );
 
     const pending = donations.filter(
@@ -219,12 +271,12 @@ export default function AdminDonations() {
         donation.status === "pending"
     );
 
-    const failed = donations.filter(
+    const cancelled = donations.filter(
       (donation) =>
-        donation.status === "failed"
+        donation.status === "cancelled"
     );
 
-    const totalAmount = successful.reduce(
+    const totalAmount = confirmed.reduce(
       (sum, donation) =>
         sum + Number(donation.amount || 0),
       0
@@ -232,25 +284,34 @@ export default function AdminDonations() {
 
     return {
       total: donations.length,
-      successful: successful.length,
+      confirmed: confirmed.length,
       pending: pending.length,
-      failed: failed.length,
+      cancelled: cancelled.length,
       totalAmount,
     };
   }, [donations]);
 
   /* =========================================================
-     FORMATTERS
+     FORMAT AMOUNT
   ========================================================= */
 
-  const formatAmount = (amount, currency = "UGX") => {
+  const formatAmount = (
+    amount,
+    currency = "UGX"
+  ) => {
     return `${currency} ${Number(
       amount || 0
     ).toLocaleString()}`;
   };
 
+  /* =========================================================
+     FORMAT DATE
+  ========================================================= */
+
   const formatDate = (date) => {
-    if (!date) return "—";
+    if (!date) {
+      return "—";
+    }
 
     return new Date(date).toLocaleDateString(
       "en-GB",
@@ -261,6 +322,10 @@ export default function AdminDonations() {
       }
     );
   };
+
+  /* =========================================================
+     FORMAT PAYMENT METHOD
+  ========================================================= */
 
   const formatMethod = (method) => {
     switch (method) {
@@ -278,11 +343,18 @@ export default function AdminDonations() {
     }
   };
 
+  /* =========================================================
+     GET DONOR INITIALS
+  ========================================================= */
+
   const getInitials = (name) => {
-    if (!name) return "D";
+    if (!name) {
+      return "D";
+    }
 
     return name
       .split(" ")
+      .filter(Boolean)
       .map((word) => word[0])
       .join("")
       .slice(0, 2)
@@ -322,11 +394,13 @@ export default function AdminDonations() {
           disabled={loading}
         >
           <span>↻</span>
-          {loading ? "Refreshing..." : "Refresh"}
+
+          {loading
+            ? "Refreshing..."
+            : "Refresh"}
         </button>
 
       </div>
-
 
       {/* =====================================================
           STATISTICS
@@ -334,64 +408,79 @@ export default function AdminDonations() {
 
       <div className="donations-stat-grid">
 
+        {/* TOTAL */}
+
         <div className="donation-stat-card">
+
           <div className="donation-stat-icon">
             ◆
           </div>
 
           <div>
             <span>Total Donations</span>
+
             <strong>
               {statistics.total}
             </strong>
           </div>
+
         </div>
 
+        {/* CONFIRMED */}
 
         <div className="donation-stat-card">
+
           <div className="donation-stat-icon success">
             ✓
           </div>
 
           <div>
-            <span>Successful</span>
+            <span>Confirmed</span>
+
             <strong>
-              {statistics.successful}
+              {statistics.confirmed}
             </strong>
           </div>
+
         </div>
 
+        {/* PENDING */}
 
         <div className="donation-stat-card">
+
           <div className="donation-stat-icon pending">
             ◷
           </div>
 
           <div>
             <span>Pending</span>
+
             <strong>
               {statistics.pending}
             </strong>
           </div>
+
         </div>
 
+        {/* CONFIRMED AMOUNT */}
 
         <div className="donation-stat-card">
+
           <div className="donation-stat-icon amount">
             UGX
           </div>
 
           <div>
-            <span>Successful Amount</span>
+            <span>Confirmed Amount</span>
 
             <strong className="amount-value">
               {statistics.totalAmount.toLocaleString()}
             </strong>
           </div>
+
         </div>
 
       </div>
-
 
       {/* =====================================================
           TOOLBAR
@@ -418,7 +507,9 @@ export default function AdminDonations() {
             <button
               type="button"
               className="clear-search"
-              onClick={() => setSearch("")}
+              onClick={() =>
+                setSearch("")
+              }
             >
               ×
             </button>
@@ -426,15 +517,19 @@ export default function AdminDonations() {
 
         </div>
 
-
         <div className="donation-filters">
+
+          {/* STATUS FILTER */}
 
           <select
             value={statusFilter}
             onChange={(event) =>
-              setStatusFilter(event.target.value)
+              setStatusFilter(
+                event.target.value
+              )
             }
           >
+
             <option value="all">
               All statuses
             </option>
@@ -443,26 +538,27 @@ export default function AdminDonations() {
               Pending
             </option>
 
-            <option value="successful">
-              Successful
-            </option>
-
-            <option value="failed">
-              Failed
+            <option value="confirmed">
+              Confirmed
             </option>
 
             <option value="cancelled">
               Cancelled
             </option>
+
           </select>
 
+          {/* METHOD FILTER */}
 
           <select
             value={methodFilter}
             onChange={(event) =>
-              setMethodFilter(event.target.value)
+              setMethodFilter(
+                event.target.value
+              )
             }
           >
+
             <option value="all">
               All methods
             </option>
@@ -478,12 +574,12 @@ export default function AdminDonations() {
             <option value="card">
               Card
             </option>
+
           </select>
 
         </div>
 
       </div>
-
 
       {/* =====================================================
           ERROR
@@ -491,9 +587,14 @@ export default function AdminDonations() {
 
       {error && (
         <div className="donations-error">
+
           <span>!</span>
+
           <div>
-            <strong>Unable to load donations</strong>
+            <strong>
+              Unable to load donations
+            </strong>
+
             <p>{error}</p>
           </div>
 
@@ -503,9 +604,9 @@ export default function AdminDonations() {
           >
             Try again
           </button>
+
         </div>
       )}
-
 
       {/* =====================================================
           TABLE
@@ -528,15 +629,23 @@ export default function AdminDonations() {
 
         </div>
 
+        {/* LOADING */}
 
         {loading ? (
 
           <div className="donations-loading">
+
             <div className="donations-spinner" />
-            <p>Loading donations...</p>
+
+            <p>
+              Loading donations...
+            </p>
+
           </div>
 
         ) : filteredDonations.length === 0 ? (
+
+          /* EMPTY */
 
           <div className="donations-empty">
 
@@ -544,7 +653,9 @@ export default function AdminDonations() {
               ◆
             </div>
 
-            <h3>No donations found</h3>
+            <h3>
+              No donations found
+            </h3>
 
             <p>
               {search ||
@@ -558,11 +669,14 @@ export default function AdminDonations() {
 
         ) : (
 
+          /* TABLE */
+
           <div className="donations-table-wrapper">
 
             <table className="donations-table">
 
               <thead>
+
                 <tr>
                   <th>DONOR</th>
                   <th>AMOUNT</th>
@@ -572,19 +686,22 @@ export default function AdminDonations() {
                   <th>STATUS</th>
                   <th>ACTIONS</th>
                 </tr>
-              </thead>
 
+              </thead>
 
               <tbody>
 
                 {filteredDonations.map(
                   (donation) => (
 
-                    <tr key={donation._id}>
+                    <tr
+                      key={donation._id}
+                    >
 
                       {/* DONOR */}
 
                       <td>
+
                         <div className="donor-cell">
 
                           <div className="donor-avatar">
@@ -594,6 +711,7 @@ export default function AdminDonations() {
                           </div>
 
                           <div>
+
                             <strong>
                               {donation.donorName ||
                                 "Anonymous"}
@@ -603,56 +721,69 @@ export default function AdminDonations() {
                               {donation.email ||
                                 "No email"}
                             </span>
+
                           </div>
 
                         </div>
-                      </td>
 
+                      </td>
 
                       {/* AMOUNT */}
 
                       <td>
+
                         <strong className="donation-amount">
+
                           {formatAmount(
                             donation.amount,
                             donation.currency
                           )}
-                        </strong>
-                      </td>
 
+                        </strong>
+
+                      </td>
 
                       {/* METHOD */}
 
                       <td>
+
                         <span className="method-badge">
+
                           {formatMethod(
                             donation.method
                           )}
-                        </span>
-                      </td>
 
+                        </span>
+
+                      </td>
 
                       {/* REFERENCE */}
 
                       <td>
+
                         <span className="reference-text">
+
                           {donation.reference ||
                             donation.transactionId ||
                             "—"}
-                        </span>
-                      </td>
 
+                        </span>
+
+                      </td>
 
                       {/* DATE */}
 
                       <td>
+
                         <span className="date-text">
+
                           {formatDate(
                             donation.createdAt
                           )}
-                        </span>
-                      </td>
 
+                        </span>
+
+                      </td>
 
                       {/* STATUS */}
 
@@ -680,12 +811,8 @@ export default function AdminDonations() {
                             Pending
                           </option>
 
-                          <option value="successful">
-                            Successful
-                          </option>
-
-                          <option value="failed">
-                            Failed
+                          <option value="confirmed">
+                            Confirmed
                           </option>
 
                           <option value="cancelled">
@@ -695,7 +822,6 @@ export default function AdminDonations() {
                         </select>
 
                       </td>
-
 
                       {/* ACTIONS */}
 
@@ -725,10 +851,12 @@ export default function AdminDonations() {
                               )
                             }
                           >
+
                             {deletingId ===
                             donation._id
                               ? "..."
                               : "×"}
+
                           </button>
 
                         </div>
@@ -736,6 +864,7 @@ export default function AdminDonations() {
                       </td>
 
                     </tr>
+
                   )
                 )}
 
