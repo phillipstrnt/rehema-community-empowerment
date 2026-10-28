@@ -16,7 +16,7 @@
       - key: JWT_SECRET
         generateValue: true
       - key: CLIENT_URL
-        value: https://rehema-website-preview-2026-1028.onrender.com
+        value: https://rehema-community-empowerment-web.onrender.com,https://rehema-website-preview-2026-1028.onrender.com
       - key: API_PUBLIC_URL
         value: https://rehema-community-empowerment-api.onrender.com
       - key: ADMIN_NAME

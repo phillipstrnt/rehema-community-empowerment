@@ -52,9 +52,17 @@ app.use(
 
 app.use(
   cors({
-    origin:
-      process.env.CLIENT_URL ||
-      "http://localhost:5173",
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        ...(process.env.CLIENT_URL || "http://localhost:5173")
+          .split(",")
+          .map((value) => value.trim())
+          .filter(Boolean),
+        "https://rehema-community-empowerment-web.onrender.com",
+      ];
+
+      callback(null, !origin || allowedOrigins.includes(origin));
+    },
 
     credentials: true,
   })
