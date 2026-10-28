@@ -1,4 +1,3 @@
-
 import express from "express";
 
 import {
@@ -13,8 +12,23 @@ import {
   Contact,
   Notification,
 } from "./models.js";
+import { requireAdmin } from "./authMiddleware.js";
 
 const router = express.Router();
+
+// Keep public submissions open and require an administrator for management APIs.
+router.use((req, res, next) => {
+  const publicWrites = new Set([
+    "POST /donations", "POST /volunteers", "POST /contact",
+    "POST /messages", "POST /newsletter/subscribe",
+  ]);
+  const privateReads = new Set([
+    "/donations", "/volunteers", "/messages", "/newsletter/subscribers", "/notifications",
+  ]);
+  if (req.method === "GET" && !privateReads.has(req.path) && !req.path.startsWith("/donations/")) return next();
+  if (publicWrites.has(`${req.method} ${req.path}`)) return next();
+  return requireAdmin(req, res, next);
+});
 
 /* =========================================================
    NOTIFICATION HELPER
@@ -1614,6 +1628,18 @@ router.post(
     }
   }
 );
+
+/* GET SINGLE DONATION */
+
+router.get("/donations/:id", async (req, res) => {
+  try {
+    const donation = await Donation.findById(req.params.id);
+    if (!donation) return res.status(404).json({ message: "Donation not found" });
+    return res.json(donation);
+  } catch (error) {
+    return res.status(400).json({ message: "Invalid donation ID" });
+  }
+});
 
 /* UPDATE DONATION STATUS */
 

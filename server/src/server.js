@@ -1,11 +1,6 @@
 
 import "dotenv/config";
 
-console.log(
-  "JWT_SECRET loaded:",
-  process.env.JWT_SECRET ? "YES" : "NO"
-);
-
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -19,6 +14,8 @@ import uploadRoutes from "./upload.js";
 import facebookRoutes from "./facebook.js";
 
 import { connectDB } from "./db.js";
+import paymentRoutes from "./paymentRoutes.js";
+import { localUploadDirectory } from "./localUploads.js";
 import routes from "./routes.js";
 
 
@@ -63,6 +60,8 @@ app.use(
 /* =========================================================
    REQUEST BODY
 ========================================================= */
+
+app.use("/uploads", express.static(localUploadDirectory, { fallthrough: false, maxAge: "1d" }));
 
 app.use(
   express.json({
@@ -127,6 +126,8 @@ app.get(
 
    POST /api/upload/...
 ========================================================= */
+
+app.use("/api/payments", paymentRoutes);
 
 app.use(
   "/api/upload",
