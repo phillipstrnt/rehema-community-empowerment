@@ -1,4 +1,5 @@
 
+
 import "dotenv/config";
 
 import express from "express";
@@ -254,8 +255,8 @@ const startServer = async () => {
     if (initialAdminEmail && initialAdminPassword) {
       const existingAdmin = await AdminUser.exists({});
       if (!existingAdmin) {
-        if (initialAdminPassword.length < 12) {
-          throw new Error("ADMIN_PASSWORD must be at least 12 characters.");
+        if (initialAdminPassword.length < 8) {
+          throw new Error("ADMIN_PASSWORD must be at least 8 characters.");
         }
 
         const passwordHash = await bcrypt.hash(initialAdminPassword, 12);
