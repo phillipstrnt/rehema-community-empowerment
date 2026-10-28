@@ -20,7 +20,7 @@ const router = express.Router();
 router.use((req, res, next) => {
   const publicWrites = new Set([
     "POST /donations", "POST /volunteers", "POST /contact",
-    "POST /messages", "POST /newsletter/subscribe",
+    "POST /messages", "POST /partners/requests", "POST /newsletter/subscribe",
   ]);
   const privateReads = new Set([
     "/donations", "/volunteers", "/messages", "/newsletter/subscribers", "/notifications",
@@ -1017,6 +1017,37 @@ router.get(
     }
   }
 );
+
+/* PUBLIC PARTNERSHIP REQUEST */
+router.post("/partners/requests", async (req, res) => {
+  try {
+    const { organization, name, email, phone, message } = req.body || {};
+    const clean = (value, max) => typeof value === "string" && value.trim().length > 0 && value.trim().length <= max;
+    if (!clean(organization, 180) || !clean(name, 120) ||
+        !clean(email, 254) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) ||
+        !clean(message, 5000) || (phone && !clean(phone, 40))) {
+      return res.status(400).json({ message: "Please provide valid organization and contact details." });
+    }
+    const partner = await Partner.create({
+      organization: organization.trim(),
+      contactName: name.trim(),
+      email: email.trim().toLowerCase(),
+      phone: phone?.trim(),
+      message: message.trim(),
+      status: "new",
+    });
+    await createNotification({
+      title: "New partnership request",
+      message: `${partner.organization} submitted a partnership request.`,
+      type: "partner",
+      link: "/admin/partners",
+    });
+    res.status(201).json({ success: true, message: "Partnership request received." });
+  } catch (error) {
+    console.error("Partnership request error:", error);
+    res.status(500).json({ message: "Unable to submit partnership request." });
+  }
+});
 
 /* CREATE PARTNER */
 

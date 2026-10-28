@@ -122,7 +122,7 @@ export default function GetInvolved() {
     });
 
     try {
-      const response = await fetch(`${API_URL}/partners`, {
+      const response = await fetch(`${API_URL}/partners/requests`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
