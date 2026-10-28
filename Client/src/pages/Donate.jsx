@@ -22,6 +22,11 @@ export default function Donations() {
 
   const [submitting, setSubmitting] = useState(false);
   const [flutterwaveEnabled, setFlutterwaveEnabled] = useState(false);
+  const [siteSettings, setSiteSettings] = useState(null);
+
+  useEffect(() => {
+    api("/settings/public").then(setSiteSettings).catch(() => {});
+  }, []);
 
   useEffect(() => {
     api("/payments/providers")
@@ -65,15 +70,9 @@ export default function Donations() {
   ========================================================= */
 
   const bankDetails = {
-    accountName:
-      "Rural Empowerment on Health Management (REHEMA)",
-
-    accountNumber: "01113658533160",
-
-    bank: "dfcu Bank",
-
-    branch: "Mbale",
-
+    accountName: siteSettings?.accountName || "Rural Empowerment on Health Management (REHEMA)",
+    accountNumber: siteSettings?.accountNumber || "01113658533160",
+    bank: siteSettings?.bankName || "dfcu Bank",
     swift: "DFCUUGKA",
   };
 
@@ -82,10 +81,8 @@ export default function Donations() {
   ========================================================= */
 
   const mobileMoneyDetails = {
-    number: "586795",
-
-    recipient:
-      "Rural Empowerment on Health Management",
+    number: siteSettings?.mobileMoneyNumber || "586795",
+    recipient: siteSettings?.mobileMoneyName || "Rural Empowerment on Health Management",
   };
 
   /* =========================================================
@@ -477,12 +474,8 @@ export default function Donations() {
                   <div>
 
                     <strong>
-                      dfcu Bank
+                      {bankDetails.bank}
                     </strong>
-
-                    <span>
-                      Mbale Branch
-                    </span>
 
                   </div>
 
@@ -553,19 +546,6 @@ export default function Donations() {
 
                   <strong>
                     {bankDetails.bank}
-                  </strong>
-
-                </div>
-
-
-                <div className="bank-detail">
-
-                  <span>
-                    Bank Branch
-                  </span>
-
-                  <strong>
-                    {bankDetails.branch}
                   </strong>
 
                 </div>
