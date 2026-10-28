@@ -6,6 +6,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
+import bcrypt from "bcryptjs";
 
 import adminAuthRoutes from "./adminAuth.js";
 import adminUserRoutes from "./routes/adminUserRoutes.js";
@@ -14,6 +15,7 @@ import uploadRoutes from "./upload.js";
 import facebookRoutes from "./facebook.js";
 
 import { connectDB } from "./db.js";
+import { AdminUser } from "./adminUserModel.js";
 import paymentRoutes from "./paymentRoutes.js";
 import { localUploadDirectory } from "./localUploads.js";
 import routes from "./routes.js";
@@ -246,6 +248,27 @@ app.use(
 const startServer = async () => {
   try {
     await connectDB();
+
+    const initialAdminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+    const initialAdminPassword = process.env.ADMIN_PASSWORD;
+    if (initialAdminEmail && initialAdminPassword) {
+      const existingAdmin = await AdminUser.exists({});
+      if (!existingAdmin) {
+        if (initialAdminPassword.length < 12) {
+          throw new Error("ADMIN_PASSWORD must be at least 12 characters.");
+        }
+
+        const passwordHash = await bcrypt.hash(initialAdminPassword, 12);
+        await AdminUser.create({
+          name: process.env.ADMIN_NAME?.trim() || "REHEMA Administrator",
+          email: initialAdminEmail,
+          password: passwordHash,
+          role: "super_admin",
+          active: true,
+        });
+        console.log("Initial REHEMA administrator created.");
+      }
+    }
 
     console.log(
       "MongoDB connected successfully."
