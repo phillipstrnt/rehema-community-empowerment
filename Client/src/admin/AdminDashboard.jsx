@@ -91,7 +91,7 @@ export default function AdminDashboard() {
           galleryResponse,
         ] = await Promise.all([
           fetch(
-            `${API_URL}/posts`,
+            `${API_URL}/admin/posts`,
             requestOptions
           ),
 

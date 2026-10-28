@@ -23,7 +23,7 @@ router.use((req, res, next) => {
     "POST /messages", "POST /partners/requests", "POST /newsletter/subscribe",
   ]);
   const privateReads = new Set([
-    "/donations", "/volunteers", "/messages", "/newsletter/subscribers", "/notifications",
+    "/donations", "/volunteers", "/messages", "/newsletter/subscribers", "/notifications", "/admin/posts",
   ]);
   if (req.method === "GET" && !privateReads.has(req.path) && !req.path.startsWith("/donations/")) return next();
   if (publicWrites.has(`${req.method} ${req.path}`)) return next();
@@ -60,11 +60,11 @@ const createNotification = async ({
    POSTS / NEWS
 ========================================================= */
 
-/* GET ALL POSTS */
+/* PUBLIC POSTS: only published stories are visible without admin access. */
 
 router.get("/posts", async (req, res) => {
   try {
-    const posts = await Post.find().sort({
+    const posts = await Post.find({ published: true }).sort({
       publishedAt: -1,
       createdAt: -1,
     });
@@ -79,6 +79,22 @@ router.get("/posts", async (req, res) => {
     res.status(500).json({
       message: "Failed to fetch posts",
     });
+  }
+});
+
+/* ADMIN POSTS: includes drafts and unpublished stories. */
+
+router.get("/admin/posts", async (req, res) => {
+  try {
+    const posts = await Post.find().sort({
+      publishedAt: -1,
+      createdAt: -1,
+    });
+
+    res.json(posts);
+  } catch (error) {
+    console.error("Admin posts GET error:", error);
+    res.status(500).json({ message: "Failed to fetch posts" });
   }
 });
 
@@ -121,6 +137,7 @@ router.get("/posts/:slug", async (req, res) => {
   try {
     const post = await Post.findOne({
       slug: req.params.slug,
+      published: true,
     });
 
     if (!post) {
