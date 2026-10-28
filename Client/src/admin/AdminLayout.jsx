@@ -150,7 +150,6 @@ export default function AdminLayout() {
   const location = useLocation();
 
   const notificationRef = useRef(null);
-  const themeRef = useRef(null);
 
   const [sidebarOpen, setSidebarOpen] =
     useState(false);
@@ -158,8 +157,6 @@ export default function AdminLayout() {
   const [notificationsOpen, setNotificationsOpen] =
     useState(false);
 
-  const [themeOpen, setThemeOpen] =
-    useState(false);
 
   const [notifications, setNotifications] =
     useState([]);
@@ -169,13 +166,6 @@ export default function AdminLayout() {
 
   const [adminUser, setAdminUser] =
     useState(null);
-
-  const [theme, setTheme] = useState(() => {
-    return (
-      localStorage.getItem("rehema_admin_theme") ||
-      "system"
-    );
-  });
 
   useEffect(() => {
     const token = getAdminToken();
@@ -191,29 +181,8 @@ export default function AdminLayout() {
   }, [navigate]);
 
   useEffect(() => {
-    localStorage.setItem(
-      "rehema_admin_theme",
-      theme
-    );
-
-    const root = document.documentElement;
-
-    if (theme === "system") {
-      root.removeAttribute("data-admin-theme");
-    } else {
-      root.setAttribute(
-        "data-admin-theme",
-        theme
-      );
-    }
-  }, [theme]);
-
-  useEffect(() => {
-    return () => {
-      document.documentElement.removeAttribute(
-        "data-admin-theme"
-      );
-    };
+    localStorage.setItem("rehema_admin_theme", "light");
+    document.documentElement.setAttribute("data-admin-theme", "light");
   }, []);
 
   const fetchNotifications = useCallback(async () => {
@@ -264,7 +233,6 @@ export default function AdminLayout() {
   useEffect(() => {
     setSidebarOpen(false);
     setNotificationsOpen(false);
-    setThemeOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -296,12 +264,6 @@ export default function AdminLayout() {
         setNotificationsOpen(false);
       }
 
-      if (
-        themeRef.current &&
-        !themeRef.current.contains(event.target)
-      ) {
-        setThemeOpen(false);
-      }
     };
 
     document.addEventListener(
@@ -323,7 +285,6 @@ export default function AdminLayout() {
 
       setSidebarOpen(false);
       setNotificationsOpen(false);
-      setThemeOpen(false);
     };
 
     document.addEventListener(
@@ -341,14 +302,12 @@ export default function AdminLayout() {
 
   const toggleSidebar = () => {
     setNotificationsOpen(false);
-    setThemeOpen(false);
 
     setSidebarOpen((current) => !current);
   };
 
   const toggleNotifications = () => {
     setSidebarOpen(false);
-    setThemeOpen(false);
 
     setNotificationsOpen((current) => {
       const nextState = !current;
@@ -361,17 +320,6 @@ export default function AdminLayout() {
     });
   };
 
-  const toggleThemeMenu = () => {
-    setSidebarOpen(false);
-    setNotificationsOpen(false);
-
-    setThemeOpen((current) => !current);
-  };
-
-  const selectTheme = (selectedTheme) => {
-    setTheme(selectedTheme);
-    setThemeOpen(false);
-  };
 
   const markNotificationRead = async (
     notification
@@ -457,7 +405,6 @@ export default function AdminLayout() {
 
     setSidebarOpen(false);
     setNotificationsOpen(false);
-    setThemeOpen(false);
 
     navigate("/admin/login", {
       replace: true,
@@ -549,7 +496,6 @@ export default function AdminLayout() {
             onClick={() => {
               setSidebarOpen(false);
               setNotificationsOpen(false);
-              setThemeOpen(false);
             }}
           >
             <span className="admin-nav-icon">
@@ -575,20 +521,6 @@ export default function AdminLayout() {
   const userInitial =
     userName?.charAt(0)?.toUpperCase() ||
     "A";
-
-  const currentThemeLabel =
-    theme === "light"
-      ? "Light"
-      : theme === "dark"
-      ? "Dark"
-      : "System";
-
-  const currentThemeIcon =
-    theme === "light"
-      ? "☀️"
-      : theme === "dark"
-      ? "🌙"
-      : "🌓";
 
   return (
     <div className="admin-layout">
@@ -824,161 +756,11 @@ export default function AdminLayout() {
               )}
             </div>
 
-            <div
-              className="admin-theme-wrapper"
-              ref={themeRef}
-            >
-              <button
-                type="button"
-                className={`admin-theme-button ${
-                  themeOpen
-                    ? "active"
-                    : ""
-                }`}
-                onClick={
-                  toggleThemeMenu
-                }
-                aria-label="Choose theme"
-                aria-expanded={
-                  themeOpen
-                }
-              >
-                <span className="admin-theme-icon">
-                  {currentThemeIcon}
-                </span>
-
-                <span className="admin-theme-label">
-                  {currentThemeLabel}
-                </span>
-
-                <span className="admin-theme-arrow">
-                  {themeOpen
-                    ? "⌃"
-                    : "⌄"}
-                </span>
-              </button>
-
-              {themeOpen && (
-                <div className="admin-theme-menu">
-                  <div className="admin-theme-menu-title">
-                    <strong>
-                      Appearance
-                    </strong>
-
-                    <span>
-                      Choose your dashboard
-                      theme
-                    </span>
-                  </div>
-
-                  <button
-                    type="button"
-                    className={`admin-theme-option ${
-                      theme === "light"
-                        ? "selected"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      selectTheme(
-                        "light"
-                      )
-                    }
-                  >
-                    <span className="admin-theme-option-icon">
-                      ☀️
-                    </span>
-
-                    <span className="admin-theme-option-content">
-                      <strong>
-                        Light
-                      </strong>
-
-                      <small>
-                        Bright dashboard
-                      </small>
-                    </span>
-
-                    {theme ===
-                      "light" && (
-                      <span className="admin-theme-check">
-                        ✓
-                      </span>
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`admin-theme-option ${
-                      theme === "dark"
-                        ? "selected"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      selectTheme(
-                        "dark"
-                      )
-                    }
-                  >
-                    <span className="admin-theme-option-icon">
-                      🌙
-                    </span>
-
-                    <span className="admin-theme-option-content">
-                      <strong>
-                        Dark
-                      </strong>
-
-                      <small>
-                        Dark dashboard
-                      </small>
-                    </span>
-
-                    {theme ===
-                      "dark" && (
-                      <span className="admin-theme-check">
-                        ✓
-                      </span>
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`admin-theme-option ${
-                      theme ===
-                      "system"
-                        ? "selected"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      selectTheme(
-                        "system"
-                      )
-                    }
-                  >
-                    <span className="admin-theme-option-icon">
-                      🌓
-                    </span>
-
-                    <span className="admin-theme-option-content">
-                      <strong>
-                        System
-                      </strong>
-
-                      <small>
-                        Follow device
-                        settings
-                      </small>
-                    </span>
-
-                    {theme ===
-                      "system" && (
-                      <span className="admin-theme-check">
-                        ✓
-                      </span>
-                    )}
-                  </button>
-                </div>
-              )}
+            <div className="admin-theme-wrapper">
+              <span className="admin-theme-button" aria-label="Light theme enabled">
+                <span className="admin-theme-icon">☀️</span>
+                <span className="admin-theme-label">Light</span>
+              </span>
             </div>
 
             <div className="admin-user-summary">
