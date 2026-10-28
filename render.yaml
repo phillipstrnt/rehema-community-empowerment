@@ -16,7 +16,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CLIENT_URL
-        value: https://rehema-community-empowerment-web.onrender.com
+        value: https://rehema-website-preview-2026-1028.onrender.com
       - key: API_PUBLIC_URL
         value: https://rehema-community-empowerment-api.onrender.com
       - key: ADMIN_NAME
@@ -39,7 +39,7 @@ services:
         value: UGX
 
   - type: web
-    name: rehema-community-empowerment-web
+    name: rehema-website-preview-2026-1028
     runtime: static
     rootDir: Client
     buildCommand: npm ci && npm run build
