@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { api } from "../api";
 import "./Donations.css";
 
@@ -21,6 +21,33 @@ export default function Donations() {
   const [message, setMessage] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const transactionId = params.get("transaction_id");
+    const txRef = params.get("tx_ref");
+    const paymentStatus = params.get("status");
+    if (!txRef) return;
+    if (!transactionId || paymentStatus !== "successful") {
+      setMessage("The payment was not completed. You can try again or use bank transfer or Mobile Money.");
+      window.history.replaceState({}, "", window.location.pathname);
+      return;
+    }
+
+    setSubmitting(true);
+    setMessage("Checking your payment securely…");
+    api("/payments/flutterwave/verify", {
+      method: "POST",
+      body: JSON.stringify({ transactionId, txRef }),
+    }).then(() => {
+      setMessage("Thank you. Your donation payment has been confirmed.");
+    }).catch((error) => {
+      setMessage(error.message || "We could not confirm the payment yet. Contact REHEMA with your payment reference.");
+    }).finally(() => {
+      setSubmitting(false);
+      window.history.replaceState({}, "", window.location.pathname);
+    });
+  }, []);
 
   /* =========================================================
      BANK INFORMATION
@@ -188,15 +215,21 @@ export default function Donations() {
         method: activeMethod,
       };
 
+      if (activeMethod === "flutterwave") {
+        const checkout = await api("/payments/flutterwave/initialize", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        window.location.assign(checkout.checkoutUrl);
+        return;
+      }
+
       const data = await api("/donations", {
         method: "POST",
         body: JSON.stringify(payload),
       });
 
-      setMessage(
-        data.message ||
-          "Your donation details have been submitted successfully."
-      );
+      setMessage(data.message || "Your donation details have been submitted successfully.");
 
       setForm({
         donorName: "",
@@ -418,8 +451,30 @@ export default function Donations() {
 
           </button>
 
+          <button
+            type="button"
+            className={`donation-method ${activeMethod === "flutterwave" ? "active" : ""}`}
+            onClick={() => changeMethod("flutterwave")}
+          >
+            <span className="method-icon">↗</span>
+            <span className="method-text">
+              <strong>Pay Online</strong>
+              <small>Secure card and mobile money checkout</small>
+            </span>
+            <span className="method-arrow">→</span>
+          </button>
+
         </div>
 
+        {activeMethod === "flutterwave" && (
+          <div className="mobile-money-section">
+            <div className="mobile-money-card">
+              <span className="donation-section-label">SECURE ONLINE CHECKOUT</span>
+              <h2>Pay with Flutterwave</h2>
+              <p>Enter your name, email and amount below. You’ll continue to Flutterwave’s secure checkout to choose an available payment method.</p>
+            </div>
+          </div>
+        )}
 
         {/* ===================================================
             BANK TRANSFER
@@ -1021,6 +1076,7 @@ export default function Donations() {
                   name="donorName"
                   type="text"
                   value={form.donorName}
+                  required={activeMethod === "flutterwave"}
                   onChange={handleChange}
                   placeholder="Your full name"
                 />
@@ -1039,6 +1095,7 @@ export default function Donations() {
                   name="email"
                   type="email"
                   value={form.email}
+                  required={activeMethod === "flutterwave"}
                   onChange={handleChange}
                   placeholder="you@example.com"
                 />
@@ -1119,12 +1176,16 @@ export default function Donations() {
                   Mobile Money
                 </option>
 
+                <option value="flutterwave">
+                  Pay Online (Flutterwave)
+                </option>
+
               </select>
 
             </div>
 
 
-            <div className="donation-field">
+            {activeMethod !== "flutterwave" && <div className="donation-field">
 
               <label htmlFor="reference">
                 Transaction Reference
@@ -1145,7 +1206,7 @@ export default function Donations() {
                 or Mobile Money payment.
               </small>
 
-            </div>
+            </div>}
 
 
             <div className="donation-field">
@@ -1174,7 +1235,7 @@ export default function Donations() {
 
               {submitting
                 ? "Submitting..."
-                : "Submit Donation Details"}
+                : activeMethod === "flutterwave" ? "Continue to Secure Checkout" : "Submit Donation Details"}
 
               {!submitting && (
                 <span>→</span>
