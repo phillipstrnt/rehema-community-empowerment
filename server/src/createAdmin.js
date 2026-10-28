@@ -1,3 +1,4 @@
+
 import "dotenv/config";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
@@ -11,8 +12,8 @@ async function createAdmin() {
   if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
     throw new Error("Set MONGO_URI and JWT_SECRET before creating an administrator.");
   }
-  if (!email || !password || password.length < 12) {
-    throw new Error("Set ADMIN_EMAIL and an ADMIN_PASSWORD of at least 12 characters.");
+  if (!email || !password || password.length < 8) {
+    throw new Error("Set ADMIN_EMAIL and an ADMIN_PASSWORD of at least 8 characters.");
   }
 
   await mongoose.connect(process.env.MONGO_URI);
