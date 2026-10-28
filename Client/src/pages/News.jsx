@@ -546,15 +546,18 @@ export default function News() {
             </div>
 
             <h3>
-              No stories found
+              {allStories.length === 0
+                ? "No stories published yet"
+                : "No stories found"}
             </h3>
 
             <p>
-              Try another search term or select a different
-              category.
+              {allStories.length === 0
+                ? "New REHEMA stories will appear here when they are published."
+                : "Try another search term or select a different category."}
             </p>
 
-            <button
+            {allStories.length > 0 && <button
               type="button"
               onClick={() => {
                 setSearch("");
@@ -563,7 +566,7 @@ export default function News() {
               className="news-reset-button"
             >
               View All Stories
-            </button>
+            </button>}
 
           </div>
 
