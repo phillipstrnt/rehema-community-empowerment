@@ -19,6 +19,7 @@ import { connectDB } from "./db.js";
 import { AdminUser } from "./adminUserModel.js";
 import paymentRoutes from "./paymentRoutes.js";
 import { localUploadDirectory } from "./localUploads.js";
+import { ensureSamplePosts } from "./samplePosts.js";
 import routes from "./routes.js";
 
 
@@ -249,6 +250,7 @@ app.use(
 const startServer = async () => {
   try {
     await connectDB();
+    await ensureSamplePosts();
 
     const initialAdminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
     const initialAdminPassword = process.env.ADMIN_PASSWORD;
