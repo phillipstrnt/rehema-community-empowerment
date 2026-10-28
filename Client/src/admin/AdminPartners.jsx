@@ -476,12 +476,8 @@ export default function AdminPartners() {
           "NGO / Organization"
       );
 
-    const corporate =
-      partners.filter(
-        (partner) =>
-          partner.type ===
-          "Corporate"
-      );
+    const corporate = partners.filter((partner) => partner.type === "Corporate");
+    const requests = partners.filter((partner) => partner.status === "new");
 
     return {
 
@@ -496,6 +492,8 @@ export default function AdminPartners() {
 
       corporate:
         corporate.length,
+      requests:
+        requests.length,
 
     };
 
@@ -540,7 +538,7 @@ export default function AdminPartners() {
 
   return (
 
-    <div className="admin-page">
+    <div className="admin-page partners-page">
 
 
       {/* ===================================================
@@ -713,11 +711,11 @@ export default function AdminPartners() {
           <div>
 
             <span>
-              Corporate Partners
+              New Requests
             </span>
 
             <strong>
-              {statistics.corporate}
+              {statistics.requests}
             </strong>
 
           </div>
@@ -1162,7 +1160,7 @@ export default function AdminPartners() {
 
         : (
 
-          <div className="admin-table-wrapper">
+          <div className="admin-table-wrapper partners-table-card">
 
             <table className="admin-table">
 
@@ -1308,7 +1306,7 @@ export default function AdminPartners() {
 
                       {/* CONTACT */}
 
-                      <td>
+                      <td className="partner-contact-cell">
 
                         <strong>
                           {
@@ -1320,10 +1318,8 @@ export default function AdminPartners() {
 
                         {partner.email && (
 
-                          <div>
-                            {
-                              partner.email
-                            }
+                          <div className="partner-contact-detail">
+                            {partner.email}
                           </div>
 
                         )}
@@ -1331,10 +1327,8 @@ export default function AdminPartners() {
 
                         {partner.phone && (
 
-                          <div>
-                            {
-                              partner.phone
-                            }
+                          <div className="partner-contact-detail">
+                            {partner.phone}
                           </div>
 
                         )}
@@ -1354,6 +1348,7 @@ export default function AdminPartners() {
                             }
                             target="_blank"
                             rel="noopener noreferrer"
+                            className="partner-website-link"
                           >
                             Visit Website
                           </a>
@@ -1371,20 +1366,8 @@ export default function AdminPartners() {
 
                       <td>
 
-                        <span
-                          className={`admin-status ${
-                            partner.status ===
-                            "Active"
-                              ? "active"
-                              : "inactive"
-                          }`}
-                        >
-
-                          {
-                            partner.status ||
-                            "Inactive"
-                          }
-
+                        <span className={`partner-status partner-status--${(partner.status || "inactive").toLowerCase()}`}>
+                          {partner.status === "new" ? "New request" : partner.status || "Inactive"}
                         </span>
 
                       </td>
