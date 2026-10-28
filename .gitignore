@@ -6,3 +6,7 @@ build/
 .vscode/
 node_modules/
 .env
+
+server/data/
+server/uploads/
+server/*.log
