@@ -6,11 +6,7 @@ import React, {
 } from "react";
 
 import "./AdminNewsletter.css";
-
-
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:5000/api";
+import { api } from "../../utils/api";
 
 
 export default function AdminNewsletter() {
@@ -43,33 +39,8 @@ export default function AdminNewsletter() {
       setError("");
 
 
-      const response = await fetch(
-        `${API_URL}/newsletter/subscribers`
-      );
-
-
-      const data =
-        await response
-          .json()
-          .catch(() => ({}));
-
-
-      if (!response.ok) {
-
-        throw new Error(
-          data.message ||
-          "Failed to fetch newsletter subscribers."
-        );
-
-      }
-
-
-      setSubscribers(
-        Array.isArray(data)
-          ? data
-          : []
-      );
-
+      const data = await api("/newsletter/subscribers");
+      setSubscribers(Array.isArray(data) ? data : data.subscribers || data.data || []);
 
     } catch (err) {
 
@@ -244,29 +215,7 @@ export default function AdminNewsletter() {
 
       try {
 
-        const response =
-          await fetch(
-            `${API_URL}/newsletter/subscribers/${id}`,
-            {
-              method: "DELETE",
-            }
-          );
-
-
-        const data =
-          await response
-            .json()
-            .catch(() => ({}));
-
-
-        if (!response.ok) {
-
-          throw new Error(
-            data.message ||
-            "Failed to delete subscriber."
-          );
-
-        }
+        await api(`/newsletter/subscribers/${id}`, { method: "DELETE" });
 
 
         setSubscribers(
