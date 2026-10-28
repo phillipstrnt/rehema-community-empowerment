@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../api";
+import "../styles/Gallery.css";
 
 export default function Gallery() {
   const [media, setMedia] = useState([]);
@@ -27,7 +28,7 @@ export default function Gallery() {
   }, []);
 
   return (
-    <section className="container section">
+    <section className="container section gallery-page">
 
       {/* HEADER */}
       <div className="gallery-header">
