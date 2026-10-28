@@ -283,10 +283,24 @@ export default function Programs() {
         );
 
 
-    const combined = [
-      ...hardcodedPrograms,
-      ...normalizedDatabasePrograms
-    ];
+    const databaseByTitle = new Map(
+      normalizedDatabasePrograms.map((program) => [
+        String(program.title || "").trim().toLowerCase(),
+        program,
+      ])
+    );
+
+    // Keep the original public programme catalogue, but let admin-managed
+    // entries replace matching cards so edits in the dashboard take effect.
+    const combined = hardcodedPrograms.map((program) => {
+      const key = String(program.title || "").trim().toLowerCase();
+      const managedProgram = databaseByTitle.get(key);
+      if (!managedProgram) return program;
+      databaseByTitle.delete(key);
+      return { ...program, ...managedProgram };
+    });
+
+    combined.push(...databaseByTitle.values());
 
 
     /*

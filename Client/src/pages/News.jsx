@@ -7,49 +7,6 @@ const API_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 
-const fallbackStories = [
-  {
-    _id: "fallback-1",
-    title:
-      "REHEMA Strengthens Community Health Through Outreach and Education",
-    slug: "rehema-strengthens-community-health",
-    excerpt:
-      "REHEMA continues to work with communities to improve access to health information, services and practical public health support.",
-    category: "Community Health",
-    author: "REHEMA",
-    image: "/images/rehema/community.jpg",
-    published: true,
-    date: "2025-08-13",
-  },
-  {
-    _id: "fallback-2",
-    title:
-      "Free Medical Camp Brings Health Services Closer to the Community",
-    slug: "free-medical-camp",
-    excerpt:
-      "A community medical outreach brought health services, screening, consultation and health education closer to residents.",
-    category: "Medical Outreach",
-    author: "REHEMA",
-    image: "/images/rehema/medical-camp.jpg",
-    published: true,
-    date: "2025-08-13",
-  },
-  {
-    _id: "fallback-3",
-    title:
-      "Investing in Maternal and Child Health for a Healthier Future",
-    slug: "maternal-child-health",
-    excerpt:
-      "REHEMA promotes access to maternal, newborn, child and adolescent health information and services.",
-    category: "Maternal & Child Health",
-    author: "REHEMA",
-    image: "/images/rehema/maternal-health.jpg",
-    published: true,
-    date: "2025-07-20",
-  },
-];
-
-
 /* ============================================================
    FORMAT DATE
 ============================================================ */
@@ -160,25 +117,12 @@ export default function News() {
   }, []);
 
 
-  /*
-    ----------------------------------------------------------
-    USE DATABASE POSTS WHEN AVAILABLE
-    ----------------------------------------------------------
-  */
-
   const allStories = useMemo(() => {
-    if (posts.length > 0) {
-      return posts.map((post) => ({
-        ...post,
-        category: getCategory(post),
-        image:
-          post.image ||
-          post.imageUrl ||
-          "/images/rehema/community.jpg",
-      }));
-    }
-
-    return fallbackStories;
+    return posts.map((post) => ({
+      ...post,
+      category: getCategory(post),
+      image: post.image || post.imageUrl || "/images/rehema/community.jpg",
+    }));
   }, [posts]);
 
 

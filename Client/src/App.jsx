@@ -24,6 +24,7 @@ import Programs from "./pages/Programs";
 import News from "./pages/News";
 import Post from "./pages/Post";
 import Gallery from "./pages/Gallery";
+import Events from "./pages/Events";
 import GetInvolved from "./pages/GetInvolved";
 import Donate from "./pages/Donate";
 import Contact from "./pages/Contact";
@@ -195,6 +196,15 @@ export default function App() {
           element={
             <PublicLayout>
               <Gallery />
+            </PublicLayout>
+          }
+        />
+
+        <Route
+          path="/events"
+          element={
+            <PublicLayout>
+              <Events />
             </PublicLayout>
           }
         />

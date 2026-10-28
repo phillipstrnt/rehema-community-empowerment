@@ -1,0 +1,17 @@
+.events-page { min-height: 55vh; }
+.events-header { max-width: 760px; margin: 0 auto 2.5rem; text-align: center; }
+.events-header h1 { margin: .25rem 0 .75rem; }
+.events-header > p:last-child { color: #52616b; line-height: 1.7; }
+.events-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr)); gap: 1.5rem; }
+.event-card { overflow: hidden; border: 1px solid #e1e9e5; border-radius: 16px; background: #fff; box-shadow: 0 10px 30px rgba(18, 61, 45, .07); }
+.event-card > img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.event-card-content { padding: 1.5rem; }
+.event-date { color: #17724e; font-weight: 700; }
+.event-card h2 { margin: .35rem 0; }
+.event-location { color: #52616b; font-weight: 600; }
+.event-description { color: #52616b; line-height: 1.65; white-space: pre-line; }
+.event-card .btn { display: inline-block; margin-top: .5rem; text-decoration: none; }
+.events-state, .events-empty { padding: 3rem 1rem; text-align: center; }
+.events-empty { border-radius: 16px; background: #f3f8f5; }
+.events-empty p { color: #52616b; }
+.events-error { color: #9e3029; }

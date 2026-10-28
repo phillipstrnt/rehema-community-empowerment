@@ -17,7 +17,7 @@ export default function WhatsAppButton() {
       className="whatsapp"
 
       href={
-        `whatsapp://send?phone=${number}&text=${
+        `https://wa.me/${number}?text=${
           encodeURIComponent(message)
         }`
       }

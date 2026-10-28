@@ -124,6 +124,12 @@ export default function Footer() {
               </li>
 
               <li>
+                <Link to="/events">
+                  Events
+                </Link>
+              </li>
+
+              <li>
                 <Link to="/gallery">
                   Gallery
                 </Link>
@@ -247,7 +253,7 @@ export default function Footer() {
                 </small>
 
                 <a
-                  href="whatsapp://send?phone=256702952694"
+                  href="https://wa.me/256702952694"
                 >
                   +256 702 952 694
                 </a>
