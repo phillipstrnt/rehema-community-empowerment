@@ -1,0 +1,42 @@
+export const communityHighlights = [
+  {
+    _id: "community-highlight-team-banner",
+    type: "image",
+    url: "/images/community-highlights/rehema-team-banner.jpg",
+    title: "A moment beside the REHEMA banner",
+    caption: "Two people stand beside a REHEMA information banner.",
+    alt: "Two people standing beside a REHEMA Foundation information banner.",
+  },
+  {
+    _id: "community-highlight-rotary-partnership",
+    type: "image",
+    url: "/images/community-highlights/rotary-partnership-vehicle.jpg",
+    title: "Partnership in action",
+    caption: "REHEMA and Rotary partners meet beside a REHEMA-branded vehicle.",
+    alt: "REHEMA-branded vehicle with REHEMA and Rotary partners standing beside it.",
+  },
+  {
+    _id: "community-highlight-health-team",
+    type: "image",
+    url: "/images/community-highlights/health-outreach-team.jpg",
+    title: "Health outreach team",
+    caption: "Volunteers work together with health supplies at an outreach.",
+    alt: "Health outreach volunteers working together with medical supplies.",
+  },
+  {
+    _id: "community-highlight-outreach-supplies",
+    type: "image",
+    url: "/images/community-highlights/outreach-supplies.jpg",
+    title: "Preparing outreach supplies",
+    caption: "Team members organize supplies at a community outreach table.",
+    alt: "Team members preparing health supplies beneath an outreach tent.",
+  },
+  {
+    _id: "community-highlight-gathering",
+    type: "image",
+    url: "/images/community-highlights/community-gathering.jpg",
+    title: "Community gathering",
+    caption: "Community members gather at an outdoor event.",
+    alt: "A crowd of community members gathered beneath an outdoor tent.",
+  },
+];

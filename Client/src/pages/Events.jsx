@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
 import "../styles/Events.css";
+import "../styles/ScrollReveal.css";
+import useScrollReveal from "../hooks/useScrollReveal";
+import { communityHighlights } from "../data/communityHighlights";
 
 export default function Events() {
+  const highlightsRef = useRef(null);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  useScrollReveal(highlightsRef);
 
   useEffect(() => {
     let mounted = true;
@@ -31,6 +36,26 @@ export default function Events() {
         <h1>Events &amp; Activities</h1>
         <p>Find upcoming REHEMA Foundation activities and ways to take part in our community work.</p>
       </header>
+
+      <section ref={highlightsRef} className="events-highlights scroll-reveal" aria-labelledby="events-highlights-title">
+        <div className="events-highlights-heading">
+          <p className="eyebrow">OUR WORK IN PICTURES</p>
+          <h2 id="events-highlights-title">Community activity highlights</h2>
+          <p>Snapshots of REHEMA community work, health outreach and partnership.</p>
+        </div>
+        <div className="events-highlights-grid">
+          {communityHighlights.map((highlight) => (
+            <article className="events-highlight-card" key={highlight._id}>
+              <img src={highlight.url} alt={highlight.alt} loading="lazy" />
+              <div className="events-highlight-content">
+                <h3>{highlight.title}</h3>
+                <p>{highlight.caption}</p>
+                <Link to="/gallery">View gallery</Link>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
 
       {loading && <p className="events-state" role="status">Loading events…</p>}
       {!loading && error && <p className="events-state events-error" role="alert">{error}</p>}

@@ -2,6 +2,20 @@
 .events-header { max-width: 760px; margin: 0 auto 2.5rem; text-align: center; }
 .events-header h1 { margin: .25rem 0 .75rem; }
 .events-header > p:last-child { color: #52616b; line-height: 1.7; }
+.events-highlights { margin: 0 0 4rem; }
+.events-highlights-heading { margin: 0 0 1.5rem; }
+.events-highlights-heading .eyebrow { color: #17724e; font-size: .75rem; font-weight: 800; letter-spacing: .14em; }
+.events-highlights-heading h2 { margin: .35rem 0 .6rem; color: #173b35; font-size: clamp(1.65rem, 3vw, 2.4rem); }
+.events-highlights-heading > p:last-child { color: #52616b; line-height: 1.7; }
+.events-highlights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 1.25rem; }
+.events-highlight-card { overflow: hidden; border: 1px solid #e1e9e5; border-radius: 16px; background: #fff; box-shadow: 0 10px 30px rgba(18, 61, 45, .07); transition: transform .25s ease, box-shadow .25s ease; }
+.events-highlight-card:hover { transform: translateY(-5px); box-shadow: 0 16px 38px rgba(18, 61, 45, .13); }
+.events-highlight-card img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.events-highlight-content { padding: 1.15rem 1.25rem 1.35rem; }
+.events-highlight-content h3 { margin: 0 0 .5rem; color: #173b35; font-size: 1.1rem; }
+.events-highlight-content p { min-height: 3.3em; margin: 0 0 .8rem; color: #52616b; line-height: 1.65; }
+.events-highlight-content a { color: #17724e; font-weight: 700; text-underline-offset: .2em; }
+.events-highlight-content a:focus-visible { outline: 3px solid #17724e; outline-offset: 3px; border-radius: 2px; }
 .events-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr)); gap: 1.5rem; }
 .event-card { overflow: hidden; border: 1px solid #e1e9e5; border-radius: 16px; background: #fff; box-shadow: 0 10px 30px rgba(18, 61, 45, .07); }
 .event-card > img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
@@ -15,3 +29,7 @@
 .events-empty { border-radius: 16px; background: #f3f8f5; }
 .events-empty p { color: #52616b; }
 .events-error { color: #9e3029; }
+@media (prefers-reduced-motion: reduce) {
+  .events-highlight-card { transition: none; }
+  .events-highlight-card:hover { transform: none; }
+}
