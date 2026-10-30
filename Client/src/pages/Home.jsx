@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Home.css";
 
@@ -11,11 +11,30 @@ function Counter({
   end,
   prefix = "",
   suffix = "",
-  duration = 1800
+  duration = 3600
 }) {
   const [count, setCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const counterRef = useRef(null);
 
   useEffect(() => {
+    const element = counterRef.current;
+    if (!element) return undefined;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsVisible(entry.isIntersecting);
+    }, { threshold: 0.35 });
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) {
+      setCount(0);
+      return undefined;
+    }
+
     let startTime = null;
     let animationFrame;
 
@@ -29,7 +48,9 @@ function Counter({
         1
       );
 
-      const value = Math.floor(progress * end);
+      // Ease out so large totals count smoothly and settle gently.
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      const value = Math.floor(easedProgress * end);
 
       setCount(value);
 
@@ -45,14 +66,14 @@ function Counter({
     return () => {
       cancelAnimationFrame(animationFrame);
     };
-  }, [end, duration]);
+  }, [end, duration, isVisible]);
 
   return (
-    <>
+    <span ref={counterRef}>
       {prefix}
       {count.toLocaleString()}
       {suffix}
-    </>
+    </span>
   );
 }
 
