@@ -1,9 +1,15 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./About.css";
+import "../styles/ScrollReveal.css";
+import useScrollReveal from "../hooks/useScrollReveal";
 
 export default function About() {
+  const approachRef = useRef(null);
+  const focusRef = useRef(null);
+  useScrollReveal(approachRef);
+  useScrollReveal(focusRef);
 
   /* =====================================================
      ALWAYS START PAGE FROM TOP
@@ -154,7 +160,7 @@ export default function About() {
           WHAT REHEMA STANDS FOR
       ===================================================== */}
 
-      <section className="about-highlight">
+      <section ref={approachRef} className="about-highlight scroll-reveal">
 
         <div className="container">
 
@@ -192,7 +198,7 @@ export default function About() {
           OUR FOCUS AREAS
       ===================================================== */}
 
-      <section className="container about-section">
+      <section ref={focusRef} className="container about-section scroll-reveal">
 
         <div className="about-section-heading">
 

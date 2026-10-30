@@ -1,8 +1,10 @@
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Programs.css";
+import "../styles/ScrollReveal.css";
 import api from "../api";
+import useScrollReveal from "../hooks/useScrollReveal";
 
 /* =====================================================
    HARDCODED PROGRAMS
@@ -183,6 +185,8 @@ function normalizeProgram(program, index) {
 ===================================================== */
 
 export default function Programs() {
+  const partnershipRef = useRef(null);
+  useScrollReveal(partnershipRef);
 
   const [databasePrograms, setDatabasePrograms] = useState([]);
   const [programsLoading, setProgramsLoading] = useState(true);
@@ -1048,7 +1052,7 @@ export default function Programs() {
           PARTNERSHIP SECTION
       ===================================================== */}
 
-      <section className="programs-partnership">
+      <section ref={partnershipRef} className="programs-partnership scroll-reveal">
 
         <div className="container programs-partnership-inner">
 

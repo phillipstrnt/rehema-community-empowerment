@@ -2,6 +2,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Home.css";
+import "../styles/ScrollReveal.css";
+import useScrollReveal from "../hooks/useScrollReveal";
 
 /* =====================================================
    ANIMATED COUNTER
@@ -83,6 +85,9 @@ function Counter({
 ===================================================== */
 
 export default function Home() {
+  const founderSectionRef = useRef(null);
+  useScrollReveal(founderSectionRef);
+
   return (
     <main className="home-page">
 
@@ -836,7 +841,7 @@ export default function Home() {
           FOUNDER
       ================================================= */}
 
-      <section className="home-founder-section">
+      <section ref={founderSectionRef} className="home-founder-section scroll-reveal">
 
         <div className="container">
 
@@ -870,27 +875,33 @@ export default function Home() {
                 Clinical Epidemiologist & Public Health Specialist
               </p>
 
-              <p>
-                REHEMA was founded with a commitment to
-                supporting communities through practical
-                public health initiatives, health education
-                and stronger community engagement.
-              </p>
+              <div className="founder-writing">
+                <svg className="founder-writing-pen" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m4 20 4.5-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z" />
+                  <path d="m14.5 6.5 3 3M4 20l5-1.5" />
+                </svg>
+                <p>
+                  REHEMA was founded with a commitment to
+                  supporting communities through practical
+                  public health initiatives, health education
+                  and stronger community engagement.
+                </p>
 
-              <p>
-                Through REHEMA, I am passionate about creating
-                opportunities for communities to better
-                understand health challenges, access appropriate
-                services and participate in solutions that
-                improve wellbeing.
-              </p>
+                <p>
+                  Through REHEMA, I am passionate about creating
+                  opportunities for communities to better
+                  understand health challenges, access appropriate
+                  services and participate in solutions that
+                  improve wellbeing.
+                </p>
 
-              <p>
-                Our approach is grounded in evidence,
-                compassion, collaboration and the belief that
-                communities should be active participants in
-                shaping healthier futures.
-              </p>
+                <p>
+                  Our approach is grounded in evidence,
+                  compassion, collaboration and the belief that
+                  communities should be active participants in
+                  shaping healthier futures.
+                </p>
+              </div>
 
               <div className="home-founder-signature">
                 Sydney Nsubuga

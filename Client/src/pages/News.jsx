@@ -1,7 +1,9 @@
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/News.css";
+import "../styles/ScrollReveal.css";
+import useScrollReveal from "../hooks/useScrollReveal";
 
 const API_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -57,6 +59,8 @@ function handleImageError(event) {
 ============================================================ */
 
 export default function News() {
+  const ctaRef = useRef(null);
+  useScrollReveal(ctaRef);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -753,7 +757,7 @@ export default function News() {
           NEWS CTA
       ===================================================== */}
 
-      <section className="news-cta">
+      <section ref={ctaRef} className="news-cta scroll-reveal">
 
         <div className="container news-cta-inner">
 
