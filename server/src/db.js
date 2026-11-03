@@ -16,7 +16,9 @@ export async function connectDB() {
   }
 
 
-  await mongoose.connect(uri);
+  await mongoose.connect(uri, {
+    serverSelectionTimeoutMS: 8000,
+  });
 
 
   console.log(

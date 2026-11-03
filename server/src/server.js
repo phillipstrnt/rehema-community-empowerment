@@ -4,6 +4,7 @@ import "dotenv/config";
 
 import express from "express";
 import cors from "cors";
+import mongoose from "mongoose";
 import helmet from "helmet";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
@@ -128,9 +129,28 @@ app.get(
     res.status(200).json({
       success: true,
       message: "REHEMA API is running",
+      database: mongoose.connection.readyState === 1 ? "connected" : "unavailable",
     });
   }
 );
+
+app.get("/health/ready", (_req, res) => {
+  const ready = mongoose.connection.readyState === 1;
+  res.status(ready ? 200 : 503).json({
+    success: ready,
+    database: ready ? "connected" : "unavailable",
+  });
+});
+
+app.use("/api", (_req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      success: false,
+      message: "The database is temporarily unavailable. Please try again shortly.",
+    });
+  }
+  next();
+});
 
 
 /* =========================================================
@@ -255,59 +275,39 @@ app.use(
    DATABASE + SERVER START
 ========================================================= */
 
-const startServer = async () => {
-  try {
-    await connectDB();
-    await ensureSamplePosts();
+const initializeDatabase = async () => {
+  while (true) {
+    try {
+      await connectDB();
+      await ensureSamplePosts();
 
-    const initialAdminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
-    const initialAdminPassword = process.env.ADMIN_PASSWORD;
-    if (initialAdminEmail && initialAdminPassword) {
-      const existingAdmin = await AdminUser.exists({});
-      if (!existingAdmin) {
-        if (initialAdminPassword.length < 8) {
-          throw new Error("ADMIN_PASSWORD must be at least 8 characters.");
+      const initialAdminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+      const initialAdminPassword = process.env.ADMIN_PASSWORD;
+      if (initialAdminEmail && initialAdminPassword) {
+        const existingAdmin = await AdminUser.exists({});
+        if (!existingAdmin) {
+          if (initialAdminPassword.length < 8) {
+            throw new Error("ADMIN_PASSWORD must be at least 8 characters.");
+          }
+
+          const passwordHash = await bcrypt.hash(initialAdminPassword, 12);
+          await AdminUser.create({
+            name: process.env.ADMIN_NAME?.trim() || "REHEMA Administrator",
+            email: initialAdminEmail,
+            password: passwordHash,
+            role: "super_admin",
+            active: true,
+          });
+          console.log("Initial REHEMA administrator created.");
         }
-
-        const passwordHash = await bcrypt.hash(initialAdminPassword, 12);
-        await AdminUser.create({
-          name: process.env.ADMIN_NAME?.trim() || "REHEMA Administrator",
-          email: initialAdminEmail,
-          password: passwordHash,
-          role: "super_admin",
-          active: true,
-        });
-        console.log("Initial REHEMA administrator created.");
       }
+
+      console.log("MongoDB connected successfully.");
+      return;
+    } catch (error) {
+      console.error("Database initialization failed; retrying in 10 seconds:", error.message);
+      await new Promise((resolve) => setTimeout(resolve, 10_000));
     }
-
-    console.log(
-      "MongoDB connected successfully."
-    );
-
-    app.listen(
-      PORT,
-      () => {
-        console.log(
-          `REHEMA API running on port ${PORT}`
-        );
-
-        console.log(
-          `API: http://localhost:${PORT}/api`
-        );
-
-        console.log(
-          `Health: http://localhost:${PORT}/`
-        );
-      }
-    );
-  } catch (error) {
-    console.error(
-      "Database connection failed:",
-      error.message
-    );
-
-    process.exit(1);
   }
 };
 
@@ -316,5 +316,9 @@ const startServer = async () => {
    START APPLICATION
 ========================================================= */
 
-startServer();
+app.listen(PORT, () => {
+  console.log(`REHEMA API running on port ${PORT}`);
+  console.log(`Health: http://localhost:${PORT}/`);
+  void initializeDatabase();
+});
 
