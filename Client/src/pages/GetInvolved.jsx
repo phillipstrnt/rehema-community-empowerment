@@ -1,11 +1,12 @@
+import { API_BASE_URL } from "../apiConfig.js";
+
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
 import "../styles/GetInvolved.css";
 
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = API_BASE_URL;
 
 export default function GetInvolved() {
   const [contactEmail, setContactEmail] = useState("rehemainfo@gmail.com");
@@ -1045,3 +1046,4 @@ export default function GetInvolved() {
     </main>
   );
 }
+

@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "../apiConfig.js";
+
 
 import React, {
   useCallback,
@@ -16,9 +18,7 @@ import {
 
 import "./AdminLayout.css";
 
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:5000/api";
+const API_URL = API_BASE_URL;
 
 const REHEMA_LOGO =
   "https://res.cloudinary.com/ttymyelh/image/upload/v1788243561/logo.jpg";

@@ -1,6 +1,6 @@
-const API =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:5000/api";
+import { API_BASE_URL } from "./apiConfig.js";
+
+const API = API_BASE_URL;
 
 /* =========================================================
    GET STORED ADMIN TOKEN

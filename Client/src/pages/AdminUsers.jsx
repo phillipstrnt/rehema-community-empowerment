@@ -1,7 +1,11 @@
+import { API_BASE_URL } from "../apiConfig.js";
+
 import React, {
   useEffect,
   useState,
 } from "react";
+
+const API_URL = API_BASE_URL;
 
 export default function AdminUsers() {
 
@@ -63,7 +67,7 @@ export default function AdminUsers() {
       }
 
       const response = await fetch(
-        "http://localhost:5000/api/admin/users",
+        `${API_URL}/admin/users`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -163,7 +167,7 @@ export default function AdminUsers() {
       const token = getToken();
 
       const response = await fetch(
-        "http://localhost:5000/api/admin/users",
+        `${API_URL}/admin/users`,
         {
           method: "POST",
 
@@ -236,7 +240,7 @@ export default function AdminUsers() {
     try {
 
       const response = await fetch(
-        `http://localhost:5000/api/admin/users/${admin._id}/status`,
+        `${API_URL}/admin/users/${admin._id}/status`,
         {
           method: "PATCH",
 
@@ -305,7 +309,7 @@ export default function AdminUsers() {
       const token = getToken();
 
       const response = await fetch(
-        `http://localhost:5000/api/admin/users/${admin._id}`,
+        `${API_URL}/admin/users/${admin._id}`,
         {
           method: "DELETE",
 
@@ -801,3 +805,4 @@ export default function AdminUsers() {
     </div>
   );
 }
+

@@ -58,7 +58,7 @@ app.use(
           .split(",")
           .map((value) => value.trim())
           .filter(Boolean),
-        "https://rehema-community-empowerment-web.onrender.com",
+        "https://rehema-website-preview-2026-1028-pe5b.onrender.com",
       ];
 
       callback(null, !origin || allowedOrigins.includes(origin));
@@ -317,3 +317,4 @@ const startServer = async () => {
 ========================================================= */
 
 startServer();
+
