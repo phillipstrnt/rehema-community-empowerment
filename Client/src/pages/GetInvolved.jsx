@@ -1,12 +1,15 @@
+import { API_BASE_URL } from "../apiConfig.js";
 
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { api } from "../api";
 import "../styles/GetInvolved.css";
 
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = API_BASE_URL;
 
 export default function GetInvolved() {
+  const [contactEmail, setContactEmail] = useState("rehemainfo@gmail.com");
   const [volunteerForm, setVolunteerForm] = useState({
     name: "",
     email: "",
@@ -22,6 +25,14 @@ export default function GetInvolved() {
     phone: "",
     message: "",
   });
+
+  useEffect(() => {
+    api("/settings/public")
+      .then((settings) => {
+        if (settings.email) setContactEmail(settings.email);
+      })
+      .catch(() => {});
+  }, []);
 
   const [volunteerStatus, setVolunteerStatus] = useState({
     loading: false,
@@ -122,7 +133,7 @@ export default function GetInvolved() {
     });
 
     try {
-      const response = await fetch(`${API_URL}/partners`, {
+      const response = await fetch(`${API_URL}/partners/requests`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -874,7 +885,7 @@ export default function GetInvolved() {
         <div className="gi-contact-grid">
 
           <a
-            href="mailto:rehemainfo@gmail.com"
+            href={`mailto:${contactEmail}`}
             className="gi-contact-card"
           >
             <span className="gi-contact-icon">
@@ -884,7 +895,7 @@ export default function GetInvolved() {
             <div>
               <span>Email</span>
               <strong>
-                rehemainfo@gmail.com
+                {contactEmail}
               </strong>
             </div>
           </a>
@@ -909,8 +920,6 @@ export default function GetInvolved() {
 
           <a
             href="https://wa.me/256702952694"
-            target="_blank"
-            rel="noopener noreferrer"
             className="gi-contact-card"
           >
             <span className="gi-contact-icon">
@@ -1037,3 +1046,4 @@ export default function GetInvolved() {
     </main>
   );
 }
+

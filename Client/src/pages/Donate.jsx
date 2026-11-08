@@ -1,5 +1,6 @@
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../api";
 import "./Donations.css";
 
@@ -11,33 +12,67 @@ export default function Donations() {
   const [form, setForm] = useState({
     donorName: "",
     email: "",
-    phone: "",
     amount: "",
     method: "bank",
     reference: "",
-    message: "",
   });
 
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("success");
 
   const [submitting, setSubmitting] = useState(false);
+  const [flutterwaveEnabled, setFlutterwaveEnabled] = useState(false);
+  const [siteSettings, setSiteSettings] = useState(null);
+
+  useEffect(() => {
+    api("/settings/public").then(setSiteSettings).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    api("/payments/providers")
+      .then((providers) => setFlutterwaveEnabled(Boolean(providers.flutterwave)))
+      .catch(() => setFlutterwaveEnabled(false));
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const transactionId = params.get("transaction_id");
+    const txRef = params.get("tx_ref");
+    const paymentStatus = params.get("status");
+    if (!txRef) return;
+    if (!transactionId || paymentStatus !== "successful") {
+      setMessageType("error");
+      setMessage("The payment was not completed. You can try again or use bank transfer or Mobile Money.");
+      window.history.replaceState({}, "", window.location.pathname);
+      return;
+    }
+
+    setSubmitting(true);
+    setMessageType("success");
+    setMessage("Checking your payment securely…");
+    api("/payments/flutterwave/verify", {
+      method: "POST",
+      body: JSON.stringify({ transactionId, txRef }),
+    }).then(() => {
+      setMessageType("success");
+      setMessage("Thank you. Your donation payment has been confirmed.");
+    }).catch((error) => {
+      setMessageType("error");
+      setMessage(error.message || "We could not confirm the payment yet. Contact REHEMA with your payment reference.");
+    }).finally(() => {
+      setSubmitting(false);
+      window.history.replaceState({}, "", window.location.pathname);
+    });
+  }, []);
 
   /* =========================================================
      BANK INFORMATION
   ========================================================= */
 
   const bankDetails = {
-    accountName:
-      "Rural Empowerment on Health Management (REHEMA)",
-
-    accountNumber: "01113658533160",
-
-    bank: "dfcu Bank",
-
-    bankAddress: "dfcu Bank, P.O Box 70, Kampala",
-
-    branch: "Mbale",
-
+    accountName: siteSettings?.accountName || "Rural Empowerment on Health Management (REHEMA)",
+    accountNumber: siteSettings?.accountNumber || "01113658533160",
+    bank: siteSettings?.bankName || "dfcu Bank",
     swift: "DFCUUGKA",
   };
 
@@ -46,84 +81,9 @@ export default function Donations() {
   ========================================================= */
 
   const mobileMoneyDetails = {
-    number: "586795",
-
-    recipient:
-      "Rural Empowerment on Health Management",
-
-    contact: "0702952694",
+    number: siteSettings?.mobileMoneyNumber || "586795",
+    recipient: siteSettings?.mobileMoneyName || "Rural Empowerment on Health Management",
   };
-
-  /* =========================================================
-     INTERMEDIARY BANKS
-  ========================================================= */
-
-  const intermediaryBanks = [
-    {
-      currency: "USD",
-      bank: "Citibank N.A. New York",
-      address:
-        "399 Park Avenue, New York, NY 10043 U.S.A.",
-      swift: "CITIUS33",
-      account: "34069709",
-    },
-
-    {
-      currency: "CNY",
-      bank: "Bank Of China",
-      address:
-        "Zhongyin Tower, Shanghai, China",
-      swift: "BKCHCNBJ500",
-      account: "453360544156",
-    },
-
-    {
-      currency: "EUR",
-      bank: "Citibank NA London",
-      address:
-        "Citigroup Centre, Canada Square, Canary Wharf, London E14 5LB",
-      swift: "CITIGB2L",
-      account: "11117874",
-      iban: "GB59CITI18500811117874",
-    },
-
-    {
-      currency: "GBP",
-      bank: "Citibank NA London",
-      address:
-        "Citigroup Centre, Canada Square, Canary Wharf, London E14 5LB",
-      swift: "CITIGB2L",
-      account: "13679780",
-      iban: "GB73CITI18500813679780",
-    },
-
-    {
-      currency: "JPY",
-      bank: "Citibank NA London",
-      address:
-        "Citigroup Centre, Canada Square, Canary Wharf, London E14 5LB",
-      swift: "CITIGB2L",
-      account: "11184253",
-    },
-
-    {
-      currency: "KES",
-      bank: "Kenya Commercial Bank",
-      address:
-        "Kencorn House, Moi Avenue, Nairobi, Kenya",
-      swift: "KCBLKENX",
-      account: "1109007396",
-    },
-
-    {
-      currency: "ZAR",
-      bank: "First Rand Bank",
-      address:
-        "6TH Floor, 1 Merchant Place, Corner Fredman Drive and Rivonia Road, Sandton, South Africa",
-      swift: "FIRNZAJJ",
-      account: "9021795",
-    },
-  ];
 
   /* =========================================================
      COPY TO CLIPBOARD
@@ -156,6 +116,7 @@ export default function Donations() {
     }));
 
     setMessage("");
+    setMessageType("success");
   };
 
   /* =========================================================
@@ -180,35 +141,44 @@ export default function Donations() {
 
     setSubmitting(true);
     setMessage("");
+    setMessageType("success");
 
     try {
       const payload = {
-        ...form,
+        donorName: form.donorName,
+        email: form.email,
         amount: Number(form.amount),
         method: activeMethod,
+        reference: form.reference,
       };
+
+      if (activeMethod === "flutterwave") {
+        const checkout = await api("/payments/flutterwave/initialize", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        window.location.assign(checkout.checkoutUrl);
+        return;
+      }
 
       const data = await api("/donations", {
         method: "POST",
         body: JSON.stringify(payload),
       });
 
-      setMessage(
-        data.message ||
-          "Your donation details have been submitted successfully."
-      );
+      setMessageType("success");
+      setMessage(data.message || "Your donation details have been submitted successfully.");
 
       setForm({
         donorName: "",
         email: "",
-        phone: "",
         amount: "",
         method: activeMethod,
         reference: "",
-        message: "",
       });
     } catch (error) {
       console.error("Donation submission error:", error);
+      setMessageType("error");
 
       setMessage(
         error.message ||
@@ -418,8 +388,36 @@ export default function Donations() {
 
           </button>
 
+          {flutterwaveEnabled ? (
+          <button
+            type="button"
+            className={`donation-method ${activeMethod === "flutterwave" ? "active" : ""}`}
+            onClick={() => changeMethod("flutterwave")}
+          >
+            <span className="method-icon">↗</span>
+            <span className="method-text">
+              <strong>Pay Online</strong>
+              <small>Secure card and mobile money checkout</small>
+            </span>
+            <span className="method-arrow">→</span>
+          </button>
+          ) : (
+            <div className="payment-unavailable-note" role="status">
+              Online card payments are temporarily unavailable. Choose bank transfer or Mobile Money instead.
+            </div>
+          )}
+
         </div>
 
+        {activeMethod === "flutterwave" && (
+          <div className="mobile-money-section">
+            <div className="mobile-money-card">
+              <span className="donation-section-label">SECURE ONLINE CHECKOUT</span>
+              <h2>Pay with Flutterwave</h2>
+              <p>Enter your name, email and amount below. You’ll continue to Flutterwave’s secure checkout to choose an available payment method.</p>
+            </div>
+          </div>
+        )}
 
         {/* ===================================================
             BANK TRANSFER
@@ -476,12 +474,8 @@ export default function Donations() {
                   <div>
 
                     <strong>
-                      dfcu Bank
+                      {bankDetails.bank}
                     </strong>
-
-                    <span>
-                      Mbale Branch
-                    </span>
 
                   </div>
 
@@ -560,32 +554,6 @@ export default function Donations() {
                 <div className="bank-detail">
 
                   <span>
-                    Bank Branch
-                  </span>
-
-                  <strong>
-                    {bankDetails.branch}
-                  </strong>
-
-                </div>
-
-
-                <div className="bank-detail">
-
-                  <span>
-                    Bank Address
-                  </span>
-
-                  <strong>
-                    {bankDetails.bankAddress}
-                  </strong>
-
-                </div>
-
-
-                <div className="bank-detail">
-
-                  <span>
                     Beneficiary SWIFT Code
                   </span>
 
@@ -618,161 +586,11 @@ export default function Donations() {
             </div>
 
 
-            {/* ===============================================
-                INTERNATIONAL TRANSFERS
-            =============================================== */}
-
             <div className="international-section">
-
-              <div className="international-heading">
-
-                <div>
-
-                  <span className="donation-section-label">
-                    INTERNATIONAL TRANSFERS
-                  </span>
-
-                  <h3>
-                    Intermediary Bank Details
-                  </h3>
-
-                  <p>
-                    Depending on the currency,
-                    payment can be made through
-                    the following intermediary banks.
-                  </p>
-
-                </div>
-
-              </div>
-
-
-              <div className="international-table-wrapper">
-
-                <table className="international-table">
-
-                  <thead>
-
-                    <tr>
-
-                      <th>
-                        Currency
-                      </th>
-
-                      <th>
-                        Bank Name & Address
-                      </th>
-
-                      <th>
-                        SWIFT Code
-                      </th>
-
-                      <th>
-                        Account Number
-                      </th>
-
-                    </tr>
-
-                  </thead>
-
-                  <tbody>
-
-                    {intermediaryBanks.map(
-                      (bank) => (
-
-                        <tr
-                          key={bank.currency}
-                        >
-
-                          <td>
-
-                            <span className="currency-badge">
-                              {bank.currency}
-                            </span>
-
-                          </td>
-
-                          <td>
-
-                            <strong>
-                              {bank.bank}
-                            </strong>
-
-                            <span>
-                              {bank.address}
-                            </span>
-
-                          </td>
-
-                          <td>
-
-                            <code>
-                              {bank.swift}
-                            </code>
-
-                          </td>
-
-                          <td>
-
-                            <strong>
-                              {bank.account}
-                            </strong>
-
-                            {bank.iban && (
-
-                              <span className="iban">
-                                IBAN:{" "}
-                                {bank.iban}
-                              </span>
-
-                            )}
-
-                          </td>
-
-                        </tr>
-
-                      )
-                    )}
-
-                  </tbody>
-
-                </table>
-
-              </div>
-
-
-              {/* =============================================
-                  FURTHER CREDIT
-              ============================================= */}
-
-              <div className="further-credit">
-
-                <div className="further-credit-icon">
-                  ✓
-                </div>
-
-                <div>
-
-                  <span>
-                    FOR FURTHER CREDIT TO
-                  </span>
-
-                  <strong>
-                    Bank: dfcu Bank
-                  </strong>
-
-                  <p>
-                    Beneficiary SWIFT Code:
-                    <strong>
-                      {" "}
-                      DFCUUGKA
-                    </strong>
-                  </p>
-
-                </div>
-
-              </div>
-
+              <span className="donation-section-label">INTERNATIONAL TRANSFERS</span>
+              <p className="international-contact-note">
+                For international transfer instructions, <Link to="/contact">contact REHEMA</Link> and include your preferred currency.
+              </p>
             </div>
 
           </div>
@@ -897,20 +715,7 @@ export default function Donations() {
                   </strong>
 
                   <p>
-                    Open your Mobile Money
-                    service and enter the MoMo
-                    number
-                    <strong>
-                      {" "}
-                      {mobileMoneyDetails.number}
-                    </strong>
-                    . Confirm that the recipient
-                    is
-                    <strong>
-                      {" "}
-                      {mobileMoneyDetails.recipient}
-                    </strong>
-                    before completing your donation.
+                    Confirm the recipient name shown above before approving your transfer.
                   </p>
 
                 </div>
@@ -918,19 +723,6 @@ export default function Donations() {
               </div>
 
 
-              {/* CONTACT */}
-
-              <div className="mobile-money-contact">
-
-                <span>
-                  NEED ASSISTANCE?
-                </span>
-
-                <strong>
-                  {mobileMoneyDetails.contact}
-                </strong>
-
-              </div>
 
             </div>
 
@@ -959,10 +751,7 @@ export default function Donations() {
             </h2>
 
             <p>
-              If you have made a transfer,
-              submitting your details helps
-              REHEMA identify and acknowledge
-              your contribution.
+              Your name, email, amount and transfer reference help REHEMA match and acknowledge your gift. Online checkout handles payment details securely.
             </p>
 
             <div className="form-trust-list">
@@ -1013,7 +802,7 @@ export default function Donations() {
               <div className="donation-field">
 
                 <label htmlFor="donorName">
-                  Full Name
+                  Full Name *
                 </label>
 
                 <input
@@ -1021,6 +810,7 @@ export default function Donations() {
                   name="donorName"
                   type="text"
                   value={form.donorName}
+                  required
                   onChange={handleChange}
                   placeholder="Your full name"
                 />
@@ -1031,7 +821,7 @@ export default function Donations() {
               <div className="donation-field">
 
                 <label htmlFor="email">
-                  Email Address
+                  Email Address *
                 </label>
 
                 <input
@@ -1039,26 +829,9 @@ export default function Donations() {
                   name="email"
                   type="email"
                   value={form.email}
+                  required
                   onChange={handleChange}
                   placeholder="you@example.com"
-                />
-
-              </div>
-
-
-              <div className="donation-field">
-
-                <label htmlFor="phone">
-                  Phone Number
-                </label>
-
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={form.phone}
-                  onChange={handleChange}
-                  placeholder="0700 000 000"
                 />
 
               </div>
@@ -1094,37 +867,7 @@ export default function Donations() {
             </div>
 
 
-            <div className="donation-field">
-
-              <label htmlFor="method">
-                Donation Method
-              </label>
-
-              <select
-                id="method"
-                name="method"
-                value={activeMethod}
-                onChange={(event) =>
-                  changeMethod(
-                    event.target.value
-                  )
-                }
-              >
-
-                <option value="bank">
-                  Bank Transfer
-                </option>
-
-                <option value="mobile_money">
-                  Mobile Money
-                </option>
-
-              </select>
-
-            </div>
-
-
-            <div className="donation-field">
+            {activeMethod !== "flutterwave" && <div className="donation-field">
 
               <label htmlFor="reference">
                 Transaction Reference
@@ -1145,25 +888,7 @@ export default function Donations() {
                 or Mobile Money payment.
               </small>
 
-            </div>
-
-
-            <div className="donation-field">
-
-              <label htmlFor="message">
-                Message
-              </label>
-
-              <textarea
-                id="message"
-                name="message"
-                rows="4"
-                value={form.message}
-                onChange={handleChange}
-                placeholder="Leave a message for REHEMA..."
-              />
-
-            </div>
+            </div>}
 
 
             <button
@@ -1174,7 +899,7 @@ export default function Donations() {
 
               {submitting
                 ? "Submitting..."
-                : "Submit Donation Details"}
+                : activeMethod === "flutterwave" ? "Continue to Secure Checkout" : "Submit Donation Details"}
 
               {!submitting && (
                 <span>→</span>
@@ -1185,10 +910,10 @@ export default function Donations() {
 
             {message && (
 
-              <div className="donation-form-message">
+              <div className={`donation-form-message ${messageType}`} role="status" aria-live="polite">
 
                 <span>
-                  ✓
+                  {messageType === "success" ? "✓" : "!"}
                 </span>
 
                 {message}
@@ -1227,13 +952,10 @@ export default function Donations() {
 
           </div>
 
-          <a
-            href={`tel:${mobileMoneyDetails.contact}`}
-            className="donation-contact-button"
-          >
-            Call {mobileMoneyDetails.contact}
+          <Link to="/contact" className="donation-contact-button">
+            Contact REHEMA
             <span>→</span>
-          </a>
+          </Link>
 
         </div>
 

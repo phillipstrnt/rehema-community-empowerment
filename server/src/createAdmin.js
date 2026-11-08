@@ -2,173 +2,35 @@
 import "dotenv/config";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-
 import { AdminUser } from "./adminUserModel.js";
 
+async function createAdmin() {
+  const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const password = process.env.ADMIN_PASSWORD;
+  const name = process.env.ADMIN_NAME?.trim() || "REHEMA Administrator";
 
-/* =========================================================
-   CREATE OR UPDATE ADMINISTRATOR
-========================================================= */
-
-const createAdmin = async () => {
-  try {
-
-    /* -------------------------------------------------------
-       CHECK MONGODB CONNECTION STRING
-    ------------------------------------------------------- */
-
-    if (!process.env.MONGO_URI) {
-      throw new Error(
-        "MONGO_URI is missing from the .env file."
-      );
-    }
-
-
-    /* -------------------------------------------------------
-       CHECK JWT SECRET
-    ------------------------------------------------------- */
-
-    if (!process.env.JWT_SECRET) {
-      console.warn(
-        "WARNING: JWT_SECRET is missing from the .env file."
-      );
-    }
-
-
-    /* -------------------------------------------------------
-       CONNECT TO MONGODB
-    ------------------------------------------------------- */
-
-    await mongoose.connect(process.env.MONGO_URI);
-
-    console.log("MongoDB connected.");
-
-
-    /* -------------------------------------------------------
-       ADMIN DETAILS
-
-       CHANGE THESE VALUES WHENEVER YOU WANT TO CHANGE
-       THE ADMIN LOGIN DETAILS.
-    ------------------------------------------------------- */
-
-    const name = "REHEMA Administrator";
-
-    const email = "rehemainfo@gmail.com";
-
-    const password = "SYDney9425#";
-
-    const role = "super_admin";
-
-
-    /* -------------------------------------------------------
-       NORMALIZE EMAIL
-    ------------------------------------------------------- */
-
-    const normalizedEmail = email
-      .toLowerCase()
-      .trim();
-
-
-    /* -------------------------------------------------------
-       HASH PASSWORD
-    ------------------------------------------------------- */
-
-    const hashedPassword = await bcrypt.hash(
-      password,
-      12
-    );
-
-
-    /* -------------------------------------------------------
-       FIND EXISTING ADMIN
-
-       We search by the CURRENT email first.
-    ------------------------------------------------------- */
-
-    let admin = await AdminUser.findOne({
-      email: normalizedEmail,
-    });
-
-
-    /* -------------------------------------------------------
-       IF ADMIN EXISTS
-       UPDATE ACCOUNT
-    ------------------------------------------------------- */
-
-    if (admin) {
-
-      admin.name = name;
-      admin.email = normalizedEmail;
-      admin.password = hashedPassword;
-      admin.role = role;
-      admin.active = true;
-
-      await admin.save();
-
-      console.log("");
-      console.log("==========================================");
-      console.log(" ADMINISTRATOR UPDATED SUCCESSFULLY");
-      console.log("==========================================");
-      console.log(`Name:  ${admin.name}`);
-      console.log(`Email: ${admin.email}`);
-      console.log(`Role:  ${admin.role}`);
-      console.log("Password: updated successfully");
-      console.log("Status: ACTIVE");
-      console.log("==========================================");
-      console.log("");
-
-      return;
-    }
-
-
-    /* -------------------------------------------------------
-       CREATE NEW ADMIN
-    ------------------------------------------------------- */
-
-    admin = await AdminUser.create({
-      name,
-      email: normalizedEmail,
-      password: hashedPassword,
-      role,
-      active: true,
-    });
-
-
-    /* -------------------------------------------------------
-       SUCCESS MESSAGE
-    ------------------------------------------------------- */
-
-    console.log("");
-    console.log("==========================================");
-    console.log(" ADMINISTRATOR CREATED SUCCESSFULLY");
-    console.log("==========================================");
-    console.log(`Name:  ${admin.name}`);
-    console.log(`Email: ${admin.email}`);
-    console.log(`Role:  ${admin.role}`);
-    console.log("Password: set successfully");
-    console.log("Status: ACTIVE");
-    console.log("==========================================");
-    console.log("");
-
-
-  } catch (error) {
-
-    console.error(
-      "Failed to create/update administrator:",
-      error.message
-    );
-
-  } finally {
-
-    /* -------------------------------------------------------
-       CLOSE DATABASE CONNECTION
-    ------------------------------------------------------- */
-
-    await mongoose.connection.close();
-
-    console.log("MongoDB connection closed.");
+  if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
+    throw new Error("Set MONGO_URI and JWT_SECRET before creating an administrator.");
   }
-};
+  if (!email || !password || password.length < 8) {
+    throw new Error("Set ADMIN_EMAIL and an ADMIN_PASSWORD of at least 8 characters.");
+  }
 
+  await mongoose.connect(process.env.MONGO_URI);
+  try {
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const admin = await AdminUser.findOneAndUpdate(
+      { email },
+      { $set: { name, email, password: hashedPassword, role: "super_admin", active: true } },
+      { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
+    );
+    console.log(`Administrator ready for ${admin.email}.`);
+  } finally {
+    await mongoose.disconnect();
+  }
+}
 
-createAdmin();
+createAdmin().catch((error) => {
+  console.error("Failed to create administrator:", error.message);
+  process.exitCode = 1;
+});

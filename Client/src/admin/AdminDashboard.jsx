@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "../apiConfig.js";
+
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -6,9 +8,7 @@ import { Link } from "react-router-dom";
    API
 ========================================================= */
 
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:5000/api";
+const API_URL = API_BASE_URL;
 
 
 /* =========================================================
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
           galleryResponse,
         ] = await Promise.all([
           fetch(
-            `${API_URL}/posts`,
+            `${API_URL}/admin/posts`,
             requestOptions
           ),
 
@@ -765,3 +765,4 @@ export default function AdminDashboard() {
   );
 
 }
+

@@ -1,8 +1,11 @@
 import express from "express";
 import multer from "multer";
-import cloudinary from "./cloudinary.js";
+import { uploadMediaFile } from "./localUploads.js";
+import { requireAdmin } from "./authMiddleware.js";
 
 const router = express.Router();
+
+router.use(requireAdmin);
 
 /*
 =========================================================
@@ -77,32 +80,10 @@ router.post(
       Upload to Cloudinary
       */
 
-      const result = await new Promise(
-        (resolve, reject) => {
-
-          const stream =
-            cloudinary.uploader.upload_stream(
-              {
-                folder: "rehema/gallery",
-                resource_type: resourceType,
-              },
-
-              (error, result) => {
-
-                if (error) {
-                  reject(error);
-                } else {
-                  resolve(result);
-                }
-
-              }
-            );
-
-
-          stream.end(req.file.buffer);
-
-        }
-      );
+      const result = await uploadMediaFile(req.file, {
+        folder: "rehema/gallery",
+        resourceType,
+      });
 
 
       /*
@@ -128,7 +109,7 @@ router.post(
     } catch (error) {
 
       console.error(
-        "Cloudinary media upload error:",
+        "Media upload error:",
         error
       );
 
@@ -172,32 +153,10 @@ router.post(
       }
 
 
-      const result = await new Promise(
-        (resolve, reject) => {
-
-          const stream =
-            cloudinary.uploader.upload_stream(
-              {
-                folder: "rehema",
-                resource_type: "image",
-              },
-
-              (error, result) => {
-
-                if (error) {
-                  reject(error);
-                } else {
-                  resolve(result);
-                }
-
-              }
-            );
-
-
-          stream.end(req.file.buffer);
-
-        }
-      );
+      const result = await uploadMediaFile(req.file, {
+        folder: "rehema",
+        resourceType: "image",
+      });
 
 
       res.json({
@@ -216,7 +175,7 @@ router.post(
     } catch (error) {
 
       console.error(
-        "Cloudinary image upload error:",
+        "Image upload error:",
         error
       );
 

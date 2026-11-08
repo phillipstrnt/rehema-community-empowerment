@@ -389,6 +389,7 @@ const donationSchema = new mongoose.Schema(
       enum: [
         "mobile_money",
         "bank",
+        "flutterwave",
       ],
       required: true,
     },
@@ -397,6 +398,10 @@ const donationSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+
+    currency: { type: String, uppercase: true, default: "UGX" },
+
+    gatewayTransactionId: { type: String, trim: true },
 
     message: {
       type: String,

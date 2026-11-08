@@ -128,6 +128,9 @@ export default function AdminDonationDetails() {
       case "card":
         return "Card";
 
+      case "flutterwave":
+        return "Flutterwave Online Payment";
+
       default:
         return method || "—";
     }

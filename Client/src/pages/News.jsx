@@ -1,53 +1,13 @@
+import { API_BASE_URL } from "../apiConfig.js";
 
-import React, { useEffect, useMemo, useState } from "react";
+
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/News.css";
+import "../styles/ScrollReveal.css";
+import useScrollReveal from "../hooks/useScrollReveal";
 
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-
-
-const fallbackStories = [
-  {
-    _id: "fallback-1",
-    title:
-      "REHEMA Strengthens Community Health Through Outreach and Education",
-    slug: "rehema-strengthens-community-health",
-    excerpt:
-      "REHEMA continues to work with communities to improve access to health information, services and practical public health support.",
-    category: "Community Health",
-    author: "REHEMA",
-    image: "/images/rehema/community.jpg",
-    published: true,
-    date: "2025-08-13",
-  },
-  {
-    _id: "fallback-2",
-    title:
-      "Free Medical Camp Brings Health Services Closer to the Community",
-    slug: "free-medical-camp",
-    excerpt:
-      "A community medical outreach brought health services, screening, consultation and health education closer to residents.",
-    category: "Medical Outreach",
-    author: "REHEMA",
-    image: "/images/rehema/medical-camp.jpg",
-    published: true,
-    date: "2025-08-13",
-  },
-  {
-    _id: "fallback-3",
-    title:
-      "Investing in Maternal and Child Health for a Healthier Future",
-    slug: "maternal-child-health",
-    excerpt:
-      "REHEMA promotes access to maternal, newborn, child and adolescent health information and services.",
-    category: "Maternal & Child Health",
-    author: "REHEMA",
-    image: "/images/rehema/maternal-health.jpg",
-    published: true,
-    date: "2025-07-20",
-  },
-];
+const API_URL = API_BASE_URL;
 
 
 /* ============================================================
@@ -100,6 +60,8 @@ function handleImageError(event) {
 ============================================================ */
 
 export default function News() {
+  const ctaRef = useRef(null);
+  useScrollReveal(ctaRef);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -160,25 +122,12 @@ export default function News() {
   }, []);
 
 
-  /*
-    ----------------------------------------------------------
-    USE DATABASE POSTS WHEN AVAILABLE
-    ----------------------------------------------------------
-  */
-
   const allStories = useMemo(() => {
-    if (posts.length > 0) {
-      return posts.map((post) => ({
-        ...post,
-        category: getCategory(post),
-        image:
-          post.image ||
-          post.imageUrl ||
-          "/images/rehema/community.jpg",
-      }));
-    }
-
-    return fallbackStories;
+    return posts.map((post) => ({
+      ...post,
+      category: getCategory(post),
+      image: post.image || post.imageUrl || "/images/rehema/community.jpg",
+    }));
   }, [posts]);
 
 
@@ -602,15 +551,18 @@ export default function News() {
             </div>
 
             <h3>
-              No stories found
+              {allStories.length === 0
+                ? "No stories published yet"
+                : "No stories found"}
             </h3>
 
             <p>
-              Try another search term or select a different
-              category.
+              {allStories.length === 0
+                ? "New REHEMA stories will appear here when they are published."
+                : "Try another search term or select a different category."}
             </p>
 
-            <button
+            {allStories.length > 0 && <button
               type="button"
               onClick={() => {
                 setSearch("");
@@ -619,7 +571,7 @@ export default function News() {
               className="news-reset-button"
             >
               View All Stories
-            </button>
+            </button>}
 
           </div>
 
@@ -806,7 +758,7 @@ export default function News() {
           NEWS CTA
       ===================================================== */}
 
-      <section className="news-cta">
+      <section ref={ctaRef} className="news-cta scroll-reveal">
 
         <div className="container news-cta-inner">
 
@@ -855,3 +807,4 @@ export default function News() {
     </main>
   );
 }
+

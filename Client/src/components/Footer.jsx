@@ -1,9 +1,19 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { api } from "../api";
 import Newsletter from "./Newsletter";
 import "../styles/Footer.css";
 
 export default function Footer() {
+  const [siteSettings, setSiteSettings] = useState(null);
+  useEffect(() => {
+    api("/settings/public").then(setSiteSettings).catch(() => {});
+  }, []);
+  const socialLinks = [
+    ["Facebook", siteSettings?.facebook || "https://www.facebook.com/share/1HmhYn5hJX/"], ["Instagram", siteSettings?.instagram],
+    ["X", siteSettings?.twitter], ["LinkedIn", siteSettings?.linkedin], ["YouTube", siteSettings?.youtube],
+  ].filter(([, url]) => url);
+
   return (
     <footer className="site-footer">
 
@@ -114,6 +124,12 @@ export default function Footer() {
               </li>
 
               <li>
+                <Link to="/events">
+                  Events
+                </Link>
+              </li>
+
+              <li>
                 <Link to="/gallery">
                   Gallery
                 </Link>
@@ -198,8 +214,8 @@ export default function Footer() {
                   Email
                 </small>
 
-                <a href="mailto:rehemainfo@gmail.com">
-                  rehemainfo@gmail.com
+                <a href={`mailto:${siteSettings?.email || "rehemainfo@gmail.com"}`}>
+                  {siteSettings?.email || "rehemainfo@gmail.com"}
                 </a>
               </div>
 
@@ -217,8 +233,8 @@ export default function Footer() {
                   Phone
                 </small>
 
-                <a href="tel:+256393239910">
-                  +256 39 3239910
+                <a href={`tel:${(siteSettings?.phone || "+256 39 3239910").replace(/[^+\d]/g, "")}`}>
+                  {siteSettings?.phone || "+256 39 3239910"}
                 </a>
               </div>
 
@@ -238,8 +254,6 @@ export default function Footer() {
 
                 <a
                   href="https://wa.me/256702952694"
-                  target="_blank"
-                  rel="noopener noreferrer"
                 >
                   +256 702 952 694
                 </a>
@@ -260,9 +274,7 @@ export default function Footer() {
                 </small>
 
                 <p>
-                  Plot 1580, Block 1<br />
-                  BUKASAKYA SUBCOUNTY<br />
-                  Florida Road, Nauyo-Bugema
+                  {siteSettings?.address || "Plot 1580, Block 1, Bukasakya Subcounty, Florida Road, Nauyo-Bugema"}
                 </p>
               </div>
 
@@ -290,17 +302,11 @@ export default function Footer() {
 
 
           <div className="footer-social">
-
-            <a
-              href="https://www.facebook.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="REHEMA on Facebook"
-              title="Rural Empowerment on Health Management on Facebook"
-            >
-              Facebook
-            </a>
-
+            {socialLinks.map(([label, url]) => (
+              <a key={label} href={url} target="_blank" rel="noopener noreferrer" aria-label={`REHEMA on ${label}`}>
+                {label}
+              </a>
+            ))}
           </div>
 
 

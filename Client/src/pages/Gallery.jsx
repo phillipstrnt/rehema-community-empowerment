@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../api";
+import "../styles/Gallery.css";
+import { communityHighlights } from "../data/communityHighlights";
 
 export default function Gallery() {
   const [media, setMedia] = useState([]);
@@ -14,10 +16,14 @@ export default function Gallery() {
 
         const data = await api("/gallery");
 
-        setMedia(Array.isArray(data) ? data : []);
+        setMedia([
+          ...communityHighlights,
+          ...(Array.isArray(data) ? data : []),
+        ]);
       } catch (error) {
         console.error("Gallery error:", error);
-        setError("Unable to load the gallery. Please try again later.");
+        setMedia(communityHighlights);
+        setError("Some additional gallery items could not be loaded.");
       } finally {
         setLoading(false);
       }
@@ -27,7 +33,7 @@ export default function Gallery() {
   }, []);
 
   return (
-    <section className="container section">
+    <section className="container section gallery-page">
 
       {/* HEADER */}
       <div className="gallery-header">
@@ -62,7 +68,7 @@ export default function Gallery() {
 
 
       {/* ERROR */}
-      {!loading && error && (
+      {!loading && error && media.length === 0 && (
         <div className="gallery-message gallery-error">
           <h3>
             Something went wrong
@@ -72,6 +78,12 @@ export default function Gallery() {
             {error}
           </p>
         </div>
+      )}
+
+      {!loading && error && media.length > 0 && (
+        <p className="gallery-notice" role="status">
+          Showing REHEMA community highlights. {error}
+        </p>
       )}
 
 
@@ -128,6 +140,7 @@ export default function Gallery() {
                   <img
                     src={item.url}
                     alt={
+                      item.alt ||
                       item.title ||
                       item.caption ||
                       "REHEMA community activity"

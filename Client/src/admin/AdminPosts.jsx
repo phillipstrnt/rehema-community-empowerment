@@ -39,7 +39,7 @@ export default function AdminPosts() {
       setError("");
 
       const data =
-        await api("/posts");
+        await api("/admin/posts");
 
       setPosts(
         Array.isArray(data)
@@ -107,6 +107,38 @@ export default function AdminPosts() {
     }
   }
 
+
+  function sharePost(post, platform) {
+    if (!post.published || !post.slug) {
+      alert("Publish this story on the website before sharing it.");
+      return;
+    }
+    const url = `${window.location.origin}/news/${encodeURIComponent(post.slug)}`;
+    const text = `${post.title}${post.excerpt ? ` — ${post.excerpt}` : ""}`;
+    const targets = {
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+      x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+      whatsapp: `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`,
+    };
+    window.open(targets[platform], "_blank", "noopener,noreferrer");
+  }
+
+  async function prepareInstagramPost(post) {
+    if (!post.published || !post.slug) {
+      alert("Publish this story on the website before sharing it.");
+      return;
+    }
+    const url = `${window.location.origin}/news/${encodeURIComponent(post.slug)}`;
+    const caption = `${post.title}${post.excerpt ? `\n\n${post.excerpt}` : ""}\n\n${url}`;
+    try {
+      await navigator.clipboard.writeText(caption);
+      window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+      alert("Caption copied. Add the story image and paste the caption in Instagram.");
+    } catch {
+      alert("Clipboard access was blocked. Copy the story title and link manually before posting on Instagram.");
+    }
+  }
 
   async function publishToFacebook(post) {
 
@@ -537,7 +569,8 @@ export default function AdminPosts() {
                         disabled={
                           facebookPublishing ===
                           post._id ||
-                          post.facebook?.published
+                          post.facebook?.published ||
+                          !post.published
                         }
                         onClick={() =>
                           publishToFacebook(
@@ -561,6 +594,11 @@ export default function AdminPosts() {
 
                       </button>
 
+                      <button type="button" className="admin-button admin-button-secondary" disabled={!post.published} onClick={() => sharePost(post, "facebook")}>Share to Facebook</button>
+                      <button type="button" className="admin-button admin-button-secondary" disabled={!post.published} onClick={() => sharePost(post, "linkedin")}>LinkedIn</button>
+                      <button type="button" className="admin-button admin-button-secondary" disabled={!post.published} onClick={() => sharePost(post, "x")}>X</button>
+                      <button type="button" className="admin-button admin-button-secondary" disabled={!post.published} onClick={() => sharePost(post, "whatsapp")}>WhatsApp</button>
+                      <button type="button" className="admin-button admin-button-secondary" disabled={!post.published} onClick={() => prepareInstagramPost(post)}>Instagram caption</button>
 
                     </div>
 

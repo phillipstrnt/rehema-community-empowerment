@@ -1,4 +1,3 @@
-
 import express from "express";
 
 import {
@@ -13,8 +12,23 @@ import {
   Contact,
   Notification,
 } from "./models.js";
+import { requireAdmin } from "./authMiddleware.js";
 
 const router = express.Router();
+
+// Keep public submissions open and require an administrator for management APIs.
+router.use((req, res, next) => {
+  const publicWrites = new Set([
+    "POST /donations", "POST /volunteers", "POST /contact",
+    "POST /messages", "POST /partners/requests", "POST /newsletter/subscribe",
+  ]);
+  const privateReads = new Set([
+    "/donations", "/volunteers", "/messages", "/newsletter/subscribers", "/notifications", "/admin/posts",
+  ]);
+  if (req.method === "GET" && !privateReads.has(req.path) && !req.path.startsWith("/donations/")) return next();
+  if (publicWrites.has(`${req.method} ${req.path}`)) return next();
+  return requireAdmin(req, res, next);
+});
 
 /* =========================================================
    NOTIFICATION HELPER
@@ -46,11 +60,11 @@ const createNotification = async ({
    POSTS / NEWS
 ========================================================= */
 
-/* GET ALL POSTS */
+/* PUBLIC POSTS: only published stories are visible without admin access. */
 
 router.get("/posts", async (req, res) => {
   try {
-    const posts = await Post.find().sort({
+    const posts = await Post.find({ published: true }).sort({
       publishedAt: -1,
       createdAt: -1,
     });
@@ -65,6 +79,22 @@ router.get("/posts", async (req, res) => {
     res.status(500).json({
       message: "Failed to fetch posts",
     });
+  }
+});
+
+/* ADMIN POSTS: includes drafts and unpublished stories. */
+
+router.get("/admin/posts", async (req, res) => {
+  try {
+    const posts = await Post.find().sort({
+      publishedAt: -1,
+      createdAt: -1,
+    });
+
+    res.json(posts);
+  } catch (error) {
+    console.error("Admin posts GET error:", error);
+    res.status(500).json({ message: "Failed to fetch posts" });
   }
 });
 
@@ -107,6 +137,7 @@ router.get("/posts/:slug", async (req, res) => {
   try {
     const post = await Post.findOne({
       slug: req.params.slug,
+      published: true,
     });
 
     if (!post) {
@@ -1004,6 +1035,37 @@ router.get(
   }
 );
 
+/* PUBLIC PARTNERSHIP REQUEST */
+router.post("/partners/requests", async (req, res) => {
+  try {
+    const { organization, name, email, phone, message } = req.body || {};
+    const clean = (value, max) => typeof value === "string" && value.trim().length > 0 && value.trim().length <= max;
+    if (!clean(organization, 180) || !clean(name, 120) ||
+        !clean(email, 254) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) ||
+        !clean(message, 5000) || (phone && !clean(phone, 40))) {
+      return res.status(400).json({ message: "Please provide valid organization and contact details." });
+    }
+    const partner = await Partner.create({
+      organization: organization.trim(),
+      contactName: name.trim(),
+      email: email.trim().toLowerCase(),
+      phone: phone?.trim(),
+      message: message.trim(),
+      status: "new",
+    });
+    await createNotification({
+      title: "New partnership request",
+      message: `${partner.organization} submitted a partnership request.`,
+      type: "partner",
+      link: "/admin/partners",
+    });
+    res.status(201).json({ success: true, message: "Partnership request received." });
+  } catch (error) {
+    console.error("Partnership request error:", error);
+    res.status(500).json({ message: "Unable to submit partnership request." });
+  }
+});
+
 /* CREATE PARTNER */
 
 router.post(
@@ -1614,6 +1676,18 @@ router.post(
     }
   }
 );
+
+/* GET SINGLE DONATION */
+
+router.get("/donations/:id", async (req, res) => {
+  try {
+    const donation = await Donation.findById(req.params.id);
+    if (!donation) return res.status(404).json({ message: "Donation not found" });
+    return res.json(donation);
+  } catch (error) {
+    return res.status(400).json({ message: "Invalid donation ID" });
+  }
+});
 
 /* UPDATE DONATION STATUS */
 

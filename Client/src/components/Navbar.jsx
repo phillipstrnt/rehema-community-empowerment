@@ -17,6 +17,7 @@ export default function Navbar() {
     ["/about", "About"],
     ["/programs", "Programs"],
     ["/news", "News"],
+    ["/events", "Events"],
     ["/gallery", "Gallery"],
     ["/get-involved", "Get Involved"],
     ["/contact", "Contact"]

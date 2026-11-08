@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "../apiConfig.js";
+
 
 import React, {
   useCallback,
@@ -8,9 +10,7 @@ import React, {
 import "./AdminUsers.css";
 
 
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:5000/api";
+const API_URL = API_BASE_URL;
 
 
 export default function AdminUsers() {
