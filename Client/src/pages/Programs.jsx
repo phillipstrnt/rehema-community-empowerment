@@ -1,8 +1,10 @@
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Programs.css";
+import "../styles/ScrollReveal.css";
 import api from "../api";
+import useScrollReveal from "../hooks/useScrollReveal";
 
 /* =====================================================
    HARDCODED PROGRAMS
@@ -183,6 +185,8 @@ function normalizeProgram(program, index) {
 ===================================================== */
 
 export default function Programs() {
+  const partnershipRef = useRef(null);
+  useScrollReveal(partnershipRef);
 
   const [databasePrograms, setDatabasePrograms] = useState([]);
   const [programsLoading, setProgramsLoading] = useState(true);
@@ -283,10 +287,24 @@ export default function Programs() {
         );
 
 
-    const combined = [
-      ...hardcodedPrograms,
-      ...normalizedDatabasePrograms
-    ];
+    const databaseByTitle = new Map(
+      normalizedDatabasePrograms.map((program) => [
+        String(program.title || "").trim().toLowerCase(),
+        program,
+      ])
+    );
+
+    // Keep the original public programme catalogue, but let admin-managed
+    // entries replace matching cards so edits in the dashboard take effect.
+    const combined = hardcodedPrograms.map((program) => {
+      const key = String(program.title || "").trim().toLowerCase();
+      const managedProgram = databaseByTitle.get(key);
+      if (!managedProgram) return program;
+      databaseByTitle.delete(key);
+      return { ...program, ...managedProgram };
+    });
+
+    combined.push(...databaseByTitle.values());
 
 
     /*
@@ -1034,7 +1052,7 @@ export default function Programs() {
           PARTNERSHIP SECTION
       ===================================================== */}
 
-      <section className="programs-partnership">
+      <section ref={partnershipRef} className="programs-partnership scroll-reveal">
 
         <div className="container programs-partnership-inner">
 

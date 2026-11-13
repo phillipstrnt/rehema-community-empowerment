@@ -1,8 +1,9 @@
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { api } from "../api";
 
 export default function Contact() {
+  const [siteSettings, setSiteSettings] = useState(null);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -13,6 +14,14 @@ export default function Contact() {
 
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    api("/settings/public").then(setSiteSettings).catch(() => {});
+  }, []);
+
+  const contactEmail = siteSettings?.email || "rehemainfo@gmail.com";
+  const contactPhone = siteSettings?.phone || "+256 39 3239910";
+  const contactAddress = siteSettings?.address || "Plot 1580, Block 1, Bukasakya Subcounty, Florida Road, Nauyo-Bugema";
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -69,11 +78,11 @@ export default function Contact() {
         <div>
           <h2>REHEMA</h2>
 
-          <p>Mbale, Uganda</p>
+          <p>{contactAddress}</p>
 
-          <p>0702952694</p>
+          <p><a href={`tel:${contactPhone.replace(/[^+\d]/g, "")}`}>{contactPhone}</a></p>
 
-          <p>info@rehemauganda.org</p>
+          <p><a href={`mailto:${contactEmail}`}>{contactEmail}</a></p>
 
           {/* ==============================================
               GOOGLE MAP
@@ -82,7 +91,7 @@ export default function Contact() {
           <div className="map">
             <iframe
               title="REHEMA location in Mbale, Uganda"
-              src="https://www.google.com/maps?q=REHEMA+MEDICAL+CENTER+%26+MATERNITY+HOME,+Plot+1580+Florida+Road,+Nauyo+Bugema+Town,+Mbale,+Uganda&output=embed"
+              src={`https://www.google.com/maps?q=${encodeURIComponent(contactAddress)}&output=embed`}
               width="100%"
               height="400"
               style={{
@@ -99,7 +108,7 @@ export default function Contact() {
 
           <p style={{ marginTop: "12px" }}>
             <a
-              href="https://maps.app.goo.gl/5AAfQMeBj6dBqXdv9?g_st=iwb"
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contactAddress)}`}
               target="_blank"
               rel="noopener noreferrer"
             >

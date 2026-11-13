@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { api } from "../../api";
 import "./AdminSettings.css";
 
 export default function AdminSettings() {
@@ -32,6 +33,11 @@ export default function AdminSettings() {
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    api("/admin/settings").then(setSettings).catch((loadError) => setError(loadError.message || "Unable to load settings."));
+  }, []);
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -50,23 +56,19 @@ export default function AdminSettings() {
     setSaving(true);
     setSaved(false);
 
-    /*
-      For now the settings are saved locally.
-      We will connect this to MongoDB after
-      the interface is complete.
-    */
-
-    localStorage.setItem(
-      "rehemaAdminSettings",
-      JSON.stringify(settings)
-    );
-
-    await new Promise((resolve) =>
-      setTimeout(resolve, 600)
-    );
-
-    setSaving(false);
-    setSaved(true);
+    setError("");
+    try {
+      const result = await api("/admin/settings", {
+        method: "PUT",
+        body: JSON.stringify(settings),
+      });
+      if (result.settings) setSettings(result.settings);
+      setSaved(true);
+    } catch (saveError) {
+      setError(saveError.message || "Unable to save settings.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const sections = [
@@ -632,7 +634,8 @@ export default function AdminSettings() {
           <div className="settings-save-bar">
 
             <div>
-              {saved && (
+              {error && <span role="alert" className="settings-error">{error}</span>}
+              {saved && !error && (
                 <span className="settings-saved">
                   ✓ Changes saved successfully
                 </span>

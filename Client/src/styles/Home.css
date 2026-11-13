@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 /* =====================================================
    REHEMA HOME PAGE
@@ -1070,4 +1071,1078 @@
     height: 44px;
   }
 
+=======
+
+/* =====================================================
+   REHEMA HOME PAGE
+   Professional NGO / Public Health Design
+===================================================== */
+
+.home-page {
+  overflow-x: hidden;
+  color: #173b35;
+  background: #ffffff;
+}
+
+
+/* =====================================================
+   CONTAINER
+===================================================== */
+
+.home-page .container {
+  width: min(1180px, 92%);
+  margin: 0 auto;
+}
+
+
+/* =====================================================
+   HERO
+===================================================== */
+
+.home-hero {
+  position: relative;
+  min-height: 760px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.home-hero-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: -3;
+  animation: heroZoom 14s ease-in-out infinite alternate;
+}
+
+.home-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(5, 31, 27, 0.98) 0%,
+      rgba(5, 31, 27, 0.90) 42%,
+      rgba(5, 31, 27, 0.55) 68%,
+      rgba(5, 31, 27, 0.22) 100%
+    );
+  z-index: -2;
+}
+
+.home-hero-content {
+  position: relative;
+  color: white;
+  padding-top: 80px;
+  padding-bottom: 100px;
+}
+
+.home-hero-copy {
+  max-width: 830px;
+  padding: 24px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: linear-gradient(100deg, rgba(5, 31, 27, 0.92), rgba(5, 31, 27, 0.82));
+  backdrop-filter: blur(6px);
+  animation: heroFadeUp 1s ease forwards;
+}
+
+.home-hero-label {
+  display: inline-block;
+  margin-bottom: 22px;
+  padding: 9px 16px;
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 50px;
+  background: rgba(255,255,255,.08);
+  backdrop-filter: blur(8px);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.home-hero h1 {
+  margin: 0;
+  font-size: clamp(40px, 4.4vw, 56px);
+  line-height: 1.02;
+  letter-spacing: -2px;
+  font-weight: 800;
+}
+
+.home-hero h1 span {
+  color: #8ee6c1;
+}
+
+.home-hero-text {
+  max-width: 680px;
+  margin: 28px 0 34px;
+  font-size: 18px;
+  line-height: 1.8;
+  color: rgba(255,255,255,.96);
+}
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 25px;
+}
+
+.home-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 25px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 700;
+  transition:
+    transform .25s ease,
+    box-shadow .25s ease,
+    background .25s ease;
+}
+
+.home-btn span {
+  transition: transform .25s ease;
+}
+
+.home-btn:hover span {
+  transform: translateX(4px);
+}
+
+.home-btn:hover {
+  transform: translateY(-3px);
+}
+
+.home-btn-primary {
+  background: #58c49a;
+  color: #07372e;
+  box-shadow: 0 12px 30px rgba(0,0,0,.2);
+}
+
+.home-btn-primary:hover {
+  box-shadow: 0 18px 35px rgba(0,0,0,.28);
+}
+
+.home-btn-outline {
+  border: 1px solid rgba(255,255,255,.6);
+  color: white;
+  background: rgba(255,255,255,.08);
+  backdrop-filter: blur(8px);
+}
+
+.home-btn-outline:hover {
+  background: white;
+  color: #123f35;
+}
+
+
+/* =====================================================
+   HERO IMPACT CARD
+===================================================== */
+
+.home-hero-impact-card {
+  position: absolute;
+  right: 4%;
+  bottom: 110px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 18px 22px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.25);
+  backdrop-filter: blur(14px);
+  color: white;
+  animation: floatingCard 4s ease-in-out infinite;
+}
+
+.home-hero-impact-card strong,
+.home-hero-impact-card span {
+  display: block;
+}
+
+.home-hero-impact-card strong {
+  font-size: 15px;
+}
+
+.home-hero-impact-card span {
+  margin-top: 4px;
+  font-size: 12px;
+  opacity: .75;
+}
+
+.impact-icon {
+  width: 45px;
+  height: 45px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #58c49a;
+  color: #08372e;
+  font-weight: 900;
+}
+
+
+/* =====================================================
+   SCROLL INDICATOR
+===================================================== */
+
+.home-scroll-indicator {
+  position: absolute;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,.75);
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.home-scroll-indicator span {
+  width: 1px;
+  height: 32px;
+  background: rgba(255,255,255,.6);
+  animation: scrollLine 1.5s ease-in-out infinite;
+}
+
+
+/* =====================================================
+   IMPACT STRIP
+===================================================== */
+
+.home-impact-strip {
+  background: #073d34;
+  color: white;
+}
+
+.home-impact-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.home-counter {
+  padding: 30px 20px;
+  text-align: center;
+  border-right: 1px solid rgba(255,255,255,.12);
+}
+
+.home-counter:last-child {
+  border-right: 0;
+}
+
+.home-counter strong {
+  display: block;
+  font-size: 32px;
+  color: #8ee6c1;
+}
+
+.home-counter span {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  opacity: .72;
+}
+
+
+/* =====================================================
+   GENERAL SECTIONS
+===================================================== */
+
+.home-section {
+  padding-top: 100px;
+  padding-bottom: 100px;
+}
+
+.home-eyebrow {
+  margin: 0 0 14px;
+  color: #399d7c;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.home-section-heading {
+  max-width: 700px;
+  margin: 0 auto 55px;
+  text-align: center;
+}
+
+.home-section-heading h2,
+.home-section-content h2 {
+  margin: 0 0 20px;
+  font-size: clamp(32px, 4vw, 50px);
+  line-height: 1.1;
+  letter-spacing: -1px;
+  color: #143d35;
+}
+
+.home-section-heading p,
+.home-section-content p {
+  line-height: 1.8;
+  color: #64756f;
+}
+
+
+/* =====================================================
+   TWO COLUMN
+===================================================== */
+
+.home-two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 70px;
+}
+
+
+/* =====================================================
+   INTRO IMAGE
+===================================================== */
+
+.home-image-wrapper {
+  position: relative;
+}
+
+.home-section-image {
+  width: 100%;
+  height: 560px;
+  object-fit: cover;
+  border-radius: 18px;
+  display: block;
+  box-shadow: 0 25px 60px rgba(10,50,40,.13);
+}
+
+.home-image-badge {
+  position: absolute;
+  right: -25px;
+  bottom: 30px;
+  padding: 20px 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 15px 40px rgba(0,0,0,.13);
+}
+
+.home-image-badge strong,
+.home-image-badge span {
+  display: block;
+}
+
+.home-image-badge strong {
+  color: #164238;
+}
+
+.home-image-badge span {
+  margin-top: 5px;
+  color: #75847f;
+  font-size: 12px;
+}
+
+
+/* =====================================================
+   TEXT LINKS
+===================================================== */
+
+.home-text-link {
+  display: inline-block;
+  margin-top: 15px;
+  color: #238b6b;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.home-text-link:hover {
+  text-decoration: underline;
+}
+
+
+/* =====================================================
+   FUNDING
+===================================================== */
+
+.home-funding-section {
+  padding: 100px 0;
+  background: #f2f8f5;
+}
+
+.home-funding-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.home-funding-card {
+  padding: 35px;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 15px 45px rgba(0,0,0,.06);
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+
+.home-funding-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 60px rgba(0,0,0,.1);
+}
+
+.home-funding-card.featured {
+  background: #073d34;
+  color: white;
+}
+
+.home-funding-card strong {
+  display: block;
+  margin: 20px 0 8px;
+  font-size: 30px;
+  color: #258e70;
+}
+
+.home-funding-card.featured strong {
+  color: #8ee6c1;
+}
+
+.home-funding-card h3 {
+  margin: 0 0 10px;
+}
+
+.home-funding-card p {
+  line-height: 1.7;
+  color: #71817b;
+}
+
+.home-funding-card.featured p {
+  color: rgba(255,255,255,.72);
+}
+
+.funding-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #dff4eb;
+  color: #1f8064;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+
+/* =====================================================
+   PROGRAM CARDS
+===================================================== */
+
+.home-work-section {
+  background: #ffffff;
+}
+
+.home-program-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+.home-program-card {
+  overflow: hidden;
+  border-radius: 16px;
+  background: white;
+  border: 1px solid #e5eee9;
+  transition:
+    transform .3s ease,
+    box-shadow .3s ease;
+}
+
+.home-program-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 25px 55px rgba(0,0,0,.1);
+}
+
+.home-card-image {
+  position: relative;
+  height: 245px;
+  overflow: hidden;
+}
+
+.home-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .6s ease;
+}
+
+.home-program-card:hover .home-card-image img {
+  transform: scale(1.08);
+}
+
+.home-card-number {
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #58c49a;
+  color: #07372e;
+  font-weight: 900;
+}
+
+.home-card-content {
+  padding: 28px;
+}
+
+.home-card-content h3 {
+  margin: 0 0 12px;
+  color: #163f35;
+  font-size: 22px;
+}
+
+.home-card-content p {
+  color: #687a73;
+  line-height: 1.7;
+}
+
+.home-card-content a {
+  display: inline-block;
+  margin-top: 12px;
+  color: #258e70;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+
+/* =====================================================
+   FEATURE SECTION
+===================================================== */
+
+.home-feature-section {
+  padding: 110px 0;
+  background: #edf7f3;
+}
+
+.home-feature-image {
+  position: relative;
+}
+
+.home-feature-image img {
+  width: 100%;
+  height: 520px;
+  object-fit: cover;
+  border-radius: 18px;
+  display: block;
+}
+
+.home-feature-caption {
+  position: absolute;
+  left: 25px;
+  right: 25px;
+  bottom: 25px;
+  padding: 18px 20px;
+  border-radius: 12px;
+  color: white;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(8px);
+}
+
+.home-feature-caption strong,
+.home-feature-caption span {
+  display: block;
+}
+
+.home-feature-caption span {
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: .8;
+}
+
+.home-mini-stats {
+  display: flex;
+  gap: 20px;
+  margin: 25px 0;
+}
+
+.home-mini-stats div {
+  padding: 18px 25px;
+  border-radius: 12px;
+  background: white;
+}
+
+.home-mini-stats strong,
+.home-mini-stats span {
+  display: block;
+}
+
+.home-mini-stats strong {
+  color: #218b6b;
+}
+
+.home-mini-stats span {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #788780;
+}
+
+
+/* =====================================================
+   FOUNDER
+===================================================== */
+
+.home-founder-section {
+  padding: 110px 0;
+  background: #073d34;
+  color: white;
+}
+
+.home-founder-grid {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.home-founder-image {
+  height: 550px;
+  overflow: hidden;
+  border-radius: 20px;
+  box-shadow: 0 30px 70px rgba(0,0,0,.25);
+}
+
+.home-founder-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.home-founder-content h2 {
+  color: white;
+  font-size: clamp(36px, 5vw, 60px);
+  margin: 0 0 8px;
+}
+
+.home-founder-content h3 {
+  margin: 0;
+  font-size: 28px;
+  color: #8ee6c1;
+}
+
+.home-founder-content p {
+  color: rgba(255,255,255,.75);
+  line-height: 1.8;
+}
+
+.home-founder-title {
+  color: #8ee6c1 !important;
+  font-weight: 700;
+}
+
+.home-founder-signature {
+  margin-top: 25px;
+  font-size: 24px;
+  font-family: cursive;
+  color: #8ee6c1;
+}
+
+
+/* =====================================================
+   VALUES
+===================================================== */
+
+.home-values-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.home-value-card {
+  padding: 30px;
+  border-radius: 15px;
+  background: #f6faf8;
+  transition: transform .3s ease;
+}
+
+.home-value-card:hover {
+  transform: translateY(-8px);
+}
+
+.home-value-icon {
+  margin-bottom: 22px;
+  font-size: 13px;
+  font-weight: 900;
+  color: #299474;
+}
+
+.home-value-card h3 {
+  margin: 0 0 10px;
+}
+
+.home-value-card p {
+  color: #6d7c76;
+  line-height: 1.7;
+}
+
+
+/* =====================================================
+   SPONSOR
+===================================================== */
+
+.home-sponsor-section {
+  padding: 100px 0;
+  background: #f5f9f7;
+}
+
+.home-sponsor-card {
+  max-width: 850px;
+  margin: auto;
+  padding: 35px;
+  display: flex;
+  align-items: center;
+  gap: 35px;
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.07);
+  animation: sponsorFloat 4s ease-in-out infinite;
+}
+
+.home-sponsor-logo {
+  width: 150px;
+  height: 120px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.home-sponsor-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.home-sponsor-card span {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  color: #319778;
+}
+
+.home-sponsor-card h3 {
+  margin: 8px 0;
+  font-size: 26px;
+}
+
+.home-sponsor-card p {
+  margin: 0;
+  line-height: 1.7;
+  color: #6d7d77;
+}
+
+
+/* =====================================================
+   CTA
+===================================================== */
+
+.home-cta-section {
+  padding: 110px 20px;
+  text-align: center;
+  color: white;
+  background:
+    linear-gradient(
+      135deg,
+      #073d34,
+      #126451
+    );
+}
+
+.home-cta-section h2 {
+  margin: 0 auto 18px;
+  max-width: 800px;
+  font-size: clamp(38px, 5vw, 62px);
+}
+
+.home-cta-section > .container > p:not(.home-eyebrow) {
+  max-width: 650px;
+  margin: 0 auto;
+  color: rgba(255,255,255,.75);
+  line-height: 1.8;
+}
+
+
+/* =====================================================
+   SCROLL TOP
+===================================================== */
+
+.home-scroll-top {
+  position: fixed;
+  right: 25px;
+  bottom: 25px;
+  z-index: 100;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 50%;
+  background: #58c49a;
+  color: #07372e;
+  font-size: 22px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0,0,0,.2);
+  transition: transform .25s ease;
+}
+
+.home-scroll-top:hover {
+  transform: translateY(-5px);
+}
+
+
+/* =====================================================
+   ANIMATIONS
+===================================================== */
+
+@keyframes heroZoom {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(35px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatingCard {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes scrollLine {
+  0% {
+    opacity: .3;
+    transform: scaleY(.5);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+
+  100% {
+    opacity: .3;
+    transform: scaleY(.5);
+  }
+}
+
+@keyframes sponsorFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 900px) {
+
+  .home-hero {
+    min-height: 700px;
+  }
+
+  .home-hero-impact-card {
+    display: none;
+  }
+
+  .home-two-column {
+    grid-template-columns: 1fr;
+    gap: 45px;
+  }
+
+  .home-founder-grid {
+    grid-template-columns: 1fr;
+    gap: 45px;
+  }
+
+  .home-founder-image {
+    height: 500px;
+    max-width: 500px;
+    width: 100%;
+    margin: auto;
+  }
+
+  .home-program-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-values-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-funding-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+  .home-hero {
+    min-height: 690px;
+  }
+
+  .home-hero-overlay {
+    background:
+      linear-gradient(
+        90deg,
+        rgba(5,31,27,.82),
+        rgba(5,31,27,.28)
+      );
+  }
+
+  .home-hero-content {
+    padding-top: 70px;
+    padding-bottom: 80px;
+  }
+
+  .home-hero-label {
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+
+  .home-hero h1 {
+    font-size: clamp(25px, 8vw, 34px);
+    letter-spacing: -0.8px;
+  }
+
+  .home-hero-copy {
+    max-width: 100%;
+    padding: 18px 12px;
+  }
+
+  .home-hero-text {
+    font-size: 16px;
+  }
+
+  .home-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .home-btn {
+    width: 100%;
+  }
+
+  .home-impact-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-counter {
+    border-bottom: 1px solid rgba(255,255,255,.12);
+  }
+
+  .home-counter strong {
+    font-size: 25px;
+  }
+
+  .home-section {
+    padding-top: 70px;
+    padding-bottom: 70px;
+  }
+
+  .home-section-image {
+    height: 380px;
+  }
+
+  .home-image-badge {
+    right: 10px;
+    bottom: 15px;
+  }
+
+  .home-program-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-values-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-feature-section {
+    padding: 75px 0;
+  }
+
+  .home-feature-image img {
+    height: 380px;
+  }
+
+  .home-mini-stats {
+    flex-direction: column;
+  }
+
+  .home-founder-section {
+    padding: 75px 0;
+  }
+
+  .home-founder-image {
+    height: 420px;
+  }
+
+  .home-sponsor-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 30px 20px;
+  }
+
+  .home-sponsor-logo {
+    width: 130px;
+    height: 100px;
+  }
+
+  .home-cta-section {
+    padding: 80px 20px;
+  }
+
+  .home-scroll-top {
+    right: 15px;
+    bottom: 15px;
+    width: 44px;
+    height: 44px;
+  }
+
+>>>>>>> d5654c452cbb6c15341a2a7d6601300e472486d0
 }

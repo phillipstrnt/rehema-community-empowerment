@@ -1,9 +1,17 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./About.css";
+import "../styles/ScrollReveal.css";
+import useScrollReveal from "../hooks/useScrollReveal";
 
 export default function About() {
+  const approachRef = useRef(null);
+  const focusRef = useRef(null);
+  const founderSectionRef = useRef(null);
+  useScrollReveal(approachRef);
+  useScrollReveal(focusRef);
+  useScrollReveal(founderSectionRef);
 
   /* =====================================================
      ALWAYS START PAGE FROM TOP
@@ -154,7 +162,7 @@ export default function About() {
           WHAT REHEMA STANDS FOR
       ===================================================== */}
 
-      <section className="about-highlight">
+      <section ref={approachRef} className="about-highlight scroll-reveal">
 
         <div className="container">
 
@@ -192,7 +200,7 @@ export default function About() {
           OUR FOCUS AREAS
       ===================================================== */}
 
-      <section className="container about-section">
+      <section ref={focusRef} className="container about-section scroll-reveal">
 
         <div className="about-section-heading">
 
@@ -786,7 +794,7 @@ export default function About() {
           FOUNDER
       ===================================================== */}
 
-      <section className="about-founder-section">
+      <section ref={founderSectionRef} className="about-founder-section scroll-reveal">
 
         <div className="container about-founder-grid">
 
@@ -819,25 +827,31 @@ export default function About() {
               Founder • Clinical Epidemiologist & Public Health Specialist
             </p>
 
-            <p>
-              REHEMA was founded around a commitment to supporting
-              communities through practical public health initiatives,
-              health education and stronger community engagement.
-            </p>
+            <div className="founder-writing about-founder-writing">
+              <svg className="founder-writing-pen" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m4 20 4.5-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z" />
+                <path d="m14.5 6.5 3 3M4 20l5-1.5" />
+              </svg>
+              <p>
+                REHEMA was founded around a commitment to supporting
+                communities through practical public health initiatives,
+                health education and stronger community engagement.
+              </p>
 
-            <p>
-              As Founder, Sydney Nsubuga brings a public health
-              perspective focused on understanding community health
-              challenges and creating practical pathways toward
-              sustainable solutions.
-            </p>
+              <p>
+                As Founder, Sydney Nsubuga brings a public health
+                perspective focused on understanding community health
+                challenges and creating practical pathways toward
+                sustainable solutions.
+              </p>
 
-            <p>
-              REHEMA's work is guided by the belief that communities
-              should not simply receive services. They should be
-              participants in identifying priorities, shaping
-              interventions and creating healthier futures.
-            </p>
+              <p>
+                REHEMA's work is guided by the belief that communities
+                should not simply receive services. They should be
+                participants in identifying priorities, shaping
+                interventions and creating healthier futures.
+              </p>
+            </div>
 
             <div className="about-founder-signature">
               Sydney Nsubuga

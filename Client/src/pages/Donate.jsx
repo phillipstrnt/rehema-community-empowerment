@@ -22,6 +22,14 @@ export default function Donations() {
 
   const [submitting, setSubmitting] = useState(false);
   const [flutterwaveEnabled, setFlutterwaveEnabled] = useState(false);
+<<<<<<< HEAD
+=======
+  const [siteSettings, setSiteSettings] = useState(null);
+
+  useEffect(() => {
+    api("/settings/public").then(setSiteSettings).catch(() => {});
+  }, []);
+>>>>>>> d5654c452cbb6c15341a2a7d6601300e472486d0
 
   useEffect(() => {
     api("/payments/providers")
@@ -65,6 +73,7 @@ export default function Donations() {
   ========================================================= */
 
   const bankDetails = {
+<<<<<<< HEAD
     accountName:
       "Rural Empowerment on Health Management (REHEMA)",
 
@@ -74,6 +83,11 @@ export default function Donations() {
 
     branch: "Mbale",
 
+=======
+    accountName: siteSettings?.accountName || "Rural Empowerment on Health Management (REHEMA)",
+    accountNumber: siteSettings?.accountNumber || "01113658533160",
+    bank: siteSettings?.bankName || "dfcu Bank",
+>>>>>>> d5654c452cbb6c15341a2a7d6601300e472486d0
     swift: "DFCUUGKA",
   };
 
@@ -82,10 +96,15 @@ export default function Donations() {
   ========================================================= */
 
   const mobileMoneyDetails = {
+<<<<<<< HEAD
     number: "586795",
 
     recipient:
       "Rural Empowerment on Health Management",
+=======
+    number: siteSettings?.mobileMoneyNumber || "586795",
+    recipient: siteSettings?.mobileMoneyName || "Rural Empowerment on Health Management",
+>>>>>>> d5654c452cbb6c15341a2a7d6601300e472486d0
   };
 
   /* =========================================================
@@ -477,12 +496,8 @@ export default function Donations() {
                   <div>
 
                     <strong>
-                      dfcu Bank
+                      {bankDetails.bank}
                     </strong>
-
-                    <span>
-                      Mbale Branch
-                    </span>
 
                   </div>
 
@@ -561,6 +576,7 @@ export default function Donations() {
                 <div className="bank-detail">
 
                   <span>
+<<<<<<< HEAD
                     Bank Branch
                   </span>
 
@@ -574,6 +590,8 @@ export default function Donations() {
                 <div className="bank-detail">
 
                   <span>
+=======
+>>>>>>> d5654c452cbb6c15341a2a7d6601300e472486d0
                     Beneficiary SWIFT Code
                   </span>
 

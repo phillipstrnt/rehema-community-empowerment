@@ -1,7 +1,9 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Home.css";
+import "../styles/ScrollReveal.css";
+import useScrollReveal from "../hooks/useScrollReveal";
 
 /* =====================================================
    ANIMATED COUNTER
@@ -11,11 +13,30 @@ function Counter({
   end,
   prefix = "",
   suffix = "",
-  duration = 1800
+  duration = 3600
 }) {
   const [count, setCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const counterRef = useRef(null);
 
   useEffect(() => {
+    const element = counterRef.current;
+    if (!element) return undefined;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsVisible(entry.isIntersecting);
+    }, { threshold: 0.35 });
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) {
+      setCount(0);
+      return undefined;
+    }
+
     let startTime = null;
     let animationFrame;
 
@@ -29,7 +50,9 @@ function Counter({
         1
       );
 
-      const value = Math.floor(progress * end);
+      // Ease out so large totals count smoothly and settle gently.
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      const value = Math.floor(easedProgress * end);
 
       setCount(value);
 
@@ -45,14 +68,14 @@ function Counter({
     return () => {
       cancelAnimationFrame(animationFrame);
     };
-  }, [end, duration]);
+  }, [end, duration, isVisible]);
 
   return (
-    <>
+    <span ref={counterRef}>
       {prefix}
       {count.toLocaleString()}
       {suffix}
-    </>
+    </span>
   );
 }
 
@@ -62,6 +85,9 @@ function Counter({
 ===================================================== */
 
 export default function Home() {
+  const founderSectionRef = useRef(null);
+  useScrollReveal(founderSectionRef);
+
   return (
     <main className="home-page">
 
@@ -815,7 +841,7 @@ export default function Home() {
           FOUNDER
       ================================================= */}
 
-      <section className="home-founder-section">
+      <section ref={founderSectionRef} className="home-founder-section scroll-reveal">
 
         <div className="container">
 
@@ -849,27 +875,33 @@ export default function Home() {
                 Clinical Epidemiologist & Public Health Specialist
               </p>
 
-              <p>
-                REHEMA was founded with a commitment to
-                supporting communities through practical
-                public health initiatives, health education
-                and stronger community engagement.
-              </p>
+              <div className="founder-writing">
+                <svg className="founder-writing-pen" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m4 20 4.5-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z" />
+                  <path d="m14.5 6.5 3 3M4 20l5-1.5" />
+                </svg>
+                <p>
+                  REHEMA was founded with a commitment to
+                  supporting communities through practical
+                  public health initiatives, health education
+                  and stronger community engagement.
+                </p>
 
-              <p>
-                Through REHEMA, I am passionate about creating
-                opportunities for communities to better
-                understand health challenges, access appropriate
-                services and participate in solutions that
-                improve wellbeing.
-              </p>
+                <p>
+                  Through REHEMA, I am passionate about creating
+                  opportunities for communities to better
+                  understand health challenges, access appropriate
+                  services and participate in solutions that
+                  improve wellbeing.
+                </p>
 
-              <p>
-                Our approach is grounded in evidence,
-                compassion, collaboration and the belief that
-                communities should be active participants in
-                shaping healthier futures.
-              </p>
+                <p>
+                  Our approach is grounded in evidence,
+                  compassion, collaboration and the belief that
+                  communities should be active participants in
+                  shaping healthier futures.
+                </p>
+              </div>
 
               <div className="home-founder-signature">
                 Sydney Nsubuga

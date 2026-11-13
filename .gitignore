@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 node_modules/
 .env
 .env.local
@@ -10,3 +11,17 @@ node_modules/
 server/data/
 server/uploads/
 server/*.log
+=======
+node_modules/
+.env
+.env.local
+dist/
+build/
+.vscode/
+node_modules/
+.env
+
+server/data/
+server/uploads/
+server/*.log
+>>>>>>> d5654c452cbb6c15341a2a7d6601300e472486d0
