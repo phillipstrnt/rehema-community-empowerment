@@ -51,10 +51,10 @@
   background:
     linear-gradient(
       90deg,
-      rgba(5, 31, 27, 0.92) 0%,
-      rgba(5, 31, 27, 0.78) 42%,
-      rgba(5, 31, 27, 0.45) 72%,
-      rgba(5, 31, 27, 0.35) 100%
+      rgba(5, 31, 27, 0.98) 0%,
+      rgba(5, 31, 27, 0.90) 42%,
+      rgba(5, 31, 27, 0.55) 68%,
+      rgba(5, 31, 27, 0.22) 100%
     );
   z-index: -2;
 }
@@ -67,7 +67,12 @@
 }
 
 .home-hero-copy {
-  max-width: 760px;
+  max-width: 830px;
+  padding: 24px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: linear-gradient(100deg, rgba(5, 31, 27, 0.92), rgba(5, 31, 27, 0.82));
+  backdrop-filter: blur(6px);
   animation: heroFadeUp 1s ease forwards;
 }
 
@@ -86,7 +91,7 @@
 
 .home-hero h1 {
   margin: 0;
-  font-size: clamp(44px, 6vw, 78px);
+  font-size: clamp(40px, 4.4vw, 56px);
   line-height: 1.02;
   letter-spacing: -2px;
   font-weight: 800;
@@ -101,7 +106,7 @@
   margin: 28px 0 34px;
   font-size: 18px;
   line-height: 1.8;
-  color: rgba(255,255,255,.88);
+  color: rgba(255,255,255,.96);
 }
 
 
@@ -951,8 +956,8 @@
     background:
       linear-gradient(
         90deg,
-        rgba(5,31,27,.9),
-        rgba(5,31,27,.72)
+        rgba(5,31,27,.82),
+        rgba(5,31,27,.28)
       );
   }
 
@@ -967,8 +972,13 @@
   }
 
   .home-hero h1 {
-    font-size: 42px;
-    letter-spacing: -1px;
+    font-size: clamp(25px, 8vw, 34px);
+    letter-spacing: -0.8px;
+  }
+
+  .home-hero-copy {
+    max-width: 100%;
+    padding: 18px 12px;
   }
 
   .home-hero-text {

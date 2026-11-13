@@ -237,9 +237,7 @@ export default function Footer() {
                 </small>
 
                 <a
-                  href="https://wa.me/256702952694"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="whatsapp://send?phone=256702952694"
                 >
                   +256 702 952 694
                 </a>

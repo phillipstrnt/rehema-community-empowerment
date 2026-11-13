@@ -309,11 +309,28 @@
 
 .donation-methods {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 
   gap: 18px;
 
-  margin-bottom: 65px;
+  margin-bottom: 48px;
+}
+
+@media (max-width: 1050px) {
+  .donation-methods {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.payment-unavailable-note {
+  grid-column: 1 / -1;
+  padding: 16px 18px;
+  border: 1px solid #e6e4d5;
+  border-radius: 12px;
+  background: #fffdf3;
+  color: #665c36;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 .donation-method {
@@ -638,7 +655,22 @@
 ========================================================= */
 
 .international-section {
-  margin-top: 70px;
+  margin-top: 42px;
+  padding: 22px 24px;
+  border: 1px solid #dfe5df;
+  border-radius: 14px;
+  background: #fbfcfb;
+}
+
+.international-contact-note {
+  margin: 10px 0 0;
+  color: #68736c;
+  line-height: 1.7;
+}
+
+.international-contact-note a {
+  color: #236b46;
+  font-weight: 700;
 }
 
 .international-heading {
@@ -1171,6 +1203,11 @@
 
 .donation-form-message span {
   font-weight: 800;
+}
+
+.donation-form-message.error {
+  background: #fff1ef;
+  color: #a43124;
 }
 
 

@@ -908,9 +908,7 @@ export default function GetInvolved() {
 
 
           <a
-            href="https://wa.me/256702952694"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="whatsapp://send?phone=256702952694"
             className="gi-contact-card"
           >
             <span className="gi-contact-icon">
